@@ -61,3 +61,10 @@
 - Média recente e variação de peso.
 - Histórico persistente.
 - Schema 4 do IndexedDB.
+
+## Sprint 008
+
+### Added
+- Coach Engine.
+- Prioridades dinâmicas.
+- Estrutura para Score TITAN.
