@@ -1,5 +1,9 @@
-import { Bell, BellRing, Save } from 'lucide-react'
-import { useMemo, useState } from 'react'
+import {
+  Bell,
+  BellRing,
+  Save,
+} from 'lucide-react'
+import { useState } from 'react'
 import { Button, Card } from '../../../shared/ui'
 import {
   getNotificationPermission,
@@ -16,25 +20,41 @@ import type {
 } from '../types/notifications'
 
 export function NotificationsPage() {
-  const [preferences, setPreferences] = useState<ReminderPreference[]>(
+  const [
+    preferences,
+    setPreferences,
+  ] = useState<ReminderPreference[]>(
     () => getReminderPreferences(),
   )
-  const [masterEnabled, setMasterEnabled] = useState(
-    notificationsEnabled(),
-  )
-  const [message, setMessage] = useState<string | null>(null)
 
-  const permission = useMemo(
-    () => getNotificationPermission(),
-    [masterEnabled],
+  const [
+    masterEnabled,
+    setMasterEnabled,
+  ] = useState(() => notificationsEnabled())
+
+  const [
+    permission,
+    setPermission,
+  ] = useState(() =>
+    getNotificationPermission(),
   )
+
+  const [
+    message,
+    setMessage,
+  ] = useState<string | null>(null)
 
   async function enableNotifications() {
     try {
-      const result = await requestNotificationPermission()
-      const enabled = result === 'granted'
+      const result =
+        await requestNotificationPermission()
+
+      const enabled =
+        result === 'granted'
+
       setNotificationsEnabled(enabled)
       setMasterEnabled(enabled)
+      setPermission(result)
 
       setMessage(
         enabled
@@ -56,7 +76,12 @@ export function NotificationsPage() {
   ) {
     setPreferences((current) =>
       current.map((item) =>
-        item.id === id ? { ...item, ...changes } : item,
+        item.id === id
+          ? {
+              ...item,
+              ...changes,
+            }
+          : item,
       ),
     )
   }
@@ -64,6 +89,27 @@ export function NotificationsPage() {
   function savePreferences() {
     saveReminderPreferences(preferences)
     setMessage('Preferências salvas.')
+  }
+
+  async function testNotification() {
+    try {
+      await showTitanNotification({
+        title: 'TITAN',
+        body: 'As notificações estão funcionando neste aparelho.',
+        tag: 'titan-test',
+        url: './',
+      })
+
+      setMessage(
+        'Notificação de teste enviada.',
+      )
+    } catch (reason) {
+      setMessage(
+        reason instanceof Error
+          ? reason.message
+          : 'Não foi possível testar a notificação.',
+      )
+    }
   }
 
   return (
@@ -78,7 +124,8 @@ export function NotificationsPage() {
         </h1>
 
         <p className="mt-2 text-sm leading-6 text-slate-400">
-          Configure lembretes locais de acordo com sua rotina.
+          Configure lembretes locais de acordo
+          com sua rotina.
         </p>
       </header>
 
@@ -91,7 +138,10 @@ export function NotificationsPage() {
           />
 
           <div>
-            <h2 className="font-bold">Permissão do aparelho</h2>
+            <h2 className="font-bold">
+              Permissão do aparelho
+            </h2>
+
             <p className="mt-1 text-sm text-slate-400">
               Estado atual: {permission}
             </p>
@@ -103,7 +153,11 @@ export function NotificationsPage() {
           fullWidth
           onClick={enableNotifications}
         >
-          <Bell size={18} aria-hidden="true" />
+          <Bell
+            size={18}
+            aria-hidden="true"
+          />
+
           {masterEnabled
             ? 'Notificações ativadas'
             : 'Ativar notificações'}
@@ -113,22 +167,7 @@ export function NotificationsPage() {
           className="mt-3"
           disabled={permission !== 'granted'}
           fullWidth
-          onClick={async () => {
-            try {
-              await showTitanNotification({
-                title: 'TITAN',
-                body: 'As notificações estão funcionando neste aparelho.',
-                tag: 'titan-test',
-                url: './',
-              })
-            } catch (reason) {
-              setMessage(
-                reason instanceof Error
-                  ? reason.message
-                  : 'Não foi possível testar a notificação.',
-              )
-            }
-          }}
+          onClick={testNotification}
           variant="ghost"
         >
           Testar notificação
@@ -140,7 +179,10 @@ export function NotificationsPage() {
           <Card key={item.id}>
             <div className="flex items-start justify-between gap-4">
               <div>
-                <h2 className="font-bold">{item.label}</h2>
+                <h2 className="font-bold">
+                  {item.label}
+                </h2>
+
                 <p className="mt-1 text-sm leading-6 text-slate-400">
                   {item.description}
                 </p>
@@ -150,9 +192,13 @@ export function NotificationsPage() {
                 checked={item.enabled}
                 className="h-5 w-5 accent-blue-500"
                 onChange={(event) =>
-                  updatePreference(item.id, {
-                    enabled: event.target.checked,
-                  })
+                  updatePreference(
+                    item.id,
+                    {
+                      enabled:
+                        event.target.checked,
+                    },
+                  )
                 }
                 type="checkbox"
               />
@@ -166,9 +212,13 @@ export function NotificationsPage() {
               <input
                 className="min-h-12 w-full rounded-2xl border border-white/10 bg-white/5 px-4 text-white outline-none"
                 onChange={(event) =>
-                  updatePreference(item.id, {
-                    time: event.target.value,
-                  })
+                  updatePreference(
+                    item.id,
+                    {
+                      time:
+                        event.target.value,
+                    },
+                  )
                 }
                 type="time"
                 value={item.time}
@@ -178,8 +228,15 @@ export function NotificationsPage() {
         ))}
       </div>
 
-      <Button fullWidth onClick={savePreferences}>
-        <Save size={18} aria-hidden="true" />
+      <Button
+        fullWidth
+        onClick={savePreferences}
+      >
+        <Save
+          size={18}
+          aria-hidden="true"
+        />
+
         Salvar lembretes
       </Button>
 

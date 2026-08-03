@@ -2,7 +2,6 @@ import type { ReactNode } from 'react'
 import {
   BarChart3,
   Bell,
-  Brain,
   DatabaseBackup,
   Download,
   FileUp,
@@ -167,13 +166,6 @@ export function SettingsPage() {
           </p>
         ) : null}
       </Card>
-
-
-      <NavigationCard
-        icon={<Brain size={23} aria-hidden="true" />}
-        label="Coach TITAN"
-        path="/coach"
-      />
 
       <NavigationCard
         icon={<Moon size={23} aria-hidden="true" />}

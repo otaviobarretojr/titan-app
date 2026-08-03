@@ -1,19 +1,10 @@
 export type CoachPriority = 'high' | 'medium' | 'low'
-export type CoachCategory =
-  | 'nutrition'
-  | 'hydration'
-  | 'training'
-  | 'cardio'
-  | 'recovery'
-  | 'consistency'
 
 export type CoachInsight = {
   id: string
-  category: CoachCategory
   priority: CoachPriority
   title: string
   message: string
-  evidence: string
   actionLabel?: string
   actionPath?: string
 }
@@ -24,26 +15,10 @@ export type TitanScoreBreakdown = {
   training: number
   cardio: number
   recovery: number
-  consistency: number
 }
 
 export type TitanScore = {
   value: number | null
   label: 'Excelente' | 'Bom' | 'Atenção' | 'Crítico' | 'Sem dados'
   breakdown: TitanScoreBreakdown
-}
-
-export type CoachTrend = {
-  id: string
-  title: string
-  direction: 'up' | 'down' | 'stable'
-  message: string
-}
-
-export type CoachReport = {
-  generatedAt: string
-  dailyInsights: CoachInsight[]
-  weeklyTrends: CoachTrend[]
-  score: TitanScore
-  executiveSummary: string
 }

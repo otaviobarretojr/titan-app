@@ -18,7 +18,6 @@ export function ScoreBreakdown({
         <ProgressBar label="Treino" value={breakdown.training} />
         <ProgressBar label="Cardio" value={breakdown.cardio} />
         <ProgressBar label="Recuperação" value={breakdown.recovery} />
-        <ProgressBar label="Consistência" value={breakdown.consistency} />
       </div>
     </Card>
   )
