@@ -96,3 +96,12 @@
 - Página de recuperação.
 - Permissão e teste de notificações PWA.
 - Configuração local de lembretes.
+
+## Sprint 012
+
+### Added
+
+- Relatórios semanais.
+- Médias de consumo, hidratação e sono.
+- Indicadores de consistência.
+- Linha diária dos últimos sete dias.

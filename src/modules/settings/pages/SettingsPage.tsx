@@ -1,4 +1,5 @@
 import {
+  BarChart3,
   Bell,
   DatabaseBackup,
   Download,
@@ -138,6 +139,30 @@ export function SettingsPage() {
         ) : null}
       </Card>
 
+
+
+      <Card>
+        <div className="flex gap-3">
+          <BarChart3
+            className="shrink-0 text-blue-300"
+            size={23}
+            aria-hidden="true"
+          />
+          <div className="flex-1">
+            <h2 className="font-bold">Relatórios</h2>
+            <p className="mt-1 text-sm leading-6 text-slate-400">
+              Consulte médias e consistência dos últimos sete dias.
+            </p>
+
+            <Link
+              className="mt-4 inline-flex min-h-11 items-center rounded-2xl bg-white/10 px-4 text-sm font-bold text-white"
+              to="/reports"
+            >
+              Abrir relatórios
+            </Link>
+          </div>
+        </div>
+      </Card>
 
       <Card>
         <div className="flex gap-3">
