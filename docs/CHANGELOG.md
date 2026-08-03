@@ -197,3 +197,11 @@
 - Gráficos de proteína, água e calorias.
 - Recordes pessoais.
 - Exportação CSV.
+
+## v0.9.0-rc.1
+
+### Changed
+
+- Rotas agora usam lazy loading e code splitting.
+- Bundle inicial reduzido.
+- Adicionado fallback acessível durante carregamento dos módulos.
