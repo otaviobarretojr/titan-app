@@ -30,13 +30,63 @@ export function BodyMetricForm({ onSave }: BodyMetricFormProps) {
       <h2 className="text-lg font-bold">Registrar medidas</h2>
 
       <div className="mt-5 grid grid-cols-2 gap-3">
-        <NumberField label="Peso" suffix="kg" value={weightKg} onChange={setWeightKg} min={1} step={0.1} />
-        <NumberField label="Cintura" suffix="cm" value={waistCm} onChange={setWaistCm} min={0} step={0.1} />
-        <NumberField label="Braço" suffix="cm" value={armCm} onChange={setArmCm} min={0} step={0.1} />
-        <NumberField label="Peito" suffix="cm" value={chestCm} onChange={setChestCm} min={0} step={0.1} />
-        <NumberField label="Coxa" suffix="cm" value={thighCm} onChange={setThighCm} min={0} step={0.1} />
-        <NumberField label="Panturrilha" suffix="cm" value={calfCm} onChange={setCalfCm} min={0} step={0.1} />
-        <NumberField label="Gordura" suffix="%" value={bodyFatPercentage} onChange={setBodyFatPercentage} min={0} max={100} step={0.1} />
+        <NumberField
+          label="Peso"
+          suffix="kg"
+          value={weightKg}
+          onChange={setWeightKg}
+          min={1}
+          step={0.1}
+        />
+        <NumberField
+          label="Cintura"
+          suffix="cm"
+          value={waistCm}
+          onChange={setWaistCm}
+          min={0}
+          step={0.1}
+        />
+        <NumberField
+          label="Braço"
+          suffix="cm"
+          value={armCm}
+          onChange={setArmCm}
+          min={0}
+          step={0.1}
+        />
+        <NumberField
+          label="Peito"
+          suffix="cm"
+          value={chestCm}
+          onChange={setChestCm}
+          min={0}
+          step={0.1}
+        />
+        <NumberField
+          label="Coxa"
+          suffix="cm"
+          value={thighCm}
+          onChange={setThighCm}
+          min={0}
+          step={0.1}
+        />
+        <NumberField
+          label="Panturrilha"
+          suffix="cm"
+          value={calfCm}
+          onChange={setCalfCm}
+          min={0}
+          step={0.1}
+        />
+        <NumberField
+          label="Gordura"
+          suffix="%"
+          value={bodyFatPercentage}
+          onChange={setBodyFatPercentage}
+          min={0}
+          max={100}
+          step={0.1}
+        />
       </div>
 
       <label className="mt-4 block">

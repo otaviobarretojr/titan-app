@@ -39,7 +39,6 @@ export function EvolutionHistory({
                 {[
                   entry.waistCm ? `Cintura ${entry.waistCm} cm` : null,
                   entry.armCm ? `Braço ${entry.armCm} cm` : null,
-                  entry.chestCm ? `Peito ${entry.chestCm} cm` : null,
                   entry.bodyFatPercentage
                     ? `Gordura ${entry.bodyFatPercentage}%`
                     : null,

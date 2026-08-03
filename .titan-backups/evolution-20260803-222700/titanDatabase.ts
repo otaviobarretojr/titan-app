@@ -124,18 +124,6 @@ export type BodyMetricRecord = {
   updatedAt: string
 }
 
-
-export type ProgressPhotoRecord = {
-  id: string
-  userId: string
-  localDate: string
-  imageDataUrl: string
-  pose: 'front' | 'side' | 'back' | 'other'
-  notes: string
-  createdAt: string
-  updatedAt: string
-}
-
 export type CardioPlanRecord = {
   id: string
   userId: string
@@ -220,7 +208,6 @@ class TitanDatabase extends Dexie {
   workoutSessions!: EntityTable<WorkoutSessionRecord, 'id'>
   exerciseSets!: EntityTable<ExerciseSetRecord, 'id'>
   bodyMetrics!: EntityTable<BodyMetricRecord, 'id'>
-  progressPhotos!: EntityTable<ProgressPhotoRecord, 'id'>
   cardioPlans!: EntityTable<CardioPlanRecord, 'id'>
   cardioSessions!: EntityTable<CardioSessionRecord, 'id'>
   exercisePersonalRecords!: EntityTable<ExercisePersonalRecord, 'id'>
@@ -332,34 +319,6 @@ class TitanDatabase extends Dexie {
       exercisePersonalRecords:
         'id, userId, exercisePlanId, exerciseName, localDate, estimatedOneRepMaxKg, [userId+exercisePlanId]',
       bodyMetrics: 'id, userId, localDate, [userId+localDate]',
-      cardioPlans: 'id, userId, localDate, type, [userId+localDate]',
-      cardioSessions:
-        'id, userId, cardioPlanId, localDate, status, [userId+localDate]',
-      hydrationEntries:
-        'id, userId, localDate, consumedAt, [userId+localDate]',
-      sleepEntries: 'id, userId, localDate, [userId+localDate]',
-      coachRecommendations:
-        'id, userId, localDate, priority, [userId+localDate]',
-    })
-
-    this.version(6).stores({
-      users: 'id, displayName, createdAt',
-      dailyPlans: 'id, userId, localDate, [userId+localDate]',
-      mealPlans:
-        'id, userId, localDate, plannedTime, sequence, [userId+localDate]',
-      mealEntries:
-        'id, userId, mealPlanId, localDate, status, [userId+localDate]',
-      workoutPlans: 'id, userId, localDate, [userId+localDate]',
-      exercisePlans:
-        'id, userId, workoutPlanId, localDate, sequence, name, [workoutPlanId+sequence]',
-      workoutSessions:
-        'id, userId, workoutPlanId, localDate, status, [userId+localDate]',
-      exerciseSets:
-        'id, userId, workoutSessionId, exercisePlanId, localDate, setNumber, [workoutSessionId+exercisePlanId]',
-      exercisePersonalRecords:
-        'id, userId, exercisePlanId, exerciseName, localDate, estimatedOneRepMaxKg, [userId+exercisePlanId]',
-      bodyMetrics: 'id, userId, localDate, [userId+localDate]',
-      progressPhotos: 'id, userId, localDate, pose, [userId+localDate]',
       cardioPlans: 'id, userId, localDate, type, [userId+localDate]',
       cardioSessions:
         'id, userId, cardioPlanId, localDate, status, [userId+localDate]',

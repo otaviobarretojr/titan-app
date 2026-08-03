@@ -1,7 +1,9 @@
-import { ArrowDown, ArrowUp, Minus } from 'lucide-react'
+import { ArrowDown, ArrowUp, Dumbbell, Minus } from 'lucide-react'
 import { Card, SectionTitle } from '../../../shared/ui'
 import { BodyMetricForm } from '../components/BodyMetricForm'
+import { EvolutionChart } from '../components/EvolutionChart'
 import { EvolutionHistory } from '../components/EvolutionHistory'
+import { ProgressPhotos } from '../components/ProgressPhotos'
 import { useEvolution } from '../hooks/useEvolution'
 
 export function EvolutionPage() {
@@ -11,6 +13,8 @@ export function EvolutionPage() {
     isLoading,
     saveBodyMetric,
     deleteBodyMetric,
+    saveProgressPhoto,
+    deleteProgressPhoto,
   } = useEvolution()
 
   if (error) {
@@ -40,7 +44,7 @@ export function EvolutionPage() {
         </p>
         <h1 className="mt-2 text-3xl font-black">Evolução corporal</h1>
         <p className="mt-2 text-sm leading-6 text-slate-400">
-          Registre medidas em condições semelhantes para melhorar a comparação.
+          Peso, medidas, fotos, força e cardio em um só lugar.
         </p>
       </header>
 
@@ -64,25 +68,109 @@ export function EvolutionPage() {
                 : '—'
             }
           />
+          <Metric
+            label="Cintura"
+            value={
+              summary.latestWaistCm !== null
+                ? `${summary.latestWaistCm.toLocaleString('pt-BR')} cm`
+                : '—'
+            }
+          />
+          <Metric
+            label="Gordura"
+            value={
+              summary.latestBodyFatPercentage !== null
+                ? `${summary.latestBodyFatPercentage.toLocaleString(
+                    'pt-BR',
+                  )}%`
+                : '—'
+            }
+          />
         </div>
 
-        <div className="mt-4 rounded-2xl bg-white/5 p-4">
-          <div className="flex items-center gap-2 text-slate-400">
-            <VariationIcon value={summary.weightVariationKg} />
-            <span className="text-xs font-bold">Variação</span>
-          </div>
-          <p className="mt-2 text-lg font-black">
-            {summary.weightVariationKg !== null
-              ? `${summary.weightVariationKg > 0 ? '+' : ''}${summary.weightVariationKg.toLocaleString(
-                  'pt-BR',
-                  { maximumFractionDigits: 1 },
-                )} kg`
-              : 'Dados insuficientes'}
-          </p>
+        <div className="mt-4 grid grid-cols-2 gap-3">
+          <Variation
+            label="Variação de peso"
+            value={summary.weightVariationKg}
+            suffix="kg"
+          />
+          <Variation
+            label="Variação de cintura"
+            value={summary.waistVariationCm}
+            suffix="cm"
+          />
         </div>
       </Card>
 
+      <EvolutionChart trend={summary.trend} />
+
       <BodyMetricForm onSave={saveBodyMetric} />
+
+      <ProgressPhotos
+        photos={summary.photos}
+        onDelete={deleteProgressPhoto}
+        onSave={saveProgressPhoto}
+      />
+
+      <section>
+        <SectionTitle title="Força" supportingText="Melhores 1RM estimados" />
+        <Card>
+          {summary.bestStrengthRecords.length === 0 ? (
+            <p className="text-sm text-slate-400">
+              Registre séries para gerar recordes de força.
+            </p>
+          ) : (
+            <div className="space-y-3">
+              {summary.bestStrengthRecords.map((record) => (
+                <div
+                  className="flex items-center justify-between gap-4 rounded-2xl bg-white/5 p-3"
+                  key={record.exerciseName}
+                >
+                  <div className="flex items-center gap-3">
+                    <Dumbbell
+                      className="text-violet-300"
+                      size={18}
+                      aria-hidden="true"
+                    />
+                    <span className="text-sm font-bold">
+                      {record.exerciseName}
+                    </span>
+                  </div>
+                  <span className="font-black">
+                    {record.estimatedOneRepMaxKg.toLocaleString('pt-BR', {
+                      maximumFractionDigits: 1,
+                    })}{' '}
+                    kg
+                  </span>
+                </div>
+              ))}
+            </div>
+          )}
+        </Card>
+      </section>
+
+      <section>
+        <SectionTitle title="Cardio acumulado" />
+        <Card>
+          <div className="grid grid-cols-3 gap-3">
+            <Metric
+              label="Sessões"
+              value={`${summary.cardioSummary.completedSessions}`}
+            />
+            <Metric
+              label="Minutos"
+              value={`${summary.cardioSummary.totalMinutes}`}
+            />
+            <Metric
+              label="Distância"
+              value={`${summary.cardioSummary.totalDistanceKm.toLocaleString(
+                'pt-BR',
+                { maximumFractionDigits: 1 },
+              )} km`}
+            />
+          </div>
+        </Card>
+      </section>
 
       <section>
         <SectionTitle
@@ -112,14 +200,33 @@ function Metric({ label, value }: MetricProps) {
   )
 }
 
-function VariationIcon({ value }: { value: number | null }) {
-  if (value === null || value === 0) {
-    return <Minus size={18} aria-hidden="true" />
-  }
+type VariationProps = {
+  label: string
+  value: number | null
+  suffix: string
+}
 
-  if (value > 0) {
-    return <ArrowUp size={18} aria-hidden="true" />
-  }
+function Variation({ label, value, suffix }: VariationProps) {
+  const Icon =
+    value === null || value === 0
+      ? Minus
+      : value > 0
+        ? ArrowUp
+        : ArrowDown
 
-  return <ArrowDown size={18} aria-hidden="true" />
+  return (
+    <div className="rounded-2xl bg-white/5 p-4">
+      <div className="flex items-center gap-2 text-slate-500">
+        <Icon size={17} aria-hidden="true" />
+        <span className="text-xs font-bold">{label}</span>
+      </div>
+      <p className="mt-2 text-lg font-black">
+        {value === null
+          ? '—'
+          : `${value > 0 ? '+' : ''}${value.toLocaleString('pt-BR', {
+              maximumFractionDigits: 1,
+            })} ${suffix}`}
+      </p>
+    </div>
+  )
 }

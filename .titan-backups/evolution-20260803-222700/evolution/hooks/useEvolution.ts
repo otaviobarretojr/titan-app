@@ -2,10 +2,8 @@ import { useLiveQuery } from 'dexie-react-hooks'
 import { useState } from 'react'
 import {
   deleteBodyMetric,
-  deleteProgressPhoto,
   getEvolutionSummary,
   saveBodyMetric,
-  saveProgressPhoto,
 } from '../data/evolutionRepository'
 
 export function useEvolution() {
@@ -42,12 +40,5 @@ export function useEvolution() {
     }) => runAction(() => saveBodyMetric(input)),
     deleteBodyMetric: (id: string) =>
       runAction(() => deleteBodyMetric(id)),
-    saveProgressPhoto: (input: {
-      imageDataUrl: string
-      pose: 'front' | 'side' | 'back' | 'other'
-      notes: string
-    }) => runAction(() => saveProgressPhoto(input)),
-    deleteProgressPhoto: (id: string) =>
-      runAction(() => deleteProgressPhoto(id)),
   }
 }
