@@ -2,7 +2,6 @@ import { useLiveQuery } from 'dexie-react-hooks'
 import { useEffect, useState } from 'react'
 import { seedToday } from '../../../database/seeds/seedToday'
 import {
-  addHydration,
   clearMealEntry,
   completeMeal,
   getNutritionDayData,
@@ -60,7 +59,5 @@ export function useNutritionDay() {
       runAction(() => skipMeal(mealId)),
     clearMealEntry: (mealId: string) =>
       runAction(() => clearMealEntry(mealId)),
-    addHydration: (amountMl: number) =>
-      runAction(() => addHydration(amountMl)),
   }
 }

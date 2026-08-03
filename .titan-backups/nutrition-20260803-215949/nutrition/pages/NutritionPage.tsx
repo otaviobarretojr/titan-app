@@ -10,7 +10,6 @@ export function NutritionPage() {
     error,
     isLoading,
     clearMealEntry,
-    addHydration,
   } = useNutritionDay()
 
   if (error) {
@@ -45,7 +44,7 @@ export function NutritionPage() {
         </p>
       </header>
 
-      {data.summary.pendingCount > 0 ? (
+      {data.pendingCount > 0 ? (
         <Card className="border-amber-500/20 bg-amber-500/5">
           <div className="flex gap-3">
             <AlertTriangle
@@ -55,8 +54,8 @@ export function NutritionPage() {
             />
             <div>
               <p className="font-bold">
-                {data.summary.pendingCount}{' '}
-                {data.summary.pendingCount === 1
+                {data.pendingCount}{' '}
+                {data.pendingCount === 1
                   ? 'refeição pendente'
                   : 'refeições pendentes'}
               </p>
@@ -69,10 +68,7 @@ export function NutritionPage() {
         </Card>
       ) : null}
 
-      <NutritionSummary
-        summary={data.summary}
-        onAddWater={addHydration}
-      />
+      <NutritionSummary summary={data.summary} />
 
       <section>
         <SectionTitle

@@ -16,5 +16,6 @@ const statusConfig = {
 
 export function MealStatusBadge({ status }: MealStatusBadgeProps) {
   const config = statusConfig[status]
+
   return <Badge tone={config.tone}>{config.label}</Badge>
 }

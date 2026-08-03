@@ -1,10 +1,4 @@
-import {
-  ArrowLeft,
-  Check,
-  CircleOff,
-  RefreshCw,
-} from 'lucide-react'
-import { useState } from 'react'
+import { ArrowLeft, Check, CircleOff, RefreshCw } from 'lucide-react'
 import { Link, Navigate, useNavigate, useParams } from 'react-router-dom'
 import { Button, Card } from '../../../shared/ui'
 import { MealStatusBadge } from '../components/MealStatusBadge'
@@ -13,8 +7,6 @@ import { useNutritionDay } from '../hooks/useNutritionDay'
 export function MealDetailPage() {
   const { mealId } = useParams()
   const navigate = useNavigate()
-  const [percentage, setPercentage] = useState(50)
-
   const {
     data,
     error,
@@ -51,7 +43,7 @@ export function MealDetailPage() {
     return <Navigate to="/nutrition" replace />
   }
 
-  async function execute(action: () => Promise<unknown>) {
+  async function execute(action: () => Promise<void>) {
     await action()
     navigate('/nutrition')
   }
@@ -91,41 +83,8 @@ export function MealDetailPage() {
         </div>
       </Card>
 
-      <Card>
-        <h2 className="text-lg font-bold">Registro parcial</h2>
-
-        <p className="mt-2 text-sm text-slate-400">
-          Ajuste a porcentagem realmente consumida.
-        </p>
-
-        <input
-          className="mt-5 w-full accent-blue-500"
-          max={100}
-          min={0}
-          onChange={(event) => setPercentage(Number(event.target.value))}
-          step={5}
-          type="range"
-          value={percentage}
-        />
-
-        <p className="mt-3 text-center text-3xl font-black">
-          {percentage}%
-        </p>
-
-        <Button
-          className="mt-4"
-          fullWidth
-          onClick={() =>
-            execute(() => registerPartialMeal(meal.id, percentage))
-          }
-          variant="ghost"
-        >
-          Registrar {percentage}%
-        </Button>
-      </Card>
-
       <section>
-        <h2 className="mb-3 text-lg font-bold">Ações rápidas</h2>
+        <h2 className="mb-3 text-lg font-bold">Registrar refeição</h2>
 
         <div className="space-y-3">
           <Button
@@ -135,6 +94,26 @@ export function MealDetailPage() {
             <Check size={19} aria-hidden="true" />
             Consumida integralmente
           </Button>
+
+          <div className="grid grid-cols-2 gap-3">
+            <Button
+              onClick={() =>
+                execute(() => registerPartialMeal(meal.id, 50))
+              }
+              variant="ghost"
+            >
+              Registrar 50%
+            </Button>
+
+            <Button
+              onClick={() =>
+                execute(() => registerPartialMeal(meal.id, 75))
+              }
+              variant="ghost"
+            >
+              Registrar 75%
+            </Button>
+          </div>
 
           <Button
             fullWidth

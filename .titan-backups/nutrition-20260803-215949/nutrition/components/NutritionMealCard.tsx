@@ -1,12 +1,16 @@
-import { ChevronRight, RotateCcw, Utensils } from 'lucide-react'
+import {
+  ChevronRight,
+  RotateCcw,
+  Utensils,
+} from 'lucide-react'
 import { Link } from 'react-router-dom'
-import { Button, Card, ProgressBar } from '../../../shared/ui'
+import { Button, Card } from '../../../shared/ui'
 import type { NutritionMeal } from '../types/nutrition'
 import { MealStatusBadge } from './MealStatusBadge'
 
 type NutritionMealCardProps = {
   meal: NutritionMeal
-  onReset: (mealId: string) => Promise<unknown>
+  onReset: (mealId: string) => Promise<void>
 }
 
 const finalStatuses = new Set([
@@ -41,17 +45,15 @@ export function NutritionMealCard({
             {meal.caloriesKcal} kcal · {meal.proteinG} g proteína ·{' '}
             {meal.carbohydrateG} g carboidratos
           </p>
+
+          {meal.consumedCaloriesKcal > 0 ? (
+            <p className="mt-2 text-xs font-semibold text-emerald-300">
+              Registrado: {meal.consumedCaloriesKcal} kcal e{' '}
+              {meal.consumedProteinG} g de proteína
+            </p>
+          ) : null}
         </div>
       </div>
-
-      {meal.completionPercentage > 0 ? (
-        <div className="mt-4">
-          <ProgressBar
-            label={`${meal.completionPercentage}% registrado`}
-            value={meal.completionPercentage}
-          />
-        </div>
-      ) : null}
 
       <div className="mt-5 flex gap-3">
         <Link

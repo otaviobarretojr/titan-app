@@ -19,7 +19,6 @@ export type NutritionMeal = {
   consumedProteinG: number
   consumedCarbohydrateG: number
   consumedFatG: number
-  completionPercentage: number
 }
 
 export type NutritionDaySummary = {
@@ -29,13 +28,11 @@ export type NutritionDaySummary = {
   fatConsumedG: number
   calorieTargetKcal: number
   proteinTargetG: number
-  hydrationConsumedMl: number
-  hydrationTargetMl: number
-  pendingCount: number
 }
 
 export type NutritionDayData = {
   localDate: string
   meals: NutritionMeal[]
   summary: NutritionDaySummary
+  pendingCount: number
 }

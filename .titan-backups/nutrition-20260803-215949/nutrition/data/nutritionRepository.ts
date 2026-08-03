@@ -32,25 +32,20 @@ function resolveStatus(
 export async function getNutritionDayData(): Promise<NutritionDayData | null> {
   const localDate = getTitanLocalDate()
 
-  const [dailyPlan, mealPlans, mealEntries, hydrationEntries] =
-    await Promise.all([
-      titanDatabase.dailyPlans
-        .where('[userId+localDate]')
-        .equals([TITAN_USER_ID, localDate])
-        .first(),
-      titanDatabase.mealPlans
-        .where('[userId+localDate]')
-        .equals([TITAN_USER_ID, localDate])
-        .sortBy('sequence'),
-      titanDatabase.mealEntries
-        .where('[userId+localDate]')
-        .equals([TITAN_USER_ID, localDate])
-        .toArray(),
-      titanDatabase.hydrationEntries
-        .where('[userId+localDate]')
-        .equals([TITAN_USER_ID, localDate])
-        .toArray(),
-    ])
+  const [dailyPlan, mealPlans, mealEntries] = await Promise.all([
+    titanDatabase.dailyPlans
+      .where('[userId+localDate]')
+      .equals([TITAN_USER_ID, localDate])
+      .first(),
+    titanDatabase.mealPlans
+      .where('[userId+localDate]')
+      .equals([TITAN_USER_ID, localDate])
+      .sortBy('sequence'),
+    titanDatabase.mealEntries
+      .where('[userId+localDate]')
+      .equals([TITAN_USER_ID, localDate])
+      .toArray(),
+  ])
 
   if (!dailyPlan) return null
 
@@ -60,10 +55,6 @@ export async function getNutritionDayData(): Promise<NutritionDayData | null> {
 
   const meals: NutritionMeal[] = mealPlans.map((meal) => {
     const entry = entryByMealId.get(meal.id)
-    const completionPercentage =
-      meal.caloriesKcal > 0
-        ? Math.round(((entry?.caloriesKcal ?? 0) / meal.caloriesKcal) * 100)
-        : 0
 
     return {
       id: meal.id,
@@ -78,13 +69,13 @@ export async function getNutritionDayData(): Promise<NutritionDayData | null> {
       consumedProteinG: entry?.proteinG ?? 0,
       consumedCarbohydrateG: entry?.carbohydrateG ?? 0,
       consumedFatG: entry?.fatG ?? 0,
-      completionPercentage,
     }
   })
 
   return {
     localDate,
     meals,
+    pendingCount: meals.filter((meal) => meal.status === 'pending').length,
     summary: {
       caloriesConsumedKcal: mealEntries.reduce(
         (total, entry) => total + entry.caloriesKcal,
@@ -104,12 +95,6 @@ export async function getNutritionDayData(): Promise<NutritionDayData | null> {
       ),
       calorieTargetKcal: dailyPlan.calorieTargetKcal,
       proteinTargetG: dailyPlan.proteinTargetG,
-      hydrationConsumedMl: hydrationEntries.reduce(
-        (total, entry) => total + entry.amountMl,
-        0,
-      ),
-      hydrationTargetMl: dailyPlan.hydrationTargetMl,
-      pendingCount: meals.filter((meal) => meal.status === 'pending').length,
     },
   }
 }
@@ -159,15 +144,8 @@ export function registerPartialMeal(
   mealPlanId: string,
   percentage: number,
 ) {
-  const normalizedPercentage = Math.min(100, Math.max(0, percentage))
-  const status =
-    normalizedPercentage === 100 ? 'completed' : 'partial'
-
-  return saveMealEntry(
-    mealPlanId,
-    status,
-    normalizedPercentage / 100,
-  )
+  const normalizedPercentage = Math.min(90, Math.max(10, percentage))
+  return saveMealEntry(mealPlanId, 'partial', normalizedPercentage / 100)
 }
 
 export function substituteMeal(mealPlanId: string) {
@@ -190,22 +168,4 @@ export async function clearMealEntry(mealPlanId: string) {
   if (existing) {
     await titanDatabase.mealEntries.delete(existing.id)
   }
-}
-
-export async function addHydration(amountMl: number) {
-  if (!Number.isFinite(amountMl) || amountMl <= 0) {
-    throw new Error('Quantidade de água inválida.')
-  }
-
-  const now = new Date().toISOString()
-
-  await titanDatabase.hydrationEntries.add({
-    id: `hydration-${crypto.randomUUID()}`,
-    userId: TITAN_USER_ID,
-    localDate: getTitanLocalDate(),
-    amountMl,
-    consumedAt: now,
-    createdAt: now,
-    updatedAt: now,
-  })
 }
