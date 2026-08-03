@@ -6,6 +6,7 @@ import {
 } from 'react-router-dom'
 import { AppShell } from '../layouts/AppShell'
 import { DashboardPage } from '../modules/dashboard/pages/DashboardPage'
+import { SleepPage } from '../modules/health/pages/SleepPage'
 import { SettingsPage } from '../modules/settings/pages/SettingsPage'
 import { EvolutionPage } from '../modules/evolution/pages/EvolutionPage'
 import { CardioPage } from '../modules/cardio/pages/CardioPage'
@@ -34,6 +35,7 @@ export function App() {
             element={<EvolutionPage />}
           />
 
+          <Route path="/health/sleep" element={<SleepPage />} />
           <Route path="/more" element={<SettingsPage />} />
         </Route>
 

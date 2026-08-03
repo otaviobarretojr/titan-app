@@ -1,21 +1,34 @@
 import {
+  Bell,
   DatabaseBackup,
   Download,
   FileUp,
   Info,
+  Moon,
   ShieldCheck,
 } from 'lucide-react'
 import { useRef, useState } from 'react'
+import { Link } from 'react-router-dom'
 import { Button, Card } from '../../../shared/ui'
 import {
   downloadBackup,
   restoreBackup,
 } from '../../../services/backup/backupService'
+import {
+  getNotificationPermission,
+  remindersEnabled,
+  requestNotificationPermission,
+  setRemindersEnabled,
+  showTitanNotification,
+} from '../../../services/notifications/notificationService'
 
 export function SettingsPage() {
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [message, setMessage] = useState<string | null>(null)
   const [isBusy, setIsBusy] = useState(false)
+  const [notificationsActive, setNotificationsActive] = useState(
+    remindersEnabled(),
+  )
 
   async function exportData() {
     try {
@@ -123,6 +136,104 @@ export function SettingsPage() {
             {message}
           </p>
         ) : null}
+      </Card>
+
+
+      <Card>
+        <div className="flex gap-3">
+          <Moon
+            className="shrink-0 text-indigo-300"
+            size={23}
+            aria-hidden="true"
+          />
+          <div className="flex-1">
+            <h2 className="font-bold">Sono e recuperação</h2>
+            <p className="mt-1 text-sm leading-6 text-slate-400">
+              Registre o sono diário para alimentar o Coach e o Score TITAN.
+            </p>
+
+            <Link
+              className="mt-4 inline-flex min-h-11 items-center rounded-2xl bg-white/10 px-4 text-sm font-bold text-white"
+              to="/health/sleep"
+            >
+              Abrir sono
+            </Link>
+          </div>
+        </div>
+      </Card>
+
+      <Card>
+        <div className="flex gap-3">
+          <Bell
+            className="shrink-0 text-amber-300"
+            size={23}
+            aria-hidden="true"
+          />
+          <div className="flex-1">
+            <h2 className="font-bold">Lembretes locais</h2>
+            <p className="mt-1 text-sm leading-6 text-slate-400">
+              Ative permissões e teste notificações do PWA neste aparelho.
+            </p>
+
+            <div className="mt-4 space-y-3">
+              <Button
+                fullWidth
+                onClick={async () => {
+                  try {
+                    const permission =
+                      await requestNotificationPermission()
+
+                    const enabled = permission === 'granted'
+                    setRemindersEnabled(enabled)
+                    setNotificationsActive(enabled)
+
+                    setMessage(
+                      enabled
+                        ? 'Notificações ativadas.'
+                        : 'Permissão de notificação não concedida.',
+                    )
+                  } catch (reason) {
+                    setMessage(
+                      reason instanceof Error
+                        ? reason.message
+                        : 'Não foi possível ativar notificações.',
+                    )
+                  }
+                }}
+                variant="ghost"
+              >
+                {notificationsActive
+                  ? 'Notificações ativadas'
+                  : 'Ativar notificações'}
+              </Button>
+
+              <Button
+                disabled={
+                  getNotificationPermission() !== 'granted'
+                }
+                fullWidth
+                onClick={async () => {
+                  try {
+                    await showTitanNotification({
+                      title: 'TITAN',
+                      body: 'Notificações funcionando neste aparelho.',
+                      tag: 'titan-test',
+                    })
+                  } catch (reason) {
+                    setMessage(
+                      reason instanceof Error
+                        ? reason.message
+                        : 'Não foi possível enviar a notificação.',
+                    )
+                  }
+                }}
+                variant="ghost"
+              >
+                Testar notificação
+              </Button>
+            </div>
+          </div>
+        </div>
       </Card>
 
       <Card>

@@ -87,3 +87,12 @@
 - Score TITAN calculado com dados reais.
 - Prioridades dinâmicas.
 - Dashboard integrado com cardio, treino, nutrição, água e sono.
+
+## Sprint 011
+
+### Added
+
+- Registro de sono.
+- Página de recuperação.
+- Permissão e teste de notificações PWA.
+- Configuração local de lembretes.
