@@ -10,10 +10,7 @@ export default defineConfig({
     tailwindcss(),
     VitePWA({
       registerType: 'prompt',
-      includeAssets: [
-        'icons/titan.svg',
-        'icons/titan-maskable.svg',
-      ],
+      includeAssets: ['icons/titan.svg', 'icons/titan-maskable.svg'],
       manifest: {
         name: 'TITAN',
         short_name: 'TITAN',
@@ -43,25 +40,7 @@ export default defineConfig({
       workbox: {
         navigateFallback: 'index.html',
         cleanupOutdatedCaches: true,
-        clientsClaim: true,
-        skipWaiting: false,
-        globPatterns: [
-          '**/*.{js,css,html,svg,png,webp,json}',
-        ],
-        runtimeCaching: [
-          {
-            urlPattern: ({ request }) =>
-              request.destination === 'image',
-            handler: 'CacheFirst',
-            options: {
-              cacheName: 'titan-images',
-              expiration: {
-                maxEntries: 60,
-                maxAgeSeconds: 60 * 60 * 24 * 30,
-              },
-            },
-          },
-        ],
+        globPatterns: ['**/*.{js,css,html,svg,png,webp,json}'],
       },
     }),
   ],

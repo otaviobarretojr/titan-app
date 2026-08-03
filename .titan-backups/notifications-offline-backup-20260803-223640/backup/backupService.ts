@@ -3,32 +3,13 @@ import { titanDatabase } from '../../database/titanDatabase'
 
 const backupSchema = z.object({
   format: z.literal('titan-backup'),
-  backupVersion: z.literal(2),
+  backupVersion: z.literal(1),
   exportedAt: z.string(),
-  databaseVersion: z.number(),
+  databaseVersion: z.number().int().positive(),
   tables: z.record(z.string(), z.array(z.unknown())),
-  localStorage: z.record(z.string(), z.string()),
 })
 
 export type TitanBackup = z.infer<typeof backupSchema>
-
-function exportTitanLocalStorage() {
-  const values: Record<string, string> = {}
-
-  for (let index = 0; index < localStorage.length; index += 1) {
-    const key = localStorage.key(index)
-
-    if (!key || !key.startsWith('titan-')) continue
-
-    const value = localStorage.getItem(key)
-
-    if (value !== null) {
-      values[key] = value
-    }
-  }
-
-  return values
-}
 
 export async function createBackup(): Promise<TitanBackup> {
   const tables: Record<string, unknown[]> = {}
@@ -39,20 +20,17 @@ export async function createBackup(): Promise<TitanBackup> {
 
   return {
     format: 'titan-backup',
-    backupVersion: 2,
+    backupVersion: 1,
     exportedAt: new Date().toISOString(),
     databaseVersion: titanDatabase.verno,
     tables,
-    localStorage: exportTitanLocalStorage(),
   }
 }
 
 export async function downloadBackup() {
   const backup = await createBackup()
   const content = JSON.stringify(backup, null, 2)
-  const blob = new Blob([content], {
-    type: 'application/json',
-  })
+  const blob = new Blob([content], { type: 'application/json' })
   const url = URL.createObjectURL(blob)
   const date = backup.exportedAt.slice(0, 10)
 
@@ -75,9 +53,7 @@ export async function restoreBackup(file: File) {
 
   for (const tableName of Object.keys(backup.tables)) {
     if (!existingTables.has(tableName)) {
-      throw new Error(
-        `Tabela incompatível no backup: ${tableName}`,
-      )
+      throw new Error(`Tabela incompatível no backup: ${tableName}`)
     }
   }
 
@@ -96,8 +72,4 @@ export async function restoreBackup(file: File) {
       }
     },
   )
-
-  for (const [key, value] of Object.entries(backup.localStorage)) {
-    localStorage.setItem(key, value)
-  }
 }
