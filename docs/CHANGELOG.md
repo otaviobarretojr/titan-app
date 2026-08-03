@@ -78,3 +78,12 @@
 - Estado offline e atualização disponível.
 - Backup e restauração.
 - Página de configurações.
+
+## Sprint 010
+
+### Added
+
+- Coach Engine funcional.
+- Score TITAN calculado com dados reais.
+- Prioridades dinâmicas.
+- Dashboard integrado com cardio, treino, nutrição, água e sono.

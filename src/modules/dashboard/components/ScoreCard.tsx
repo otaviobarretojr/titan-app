@@ -1,7 +1,20 @@
 import { Activity } from 'lucide-react'
-import { Badge, Card } from '../../../shared/ui'
+import { Badge, Card, ProgressBar } from '../../../shared/ui'
+import type { TitanScore } from '../../coach/types/coach'
 
-export function ScoreCard() {
+type ScoreCardProps = {
+  score: TitanScore
+}
+
+const toneByLabel = {
+  Excelente: 'success',
+  Bom: 'primary',
+  Atenção: 'warning',
+  Crítico: 'warning',
+  'Sem dados': 'neutral',
+} as const
+
+export function ScoreCard({ score }: ScoreCardProps) {
   return (
     <Card elevated>
       <div className="flex items-start justify-between gap-4">
@@ -11,14 +24,24 @@ export function ScoreCard() {
             <span className="text-sm font-bold">SCORE TITAN</span>
           </div>
 
-          <p className="mt-3 text-4xl font-black">—</p>
+          <p className="mt-3 text-4xl font-black">
+            {score.value ?? '—'}
+          </p>
           <p className="mt-1 text-sm text-slate-400">
-            Dados insuficientes para calcular o score.
+            {score.value === null
+              ? 'Registre ações para calcular o score.'
+              : 'Calculado com os dados registrados hoje.'}
           </p>
         </div>
 
-        <Badge tone="neutral">Aguardando</Badge>
+        <Badge tone={toneByLabel[score.label]}>{score.label}</Badge>
       </div>
+
+      {score.value !== null ? (
+        <div className="mt-5">
+          <ProgressBar label="Performance diária" value={score.value} />
+        </div>
+      ) : null}
     </Card>
   )
 }

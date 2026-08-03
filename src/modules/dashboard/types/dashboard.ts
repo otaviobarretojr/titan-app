@@ -1,3 +1,8 @@
+import type {
+  CoachInsight,
+  TitanScore,
+} from '../../coach/types/coach'
+
 export type DashboardMeal = {
   id: string
   name: string
@@ -14,12 +19,15 @@ export type DashboardWorkout = {
   plannedTime: string
   exerciseCount: number
   estimatedDurationMinutes: number
+  status: 'planned' | 'started' | 'completed'
 }
 
-export type DashboardCoachMessage = {
+export type DashboardCardio = {
   id: string
   title: string
-  message: string
+  plannedTime: string
+  targetDurationMinutes: number
+  status: 'planned' | 'started' | 'completed'
 }
 
 export type DashboardSummary = {
@@ -37,6 +45,8 @@ export type DashboardData = {
   userName: string
   nextMeal: DashboardMeal | null
   workout: DashboardWorkout | null
-  coachMessage: DashboardCoachMessage | null
+  cardio: DashboardCardio | null
+  insights: CoachInsight[]
+  score: TitanScore
   summary: DashboardSummary
 }

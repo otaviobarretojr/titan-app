@@ -8,6 +8,10 @@ import {
   type HydrationEntryRecord,
 } from '../../../database/titanDatabase'
 import { TITAN_USER_ID } from '../../../database/seeds/seedToday'
+import {
+  calculateTitanScore,
+  generateCoachInsights,
+} from '../../coach/engine/coachEngine'
 import type { DashboardData } from '../types/dashboard'
 
 export async function getDashboardData(): Promise<DashboardData | null> {
@@ -19,7 +23,9 @@ export async function getDashboardData(): Promise<DashboardData | null> {
     meals,
     mealEntries,
     workout,
-    coachMessage,
+    workoutSession,
+    cardioPlan,
+    cardioSession,
     hydrationEntries,
     sleepEntry,
   ] = await Promise.all([
@@ -40,7 +46,15 @@ export async function getDashboardData(): Promise<DashboardData | null> {
       .where('[userId+localDate]')
       .equals([TITAN_USER_ID, localDate])
       .first(),
-    titanDatabase.coachRecommendations
+    titanDatabase.workoutSessions
+      .where('[userId+localDate]')
+      .equals([TITAN_USER_ID, localDate])
+      .first(),
+    titanDatabase.cardioPlans
+      .where('[userId+localDate]')
+      .equals([TITAN_USER_ID, localDate])
+      .first(),
+    titanDatabase.cardioSessions
       .where('[userId+localDate]')
       .equals([TITAN_USER_ID, localDate])
       .first(),
@@ -54,26 +68,77 @@ export async function getDashboardData(): Promise<DashboardData | null> {
       .first(),
   ])
 
-  if (!user || !dailyPlan) {
-    return null
-  }
-
-  const completedMealIds = new Set(
-    mealEntries
-      .filter((entry) => entry.status !== 'skipped')
-      .map((entry) => entry.mealPlanId),
-  )
+  if (!user || !dailyPlan) return null
 
   const currentMinutes = getTitanCurrentMinutes()
 
+  const mealEntryByPlanId = new Map(
+    mealEntries.map((entry) => [entry.mealPlanId, entry]),
+  )
+
+  const unresolvedMeals = meals.filter(
+    (meal) => !mealEntryByPlanId.has(meal.id),
+  )
+
+  const pendingMeals = unresolvedMeals.filter(
+    (meal) => timeToMinutes(meal.plannedTime) < currentMinutes,
+  )
+
   const nextMeal =
-    meals.find(
-      (meal) =>
-        !completedMealIds.has(meal.id) &&
-        timeToMinutes(meal.plannedTime) >= currentMinutes,
+    unresolvedMeals.find(
+      (meal) => timeToMinutes(meal.plannedTime) >= currentMinutes,
     ) ??
-    meals.find((meal) => !completedMealIds.has(meal.id)) ??
+    unresolvedMeals[0] ??
     null
+
+  const caloriesConsumedKcal = mealEntries.reduce(
+    (total, entry) => total + entry.caloriesKcal,
+    0,
+  )
+  const proteinConsumedG = mealEntries.reduce(
+    (total, entry) => total + entry.proteinG,
+    0,
+  )
+  const hydrationConsumedMl = hydrationEntries.reduce(
+    (total, entry) => total + entry.amountMl,
+    0,
+  )
+
+  const workoutStatus =
+    workoutSession?.status === 'completed'
+      ? 'completed'
+      : workoutSession?.status === 'started'
+        ? 'started'
+        : workout
+          ? 'planned'
+          : 'none'
+
+  const cardioStatus =
+    cardioSession?.status === 'completed'
+      ? 'completed'
+      : cardioSession?.status === 'started'
+        ? 'started'
+        : cardioPlan
+          ? 'planned'
+          : 'none'
+
+  const engineInput = {
+    currentMinutes,
+    proteinConsumedG,
+    proteinTargetG: dailyPlan.proteinTargetG,
+    caloriesConsumedKcal,
+    calorieTargetKcal: dailyPlan.calorieTargetKcal,
+    hydrationConsumedMl,
+    hydrationTargetMl: dailyPlan.hydrationTargetMl,
+    sleepMinutes: sleepEntry?.durationMinutes ?? null,
+    sleepTargetMinutes: dailyPlan.sleepTargetMinutes,
+    pendingMeals: pendingMeals.length,
+    workoutStatus,
+    cardioStatus,
+    plannedWorkoutMinutes: workout
+      ? timeToMinutes(workout.plannedTime)
+      : null,
+  } as const
 
   return {
     userName: user.displayName,
@@ -95,28 +160,25 @@ export async function getDashboardData(): Promise<DashboardData | null> {
           plannedTime: workout.plannedTime,
           exerciseCount: workout.exerciseCount,
           estimatedDurationMinutes: workout.estimatedDurationMinutes,
+          status:
+            workoutStatus === 'none' ? 'planned' : workoutStatus,
         }
       : null,
-    coachMessage: coachMessage
+    cardio: cardioPlan
       ? {
-          id: coachMessage.id,
-          title: coachMessage.title,
-          message: coachMessage.message,
+          id: cardioPlan.id,
+          title: cardioPlan.title,
+          plannedTime: cardioPlan.plannedTime,
+          targetDurationMinutes: cardioPlan.targetDurationMinutes,
+          status: cardioStatus === 'none' ? 'planned' : cardioStatus,
         }
       : null,
+    insights: generateCoachInsights(engineInput),
+    score: calculateTitanScore(engineInput),
     summary: {
-      caloriesConsumedKcal: mealEntries.reduce(
-        (total, entry) => total + entry.caloriesKcal,
-        0,
-      ),
-      proteinConsumedG: mealEntries.reduce(
-        (total, entry) => total + entry.proteinG,
-        0,
-      ),
-      hydrationConsumedMl: hydrationEntries.reduce(
-        (total, entry) => total + entry.amountMl,
-        0,
-      ),
+      caloriesConsumedKcal,
+      proteinConsumedG,
+      hydrationConsumedMl,
       sleepMinutes: sleepEntry?.durationMinutes ?? null,
       calorieTargetKcal: dailyPlan.calorieTargetKcal,
       proteinTargetG: dailyPlan.proteinTargetG,

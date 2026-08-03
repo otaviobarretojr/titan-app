@@ -1,4 +1,5 @@
 import { Card, SectionTitle } from '../../../shared/ui'
+import { CardioCard } from '../components/CardioCard'
 import { CoachCard } from '../components/CoachCard'
 import { MealCard } from '../components/MealCard'
 import { MetricsGrid } from '../components/MetricsGrid'
@@ -78,12 +79,7 @@ export function DashboardPage() {
         </div>
       </header>
 
-      {data.coachMessage ? (
-        <CoachCard
-          message={data.coachMessage.message}
-          title={data.coachMessage.title}
-        />
-      ) : null}
+      <CoachCard insight={data.insights[0]} />
 
       <section>
         <SectionTitle supportingText="Próxima ação" title="Agora" />
@@ -96,8 +92,13 @@ export function DashboardPage() {
       </section>
 
       <section>
+        <SectionTitle title="Cardio do dia" />
+        <CardioCard cardio={data.cardio} />
+      </section>
+
+      <section>
         <SectionTitle title="Score TITAN" />
-        <ScoreCard />
+        <ScoreCard score={data.score} />
       </section>
 
       <section>
