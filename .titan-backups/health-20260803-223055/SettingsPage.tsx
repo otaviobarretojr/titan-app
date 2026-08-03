@@ -7,7 +7,6 @@ import {
   Info,
   Moon,
   ShieldCheck,
-  Stethoscope,
 } from 'lucide-react'
 import { useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
@@ -160,32 +159,6 @@ export function SettingsPage() {
               to="/reports"
             >
               Abrir relatórios
-            </Link>
-          </div>
-        </div>
-      </Card>
-
-
-      <Card>
-        <div className="flex gap-3">
-          <Stethoscope
-            className="shrink-0 text-emerald-300"
-            size={23}
-            aria-hidden="true"
-          />
-
-          <div className="flex-1">
-            <h2 className="font-bold">Saúde</h2>
-
-            <p className="mt-1 text-sm leading-6 text-slate-400">
-              Pressão, frequência cardíaca, sintomas e exames.
-            </p>
-
-            <Link
-              className="mt-4 inline-flex min-h-11 items-center rounded-2xl bg-white/10 px-4 text-sm font-bold text-white"
-              to="/health"
-            >
-              Abrir saúde
             </Link>
           </div>
         </div>

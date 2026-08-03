@@ -136,33 +136,6 @@ export type ProgressPhotoRecord = {
   updatedAt: string
 }
 
-
-export type HealthMetricRecord = {
-  id: string
-  userId: string
-  localDate: string
-  systolicPressure: number | null
-  diastolicPressure: number | null
-  restingHeartRate: number | null
-  symptom: string
-  notes: string
-  createdAt: string
-  updatedAt: string
-}
-
-export type HealthExamRecord = {
-  id: string
-  userId: string
-  examDate: string
-  title: string
-  category: string
-  value: string
-  referenceRange: string
-  notes: string
-  createdAt: string
-  updatedAt: string
-}
-
 export type CardioPlanRecord = {
   id: string
   userId: string
@@ -248,8 +221,6 @@ class TitanDatabase extends Dexie {
   exerciseSets!: EntityTable<ExerciseSetRecord, 'id'>
   bodyMetrics!: EntityTable<BodyMetricRecord, 'id'>
   progressPhotos!: EntityTable<ProgressPhotoRecord, 'id'>
-  healthMetrics!: EntityTable<HealthMetricRecord, 'id'>
-  healthExams!: EntityTable<HealthExamRecord, 'id'>
   cardioPlans!: EntityTable<CardioPlanRecord, 'id'>
   cardioSessions!: EntityTable<CardioSessionRecord, 'id'>
   exercisePersonalRecords!: EntityTable<ExercisePersonalRecord, 'id'>
@@ -389,36 +360,6 @@ class TitanDatabase extends Dexie {
         'id, userId, exercisePlanId, exerciseName, localDate, estimatedOneRepMaxKg, [userId+exercisePlanId]',
       bodyMetrics: 'id, userId, localDate, [userId+localDate]',
       progressPhotos: 'id, userId, localDate, pose, [userId+localDate]',
-      cardioPlans: 'id, userId, localDate, type, [userId+localDate]',
-      cardioSessions:
-        'id, userId, cardioPlanId, localDate, status, [userId+localDate]',
-      hydrationEntries:
-        'id, userId, localDate, consumedAt, [userId+localDate]',
-      sleepEntries: 'id, userId, localDate, [userId+localDate]',
-      coachRecommendations:
-        'id, userId, localDate, priority, [userId+localDate]',
-    })
-
-    this.version(7).stores({
-      users: 'id, displayName, createdAt',
-      dailyPlans: 'id, userId, localDate, [userId+localDate]',
-      mealPlans:
-        'id, userId, localDate, plannedTime, sequence, [userId+localDate]',
-      mealEntries:
-        'id, userId, mealPlanId, localDate, status, [userId+localDate]',
-      workoutPlans: 'id, userId, localDate, [userId+localDate]',
-      exercisePlans:
-        'id, userId, workoutPlanId, localDate, sequence, name, [workoutPlanId+sequence]',
-      workoutSessions:
-        'id, userId, workoutPlanId, localDate, status, [userId+localDate]',
-      exerciseSets:
-        'id, userId, workoutSessionId, exercisePlanId, localDate, setNumber, [workoutSessionId+exercisePlanId]',
-      exercisePersonalRecords:
-        'id, userId, exercisePlanId, exerciseName, localDate, estimatedOneRepMaxKg, [userId+exercisePlanId]',
-      bodyMetrics: 'id, userId, localDate, [userId+localDate]',
-      progressPhotos: 'id, userId, localDate, pose, [userId+localDate]',
-      healthMetrics: 'id, userId, localDate, [userId+localDate]',
-      healthExams: 'id, userId, examDate, category, [userId+examDate]',
       cardioPlans: 'id, userId, localDate, type, [userId+localDate]',
       cardioSessions:
         'id, userId, cardioPlanId, localDate, status, [userId+localDate]',
