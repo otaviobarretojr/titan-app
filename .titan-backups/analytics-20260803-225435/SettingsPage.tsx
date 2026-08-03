@@ -7,7 +7,6 @@ import {
   Download,
   FileUp,
   Info,
-  LineChart,
   Moon,
   ShieldCheck,
   Stethoscope,
@@ -186,13 +185,6 @@ export function SettingsPage() {
         icon={<Stethoscope size={23} aria-hidden="true" />}
         label="Saúde"
         path="/health"
-      />
-
-
-      <NavigationCard
-        icon={<LineChart size={23} aria-hidden="true" />}
-        label="Analytics"
-        path="/analytics"
       />
 
       <NavigationCard
