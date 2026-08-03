@@ -1,6 +1,6 @@
 # TITAN
 
-PWA mobile-first para treino, nutrição, cardio, evolução, recuperação e decisões diárias de performance.
+Sistema operacional de performance pessoal, mobile-first e instalável como PWA.
 
 ## Desenvolvimento
 
@@ -17,8 +17,14 @@ npm run validate
 
 ## Publicação
 
-O push para `main` executa validação e publicação automática no GitHub Pages.
+Todo push para `main` executa validação e publicação automática no GitHub Pages.
+
+URL esperada:
+
+```text
+https://otaviobarretojr.github.io/titan-app/
+```
 
 ## Dados
 
-Os dados ficam no IndexedDB do navegador. Use a função de backup antes de limpar dados do navegador ou trocar de aparelho.
+Os registros permanecem no IndexedDB do navegador. Exporte backup antes de limpar dados ou trocar de aparelho.

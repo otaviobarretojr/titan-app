@@ -13,7 +13,7 @@ for (const file of requiredFiles) {
 const indexHtml = await readFile('dist/index.html', 'utf8')
 
 if (!indexHtml.includes('/titan-app/')) {
-  throw new Error('Build não contém a base correta do GitHub Pages.')
+  throw new Error('Build sem base correta para GitHub Pages.')
 }
 
-console.log('Release validada com sucesso.')
+console.log('✅ Release validada.')
