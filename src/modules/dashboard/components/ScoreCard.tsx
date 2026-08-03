@@ -1,5 +1,5 @@
 import { Activity } from 'lucide-react'
-import { Badge, Card, ProgressBar } from '../../../shared/ui'
+import { Badge, Card } from '../../../shared/ui'
 
 export function ScoreCard() {
   return (
@@ -11,15 +11,13 @@ export function ScoreCard() {
             <span className="text-sm font-bold">SCORE TITAN</span>
           </div>
 
-          <p className="mt-3 text-4xl font-black">72</p>
-          <p className="mt-1 text-sm text-slate-400">Base demonstrativa, ainda sem dados reais.</p>
+          <p className="mt-3 text-4xl font-black">—</p>
+          <p className="mt-1 text-sm text-slate-400">
+            Dados insuficientes para calcular o score.
+          </p>
         </div>
 
-        <Badge tone="primary">Bom</Badge>
-      </div>
-
-      <div className="mt-5">
-        <ProgressBar label="Consistência diária" value={72} />
+        <Badge tone="neutral">Aguardando</Badge>
       </div>
     </Card>
   )

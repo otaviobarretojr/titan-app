@@ -1,7 +1,22 @@
 import { Dumbbell } from 'lucide-react'
 import { Badge, Button, Card } from '../../../shared/ui'
+import type { DashboardWorkout } from '../types/dashboard'
 
-export function WorkoutCard() {
+type WorkoutCardProps = {
+  workout: DashboardWorkout | null
+}
+
+export function WorkoutCard({ workout }: WorkoutCardProps) {
+  if (!workout) {
+    return (
+      <Card>
+        <p className="text-sm text-slate-400">
+          Nenhum treino programado para hoje.
+        </p>
+      </Card>
+    )
+  }
+
   return (
     <Card>
       <div className="flex items-center gap-4">
@@ -10,13 +25,20 @@ export function WorkoutCard() {
         </div>
 
         <div className="min-w-0 flex-1">
-          <Badge>19:00 · TREINO</Badge>
-          <h3 className="mt-3 text-lg font-bold">Peito e tríceps</h3>
-          <p className="mt-1 text-sm leading-6 text-slate-400">7 exercícios · aproximadamente 60 minutos</p>
+          <Badge>{workout.plannedTime} · TREINO</Badge>
+
+          <h3 className="mt-3 text-lg font-bold">{workout.name}</h3>
+
+          <p className="mt-1 text-sm leading-6 text-slate-400">
+            {workout.exerciseCount} exercícios · aproximadamente{' '}
+            {workout.estimatedDurationMinutes} minutos
+          </p>
         </div>
       </div>
 
-      <Button className="mt-5" fullWidth variant="secondary">Iniciar treino</Button>
+      <Button className="mt-5" fullWidth variant="secondary">
+        Iniciar treino
+      </Button>
     </Card>
   )
 }
