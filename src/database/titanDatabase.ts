@@ -107,6 +107,23 @@ export type ExerciseSetRecord = {
 }
 
 
+
+export type BodyMetricRecord = {
+  id: string
+  userId: string
+  localDate: string
+  weightKg: number
+  waistCm: number | null
+  armCm: number | null
+  chestCm: number | null
+  thighCm: number | null
+  calfCm: number | null
+  bodyFatPercentage: number | null
+  notes: string
+  createdAt: string
+  updatedAt: string
+}
+
 export type CardioPlanRecord = {
   id: string
   userId: string
@@ -176,6 +193,7 @@ class TitanDatabase extends Dexie {
   exercisePlans!: EntityTable<ExercisePlanRecord, 'id'>
   workoutSessions!: EntityTable<WorkoutSessionRecord, 'id'>
   exerciseSets!: EntityTable<ExerciseSetRecord, 'id'>
+  bodyMetrics!: EntityTable<BodyMetricRecord, 'id'>
   cardioPlans!: EntityTable<CardioPlanRecord, 'id'>
   cardioSessions!: EntityTable<CardioSessionRecord, 'id'>
   hydrationEntries!: EntityTable<HydrationEntryRecord, 'id'>
@@ -234,6 +252,31 @@ class TitanDatabase extends Dexie {
         'id, userId, workoutPlanId, localDate, status, [userId+localDate]',
       exerciseSets:
         'id, userId, workoutSessionId, exercisePlanId, localDate, setNumber, [workoutSessionId+exercisePlanId]',
+      cardioPlans: 'id, userId, localDate, type, [userId+localDate]',
+      cardioSessions:
+        'id, userId, cardioPlanId, localDate, status, [userId+localDate]',
+      hydrationEntries:
+        'id, userId, localDate, consumedAt, [userId+localDate]',
+      sleepEntries: 'id, userId, localDate, [userId+localDate]',
+      coachRecommendations:
+        'id, userId, localDate, priority, [userId+localDate]',
+    })
+
+    this.version(4).stores({
+      users: 'id, displayName, createdAt',
+      dailyPlans: 'id, userId, localDate, [userId+localDate]',
+      mealPlans:
+        'id, userId, localDate, plannedTime, sequence, [userId+localDate]',
+      mealEntries:
+        'id, userId, mealPlanId, localDate, status, [userId+localDate]',
+      workoutPlans: 'id, userId, localDate, [userId+localDate]',
+      exercisePlans:
+        'id, userId, workoutPlanId, localDate, sequence, [workoutPlanId+sequence]',
+      workoutSessions:
+        'id, userId, workoutPlanId, localDate, status, [userId+localDate]',
+      exerciseSets:
+        'id, userId, workoutSessionId, exercisePlanId, localDate, setNumber, [workoutSessionId+exercisePlanId]',
+      bodyMetrics: 'id, userId, localDate, [userId+localDate]',
       cardioPlans: 'id, userId, localDate, type, [userId+localDate]',
       cardioSessions:
         'id, userId, cardioPlanId, localDate, status, [userId+localDate]',

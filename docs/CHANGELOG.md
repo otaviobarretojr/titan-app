@@ -51,3 +51,13 @@
 - Sessões de caminhada, Zona 2, corrida e HIIT.
 - Registro de duração, distância, FC média e esforço percebido.
 - Schema 3 do IndexedDB.
+
+## Sprint 007
+
+### Added
+
+- Módulo de evolução corporal.
+- Registro de peso e medidas.
+- Média recente e variação de peso.
+- Histórico persistente.
+- Schema 4 do IndexedDB.

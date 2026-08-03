@@ -7,6 +7,7 @@ import {
 import { ModulePlaceholderPage } from '../components/feedback/ModulePlaceholderPage'
 import { AppShell } from '../layouts/AppShell'
 import { DashboardPage } from '../modules/dashboard/pages/DashboardPage'
+import { EvolutionPage } from '../modules/evolution/pages/EvolutionPage'
 import { CardioPage } from '../modules/cardio/pages/CardioPage'
 import { TrainingPage } from '../modules/training/pages/TrainingPage'
 import { MealDetailPage } from '../modules/nutrition/pages/MealDetailPage'
@@ -30,13 +31,7 @@ export function App() {
 
           <Route
             path="/evolution"
-            element={
-              <ModulePlaceholderPage
-                eyebrow="Acompanhamento"
-                title="Evolução"
-                description="Peso, medidas, fotos, desempenho e tendências corporais ficarão reunidos aqui."
-              />
-            }
+            element={<EvolutionPage />}
           />
 
           <Route
