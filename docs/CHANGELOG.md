@@ -21,3 +21,13 @@
 ### Changed
 
 - Removidos valores demonstrativos tratados como se fossem registros reais.
+
+## Sprint 004
+
+### Added
+
+- Módulo de nutrição.
+- Lista e detalhe das refeições.
+- Estados planejada, pendente, parcial, concluída, substituída e não realizada.
+- Registro persistente no IndexedDB.
+- Resumo nutricional reativo.

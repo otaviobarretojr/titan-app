@@ -7,6 +7,8 @@ import {
 import { ModulePlaceholderPage } from '../components/feedback/ModulePlaceholderPage'
 import { AppShell } from '../layouts/AppShell'
 import { DashboardPage } from '../modules/dashboard/pages/DashboardPage'
+import { MealDetailPage } from '../modules/nutrition/pages/MealDetailPage'
+import { NutritionPage } from '../modules/nutrition/pages/NutritionPage'
 
 export function App() {
   return (
@@ -26,15 +28,10 @@ export function App() {
             }
           />
 
+          <Route path="/nutrition" element={<NutritionPage />} />
           <Route
-            path="/nutrition"
-            element={
-              <ModulePlaceholderPage
-                eyebrow="Módulo nutricional"
-                title="Nutrição"
-                description="Refeições, macros, substituições e pendências serão implementados na versão v0.4."
-              />
-            }
+            path="/nutrition/:mealId"
+            element={<MealDetailPage />}
           />
 
           <Route
