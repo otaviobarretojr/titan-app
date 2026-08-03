@@ -42,3 +42,12 @@
 - Carga, repetições e RIR.
 - Progresso e conclusão do treino.
 - Schema 2 do IndexedDB.
+
+## Sprint 006
+
+### Added
+
+- Módulo de Cardio.
+- Sessões de caminhada, Zona 2, corrida e HIIT.
+- Registro de duração, distância, FC média e esforço percebido.
+- Schema 3 do IndexedDB.

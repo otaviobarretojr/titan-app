@@ -2,6 +2,7 @@ import {
   ChartNoAxesCombined,
   Dumbbell,
   House,
+  HeartPulse,
   MoreHorizontal,
   Utensils,
 } from 'lucide-react'
@@ -23,6 +24,11 @@ const navigationItems = [
     label: 'Nutrição',
     to: '/nutrition',
     icon: Utensils,
+  },
+  {
+    label: 'Cardio',
+    to: '/cardio',
+    icon: HeartPulse,
   },
   {
     label: 'Evolução',

@@ -19,6 +19,7 @@ export async function seedToday() {
       titanDatabase.mealPlans,
       titanDatabase.workoutPlans,
       titanDatabase.exercisePlans,
+      titanDatabase.cardioPlans,
       titanDatabase.coachRecommendations,
     ],
     async () => {
@@ -296,6 +297,27 @@ export async function seedToday() {
             updatedAt: now,
           },
         ])
+      }
+
+
+      const cardioPlan = await titanDatabase.cardioPlans
+        .where('[userId+localDate]')
+        .equals([USER_ID, localDate])
+        .first()
+
+      if (!cardioPlan) {
+        await titanDatabase.cardioPlans.add({
+          id: createId('cardio'),
+          userId: USER_ID,
+          localDate,
+          type: 'zone2',
+          title: 'Cardio Zona 2',
+          plannedTime: '18:10',
+          targetDurationMinutes: 30,
+          targetDistanceKm: null,
+          createdAt: now,
+          updatedAt: now,
+        })
       }
 
       const recommendation = await titanDatabase.coachRecommendations

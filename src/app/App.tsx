@@ -7,6 +7,7 @@ import {
 import { ModulePlaceholderPage } from '../components/feedback/ModulePlaceholderPage'
 import { AppShell } from '../layouts/AppShell'
 import { DashboardPage } from '../modules/dashboard/pages/DashboardPage'
+import { CardioPage } from '../modules/cardio/pages/CardioPage'
 import { TrainingPage } from '../modules/training/pages/TrainingPage'
 import { MealDetailPage } from '../modules/nutrition/pages/MealDetailPage'
 import { NutritionPage } from '../modules/nutrition/pages/NutritionPage'
@@ -20,6 +21,7 @@ export function App() {
 
           <Route path="/training" element={<TrainingPage />} />
 
+          <Route path="/cardio" element={<CardioPage />} />
           <Route path="/nutrition" element={<NutritionPage />} />
           <Route
             path="/nutrition/:mealId"
