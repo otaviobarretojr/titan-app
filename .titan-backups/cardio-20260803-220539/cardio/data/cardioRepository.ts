@@ -1,11 +1,10 @@
 import { getTitanLocalDate } from '../../../database/date'
-import { titanDatabase } from '../../../database/titanDatabase'
+import {
+  titanDatabase,
+  type CardioSessionRecord,
+} from '../../../database/titanDatabase'
 import { TITAN_USER_ID } from '../../../database/seeds/seedToday'
-import type {
-  CardioDay,
-  CardioHistoryItem,
-} from '../types/cardio'
-import { calculatePace } from '../utils/cardioMath'
+import type { CardioDay } from '../types/cardio'
 
 export async function getCardioDay(): Promise<CardioDay | null> {
   const localDate = getTitanLocalDate()
@@ -37,51 +36,7 @@ export async function getCardioDay(): Promise<CardioDay | null> {
     averageHeartRate: session?.averageHeartRate ?? null,
     perceivedEffort: session?.perceivedEffort ?? 5,
     notes: session?.notes ?? '',
-    paceMinutesPerKm: calculatePace(
-      session?.durationMinutes ?? 0,
-      session?.distanceKm ?? null,
-    ),
   }
-}
-
-export async function getCardioHistory(
-  limit = 12,
-): Promise<CardioHistoryItem[]> {
-  const sessions = await titanDatabase.cardioSessions
-    .where('userId')
-    .equals(TITAN_USER_ID)
-    .reverse()
-    .sortBy('localDate')
-
-  const plans = await titanDatabase.cardioPlans
-    .where('userId')
-    .equals(TITAN_USER_ID)
-    .toArray()
-
-  const planById = new Map(plans.map((plan) => [plan.id, plan]))
-
-  return sessions
-    .filter((session) => session.status === 'completed')
-    .sort((a, b) => b.localDate.localeCompare(a.localDate))
-    .slice(0, limit)
-    .map((session) => {
-      const plan = planById.get(session.cardioPlanId)
-
-      return {
-        id: session.id,
-        localDate: session.localDate,
-        title: plan?.title ?? 'Cardio',
-        type: plan?.type ?? 'walking',
-        durationMinutes: session.durationMinutes,
-        distanceKm: session.distanceKm,
-        averageHeartRate: session.averageHeartRate,
-        perceivedEffort: session.perceivedEffort,
-        paceMinutesPerKm: calculatePace(
-          session.durationMinutes,
-          session.distanceKm,
-        ),
-      }
-    })
 }
 
 export async function startCardio(cardioPlanId: string) {
@@ -97,12 +52,12 @@ export async function startCardio(cardioPlanId: string) {
 
   const now = new Date().toISOString()
 
-  const session = {
+  const session: CardioSessionRecord = {
     id: `cardio-session-${crypto.randomUUID()}`,
     userId: TITAN_USER_ID,
     cardioPlanId,
     localDate,
-    status: 'started' as const,
+    status: 'started',
     durationMinutes: 0,
     distanceKm: null,
     averageHeartRate: null,

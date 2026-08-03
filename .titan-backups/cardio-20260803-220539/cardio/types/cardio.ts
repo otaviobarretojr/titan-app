@@ -20,17 +20,4 @@ export type CardioDay = {
   averageHeartRate: number | null
   perceivedEffort: number
   notes: string
-  paceMinutesPerKm: number | null
-}
-
-export type CardioHistoryItem = {
-  id: string
-  localDate: string
-  title: string
-  type: CardioType
-  durationMinutes: number
-  distanceKm: number | null
-  averageHeartRate: number | null
-  perceivedEffort: number
-  paceMinutesPerKm: number | null
 }

@@ -7,12 +7,9 @@ import {
   RotateCcw,
   Timer,
 } from 'lucide-react'
-import { Button, Card, SectionTitle } from '../../../shared/ui'
+import { Button, Card } from '../../../shared/ui'
 import { CardioForm } from '../components/CardioForm'
-import { CardioHistory } from '../components/CardioHistory'
 import { useCardioDay } from '../hooks/useCardioDay'
-import { useCardioHistory } from '../hooks/useCardioHistory'
-import { formatPace } from '../utils/cardioMath'
 
 const cardioLabels = {
   walking: 'Caminhada',
@@ -30,8 +27,6 @@ export function CardioPage() {
     completeCardio,
     resetCardio,
   } = useCardioDay()
-
-  const { history } = useCardioHistory()
 
   if (error) {
     return (
@@ -58,11 +53,7 @@ export function CardioPage() {
         <p className="text-sm font-bold uppercase tracking-widest text-cyan-300">
           TITAN CARDIO
         </p>
-
-        <h1 className="mt-2 text-3xl font-black">
-          {cardio.title}
-        </h1>
-
+        <h1 className="mt-2 text-3xl font-black">{cardio.title}</h1>
         <p className="mt-2 text-sm text-slate-400">
           {cardio.plannedTime} · {cardioLabels[cardio.type]}
         </p>
@@ -75,7 +66,6 @@ export function CardioPage() {
             label="Meta"
             value={`${cardio.targetDurationMinutes} min`}
           />
-
           <Metric
             icon={<Footprints size={19} aria-hidden="true" />}
             label="Distância"
@@ -102,26 +92,17 @@ export function CardioPage() {
           <div className="mt-5 rounded-2xl bg-emerald-500/10 p-4">
             <div className="flex items-center gap-2 text-emerald-300">
               <Check size={19} aria-hidden="true" />
-              <span className="font-bold">
-                Cardio concluído
-              </span>
+              <span className="font-bold">Cardio concluído</span>
             </div>
 
             <p className="mt-3 text-sm text-slate-300">
               {cardio.durationMinutes} min
-
               {cardio.distanceKm
                 ? ` · ${cardio.distanceKm.toLocaleString('pt-BR')} km`
                 : ''}
-
               {cardio.averageHeartRate
                 ? ` · ${cardio.averageHeartRate} bpm`
                 : ''}
-            </p>
-
-            <p className="mt-2 text-sm text-slate-400">
-              Pace: {formatPace(cardio.paceMinutesPerKm)} · Esforço{' '}
-              {cardio.perceivedEffort}/10
             </p>
 
             {cardio.sessionId ? (
@@ -140,20 +121,8 @@ export function CardioPage() {
       </Card>
 
       {cardio.status === 'started' ? (
-        <CardioForm
-          cardio={cardio}
-          onComplete={completeCardio}
-        />
+        <CardioForm cardio={cardio} onComplete={completeCardio} />
       ) : null}
-
-      <section>
-        <SectionTitle
-          title="Histórico"
-          supportingText={`${history.length} sessões`}
-        />
-
-        <CardioHistory history={history} />
-      </section>
 
       <Card>
         <div className="flex gap-3">
@@ -162,13 +131,11 @@ export function CardioPage() {
             size={22}
             aria-hidden="true"
           />
-
           <div>
             <h2 className="font-bold">Orientação</h2>
-
             <p className="mt-1 text-sm leading-6 text-slate-400">
-              Na Zona 2, mantenha um esforço sustentável. Em corrida,
-              compare pace, duração e esforço ao longo das semanas.
+              Na Zona 2, mantenha um esforço sustentável e registre a
+              frequência cardíaca média quando disponível.
             </p>
           </div>
         </div>
@@ -183,24 +150,14 @@ type MetricProps = {
   value: string
 }
 
-function Metric({
-  icon,
-  label,
-  value,
-}: MetricProps) {
+function Metric({ icon, label, value }: MetricProps) {
   return (
     <div className="rounded-2xl bg-white/5 p-4">
       <div className="flex items-center gap-2 text-slate-500">
         {icon}
-
-        <span className="text-xs font-bold">
-          {label}
-        </span>
+        <span className="text-xs font-bold">{label}</span>
       </div>
-
-      <p className="mt-3 text-lg font-black">
-        {value}
-      </p>
+      <p className="mt-3 text-lg font-black">{value}</p>
     </div>
   )
 }

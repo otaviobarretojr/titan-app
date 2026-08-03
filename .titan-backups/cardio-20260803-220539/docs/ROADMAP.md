@@ -1,0 +1,11 @@
+# TITAN — Roadmap
+- [x] v0.1 — Foundation
+- [ ] v0.2 — Dashboard
+- [ ] v0.3 — Treinos
+- [ ] v0.4 — Nutrição
+- [ ] v0.5 — Cardio
+- [ ] v0.6 — Saúde e evolução
+- [ ] v0.7 — Coach
+- [ ] v0.8 — Relatórios
+- [ ] v0.9 — Polimento
+- [ ] v1.0 — Primeira versão estável

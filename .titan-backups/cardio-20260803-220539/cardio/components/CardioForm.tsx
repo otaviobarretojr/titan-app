@@ -2,11 +2,6 @@ import { Check } from 'lucide-react'
 import { useState } from 'react'
 import { Button, Card } from '../../../shared/ui'
 import type { CardioDay } from '../types/cardio'
-import {
-  calculatePace,
-  formatPace,
-  getCardioFeedback,
-} from '../utils/cardioMath'
 
 type CardioFormProps = {
   cardio: CardioDay
@@ -35,18 +30,6 @@ export function CardioForm({
   const [notes, setNotes] = useState('')
 
   if (!cardio.sessionId) return null
-
-  const pace = calculatePace(
-    durationMinutes,
-    distanceKm > 0 ? distanceKm : null,
-  )
-
-  const feedback = getCardioFeedback({
-    type: cardio.type,
-    perceivedEffort,
-    averageHeartRate:
-      averageHeartRate > 0 ? averageHeartRate : null,
-  })
 
   return (
     <Card>
@@ -91,11 +74,6 @@ export function CardioForm({
         />
       </div>
 
-      <div className="mt-4 rounded-2xl bg-white/5 p-4">
-        <p className="text-xs font-bold text-slate-500">Pace estimado</p>
-        <p className="mt-2 text-xl font-black">{formatPace(pace)}</p>
-      </div>
-
       <label className="mt-4 block">
         <span className="mb-2 block text-xs font-bold text-slate-500">
           Observações
@@ -107,10 +85,6 @@ export function CardioForm({
           value={notes}
         />
       </label>
-
-      <p className="mt-4 rounded-2xl bg-cyan-500/5 p-3 text-xs leading-5 text-cyan-200">
-        {feedback}
-      </p>
 
       <Button
         className="mt-5"
