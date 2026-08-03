@@ -31,3 +31,14 @@
 - Estados planejada, pendente, parcial, concluída, substituída e não realizada.
 - Registro persistente no IndexedDB.
 - Resumo nutricional reativo.
+
+## Sprint 005
+
+### Added
+
+- Módulo de treino.
+- Sessões de treino persistentes.
+- Registro individual de séries.
+- Carga, repetições e RIR.
+- Progresso e conclusão do treino.
+- Schema 2 do IndexedDB.

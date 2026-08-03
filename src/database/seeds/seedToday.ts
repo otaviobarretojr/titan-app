@@ -18,6 +18,7 @@ export async function seedToday() {
       titanDatabase.dailyPlans,
       titanDatabase.mealPlans,
       titanDatabase.workoutPlans,
+      titanDatabase.exercisePlans,
       titanDatabase.coachRecommendations,
     ],
     async () => {
@@ -145,14 +146,16 @@ export async function seedToday() {
         ])
       }
 
-      const workout = await titanDatabase.workoutPlans
+      let workout = await titanDatabase.workoutPlans
         .where('[userId+localDate]')
         .equals([USER_ID, localDate])
         .first()
 
       if (!workout) {
-        await titanDatabase.workoutPlans.add({
-          id: createId('workout'),
+        const workoutPlanId = createId('workout')
+
+        workout = {
+          id: workoutPlanId,
           userId: USER_ID,
           localDate,
           name: 'Peito e tríceps',
@@ -161,7 +164,138 @@ export async function seedToday() {
           estimatedDurationMinutes: 60,
           createdAt: now,
           updatedAt: now,
-        })
+        }
+
+        await titanDatabase.workoutPlans.add(workout)
+      }
+
+      const exerciseCount = await titanDatabase.exercisePlans
+        .where('workoutPlanId')
+        .equals(workout.id)
+        .count()
+
+      if (exerciseCount === 0) {
+        await titanDatabase.exercisePlans.bulkAdd([
+          {
+            id: createId('exercise'),
+            userId: USER_ID,
+            workoutPlanId: workout.id,
+            localDate,
+            name: 'Supino reto',
+            muscleGroup: 'Peito',
+            sequence: 1,
+            targetSets: 4,
+            minReps: 6,
+            maxReps: 10,
+            targetRir: 2,
+            restSeconds: 120,
+            previousLoadKg: null,
+            createdAt: now,
+            updatedAt: now,
+          },
+          {
+            id: createId('exercise'),
+            userId: USER_ID,
+            workoutPlanId: workout.id,
+            localDate,
+            name: 'Supino inclinado com halteres',
+            muscleGroup: 'Peito',
+            sequence: 2,
+            targetSets: 3,
+            minReps: 8,
+            maxReps: 12,
+            targetRir: 2,
+            restSeconds: 90,
+            previousLoadKg: null,
+            createdAt: now,
+            updatedAt: now,
+          },
+          {
+            id: createId('exercise'),
+            userId: USER_ID,
+            workoutPlanId: workout.id,
+            localDate,
+            name: 'Crucifixo na máquina',
+            muscleGroup: 'Peito',
+            sequence: 3,
+            targetSets: 3,
+            minReps: 10,
+            maxReps: 15,
+            targetRir: 1,
+            restSeconds: 75,
+            previousLoadKg: null,
+            createdAt: now,
+            updatedAt: now,
+          },
+          {
+            id: createId('exercise'),
+            userId: USER_ID,
+            workoutPlanId: workout.id,
+            localDate,
+            name: 'Crossover',
+            muscleGroup: 'Peito',
+            sequence: 4,
+            targetSets: 3,
+            minReps: 12,
+            maxReps: 15,
+            targetRir: 1,
+            restSeconds: 60,
+            previousLoadKg: null,
+            createdAt: now,
+            updatedAt: now,
+          },
+          {
+            id: createId('exercise'),
+            userId: USER_ID,
+            workoutPlanId: workout.id,
+            localDate,
+            name: 'Tríceps testa',
+            muscleGroup: 'Tríceps',
+            sequence: 5,
+            targetSets: 3,
+            minReps: 8,
+            maxReps: 12,
+            targetRir: 2,
+            restSeconds: 75,
+            previousLoadKg: null,
+            createdAt: now,
+            updatedAt: now,
+          },
+          {
+            id: createId('exercise'),
+            userId: USER_ID,
+            workoutPlanId: workout.id,
+            localDate,
+            name: 'Tríceps corda',
+            muscleGroup: 'Tríceps',
+            sequence: 6,
+            targetSets: 3,
+            minReps: 10,
+            maxReps: 15,
+            targetRir: 1,
+            restSeconds: 60,
+            previousLoadKg: null,
+            createdAt: now,
+            updatedAt: now,
+          },
+          {
+            id: createId('exercise'),
+            userId: USER_ID,
+            workoutPlanId: workout.id,
+            localDate,
+            name: 'Tríceps unilateral',
+            muscleGroup: 'Tríceps',
+            sequence: 7,
+            targetSets: 3,
+            minReps: 10,
+            maxReps: 15,
+            targetRir: 1,
+            restSeconds: 60,
+            previousLoadKg: null,
+            createdAt: now,
+            updatedAt: now,
+          },
+        ])
       }
 
       const recommendation = await titanDatabase.coachRecommendations
