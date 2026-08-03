@@ -95,12 +95,10 @@ export async function getDashboardData(): Promise<DashboardData | null> {
     (total, entry) => total + entry.caloriesKcal,
     0,
   )
-
   const proteinConsumedG = mealEntries.reduce(
     (total, entry) => total + entry.proteinG,
     0,
   )
-
   const hydrationConsumedMl = hydrationEntries.reduce(
     (total, entry) => total + entry.amountMl,
     0,
@@ -144,7 +142,6 @@ export async function getDashboardData(): Promise<DashboardData | null> {
 
   return {
     userName: user.displayName,
-
     nextMeal: nextMeal
       ? {
           id: nextMeal.id,
@@ -152,9 +149,10 @@ export async function getDashboardData(): Promise<DashboardData | null> {
           plannedTime: nextMeal.plannedTime,
           caloriesKcal: nextMeal.caloriesKcal,
           proteinG: nextMeal.proteinG,
+          carbohydrateG: nextMeal.carbohydrateG,
+          fatG: nextMeal.fatG,
         }
       : null,
-
     workout: workout
       ? {
           id: workout.id,
@@ -166,7 +164,6 @@ export async function getDashboardData(): Promise<DashboardData | null> {
             workoutStatus === 'none' ? 'planned' : workoutStatus,
         }
       : null,
-
     cardio: cardioPlan
       ? {
           id: cardioPlan.id,
@@ -176,10 +173,8 @@ export async function getDashboardData(): Promise<DashboardData | null> {
           status: cardioStatus === 'none' ? 'planned' : cardioStatus,
         }
       : null,
-
     insights: generateCoachInsights(engineInput),
     score: calculateTitanScore(engineInput),
-
     summary: {
       caloriesConsumedKcal,
       proteinConsumedG,

@@ -1,8 +1,6 @@
 import { Card, SectionTitle } from '../../../shared/ui'
-import { CoachInsightsList } from '../components/CoachInsightsList'
-import { DailyMetricsGrid } from '../components/DailyMetricsGrid'
-import { ScoreBreakdown } from '../components/ScoreBreakdown'
 import { CardioCard } from '../components/CardioCard'
+import { CoachCard } from '../components/CoachCard'
 import { MealCard } from '../components/MealCard'
 import { MetricsGrid } from '../components/MetricsGrid'
 import { ScoreCard } from '../components/ScoreCard'
@@ -81,7 +79,7 @@ export function DashboardPage() {
         </div>
       </header>
 
-      <CoachInsightsList insights={data.insights} />
+      <CoachCard insight={data.insights[0]} />
 
       <section>
         <SectionTitle supportingText="Próxima ação" title="Agora" />
@@ -99,16 +97,8 @@ export function DashboardPage() {
       </section>
 
       <section>
-        <SectionTitle title="Resumo do dia" />
-        <DailyMetricsGrid summary={data.summary} />
-      </section>
-
-      <section>
         <SectionTitle title="Score TITAN" />
         <ScoreCard score={data.score} />
-        <div className="mt-3">
-          <ScoreBreakdown breakdown={data.score.breakdown} />
-        </div>
       </section>
 
       <section>

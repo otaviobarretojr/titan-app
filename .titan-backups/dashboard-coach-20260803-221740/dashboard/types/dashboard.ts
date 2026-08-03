@@ -9,6 +9,8 @@ export type DashboardMeal = {
   plannedTime: string
   caloriesKcal: number
   proteinG: number
+  carbohydrateG: number
+  fatG: number
 }
 
 export type DashboardWorkout = {

@@ -1,0 +1,102 @@
+import type { ReactNode } from 'react'
+import { Droplets, Dumbbell, Flame, Moon, Plus } from 'lucide-react'
+import { Button, Card } from '../../../shared/ui'
+import type { DashboardSummary } from '../types/dashboard'
+
+type MetricsGridProps = {
+  summary: DashboardSummary
+  onAddWater: (amountMl: number) => Promise<void>
+}
+
+function formatLiters(valueMl: number) {
+  return `${(valueMl / 1000).toLocaleString('pt-BR', {
+    maximumFractionDigits: 1,
+  })} L`
+}
+
+function formatSleep(valueMinutes: number | null) {
+  if (valueMinutes === null) return '—'
+
+  const hours = Math.floor(valueMinutes / 60)
+  const minutes = valueMinutes % 60
+
+  return `${hours}h${minutes.toString().padStart(2, '0')}`
+}
+
+export function MetricsGrid({
+  summary,
+  onAddWater,
+}: MetricsGridProps) {
+  const metrics = [
+    {
+      icon: <Flame size={19} aria-hidden="true" />,
+      label: 'Calorias',
+      value: summary.caloriesConsumedKcal.toLocaleString('pt-BR'),
+      target: `Meta ${summary.calorieTargetKcal.toLocaleString('pt-BR')} kcal`,
+    },
+    {
+      icon: <Dumbbell size={19} aria-hidden="true" />,
+      label: 'Proteína',
+      value: `${summary.proteinConsumedG} g`,
+      target: `Meta ${summary.proteinTargetG} g`,
+    },
+    {
+      icon: <Droplets size={19} aria-hidden="true" />,
+      label: 'Água',
+      value: formatLiters(summary.hydrationConsumedMl),
+      target: `Meta ${formatLiters(summary.hydrationTargetMl)}`,
+    },
+    {
+      icon: <Moon size={19} aria-hidden="true" />,
+      label: 'Sono',
+      value: formatSleep(summary.sleepMinutes),
+      target: `Meta ${formatSleep(summary.sleepTargetMinutes)}`,
+    },
+  ]
+
+  return (
+    <div>
+      <div className="grid grid-cols-2 gap-3">
+        {metrics.map((metric) => (
+          <MetricCard key={metric.label} {...metric} />
+        ))}
+      </div>
+
+      <Button
+        className="mt-3"
+        fullWidth
+        onClick={() => onAddWater(300)}
+        variant="ghost"
+      >
+        <Plus size={18} aria-hidden="true" />
+        Registrar 300 ml de água
+      </Button>
+    </div>
+  )
+}
+
+type MetricCardProps = {
+  icon: ReactNode
+  label: string
+  value: string
+  target: string
+}
+
+function MetricCard({
+  icon,
+  label,
+  value,
+  target,
+}: MetricCardProps) {
+  return (
+    <Card className="p-4">
+      <div className="flex items-center gap-2 text-slate-400">
+        {icon}
+        <span className="text-xs font-bold">{label}</span>
+      </div>
+
+      <p className="mt-4 text-2xl font-black">{value}</p>
+      <p className="mt-1 text-xs text-slate-500">{target}</p>
+    </Card>
+  )
+}

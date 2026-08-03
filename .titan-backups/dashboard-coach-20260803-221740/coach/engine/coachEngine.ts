@@ -68,9 +68,7 @@ export function calculateTitanScore(
     recovery:
       input.sleepMinutes === null
         ? 0
-        : clampScore(
-            ratio(input.sleepMinutes, input.sleepTargetMinutes) * 100,
-          ),
+        : clampScore(ratio(input.sleepMinutes, input.sleepTargetMinutes) * 100),
   }
 
   if (!hasEnoughData) {
@@ -135,14 +133,11 @@ export function generateCoachInsights(
       id: 'hydration-low',
       priority: 'high',
       title: 'Hidratação abaixo do esperado',
-      message: `Você registrou ${(input.hydrationConsumedMl / 1000).toLocaleString(
-        'pt-BR',
-        { maximumFractionDigits: 1 },
-      )} L de ${(input.hydrationTargetMl / 1000).toLocaleString('pt-BR', {
-        maximumFractionDigits: 1,
-      })} L.`,
+      message: `Você registrou ${Math.round(
+        input.hydrationConsumedMl / 100,
+      ) / 10} L de ${input.hydrationTargetMl / 1000} L.`,
       actionLabel: 'Registrar água',
-      actionPath: '/nutrition',
+      actionPath: '/',
     })
   }
 
@@ -172,7 +167,7 @@ export function generateCoachInsights(
       priority: 'medium',
       title: 'Treino se aproxima',
       message:
-        'Revise o pré-treino, hidrate-se e prepare a primeira carga.',
+        'Revise o pré-treino, hidrate-se e prepare a primeira carga do treino.',
       actionLabel: 'Abrir treino',
       actionPath: '/training',
     })
@@ -211,9 +206,7 @@ export function generateCoachInsights(
       priority: 'medium',
       title: 'Sono abaixo da meta',
       message:
-        'A recuperação pode estar comprometida. Ajuste intensidade e priorize o sono.',
-      actionLabel: 'Abrir sono',
-      actionPath: '/health/sleep',
+        'Reduza a intensidade se a recuperação estiver comprometida e priorize o horário de dormir.',
     })
   }
 
@@ -229,9 +222,7 @@ export function generateCoachInsights(
 
   const priorityOrder = { high: 0, medium: 1, low: 2 }
 
-  return insights
-    .sort(
-      (a, b) => priorityOrder[a.priority] - priorityOrder[b.priority],
-    )
-    .slice(0, 3)
+  return insights.sort(
+    (a, b) => priorityOrder[a.priority] - priorityOrder[b.priority],
+  )
 }
