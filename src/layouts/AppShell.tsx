@@ -7,6 +7,7 @@ import {
   Utensils,
 } from 'lucide-react'
 import { NavLink, Outlet } from 'react-router-dom'
+import { PwaStatus } from '../components/feedback/PwaStatus'
 
 const navigationItems = [
   {
@@ -45,6 +46,7 @@ const navigationItems = [
 export function AppShell() {
   return (
     <div className="min-h-dvh bg-titan-background text-white">
+      <PwaStatus />
       <main className="mx-auto min-h-dvh w-full max-w-md px-4 pb-28 pt-6">
         <Outlet />
       </main>

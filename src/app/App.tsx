@@ -4,9 +4,9 @@ import {
   Route,
   Routes,
 } from 'react-router-dom'
-import { ModulePlaceholderPage } from '../components/feedback/ModulePlaceholderPage'
 import { AppShell } from '../layouts/AppShell'
 import { DashboardPage } from '../modules/dashboard/pages/DashboardPage'
+import { SettingsPage } from '../modules/settings/pages/SettingsPage'
 import { EvolutionPage } from '../modules/evolution/pages/EvolutionPage'
 import { CardioPage } from '../modules/cardio/pages/CardioPage'
 import { TrainingPage } from '../modules/training/pages/TrainingPage'
@@ -34,16 +34,7 @@ export function App() {
             element={<EvolutionPage />}
           />
 
-          <Route
-            path="/more"
-            element={
-              <ModulePlaceholderPage
-                eyebrow="Configurações"
-                title="Mais"
-                description="Backup, perfil, preferências, saúde e configurações do TITAN serão acessados nesta área."
-              />
-            }
-          />
+          <Route path="/more" element={<SettingsPage />} />
         </Route>
 
         <Route path="*" element={<Navigate to="/" replace />} />

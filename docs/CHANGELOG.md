@@ -68,3 +68,13 @@
 - Coach Engine.
 - Prioridades dinâmicas.
 - Estrutura para Score TITAN.
+
+## Sprint 009
+
+### Added
+
+- Configuração PWA.
+- Service Worker e cache do App Shell.
+- Estado offline e atualização disponível.
+- Backup e restauração.
+- Página de configurações.
