@@ -1,14 +1,10 @@
-import { Minus, Plus, Trophy } from 'lucide-react'
+import { Minus, Plus } from 'lucide-react'
 import { useState } from 'react'
 import { Button, Card } from '../../../shared/ui'
-import type {
-  TrainingExercise,
-  TrainingSet,
-} from '../types/training'
+import type { TrainingExercise } from '../types/training'
 
 type ExerciseCardProps = {
   exercise: TrainingExercise
-  sets: TrainingSet[]
   sessionId: string
   onAddSet: (input: {
     workoutSessionId: string
@@ -21,37 +17,17 @@ type ExerciseCardProps = {
     workoutSessionId: string,
     exercisePlanId: string,
   ) => Promise<unknown>
-  onStartRest: (seconds: number) => void
 }
 
 export function ExerciseCard({
   exercise,
-  sets,
   sessionId,
   onAddSet,
   onRemoveLastSet,
-  onStartRest,
 }: ExerciseCardProps) {
-  const lastSet = sets.at(-1)
-  const [loadKg, setLoadKg] = useState(
-    lastSet?.loadKg ?? exercise.previousLoadKg ?? 0,
-  )
-  const [repetitions, setRepetitions] = useState(
-    lastSet?.repetitions ?? exercise.minReps,
-  )
-  const [rir, setRir] = useState(lastSet?.rir ?? exercise.targetRir)
-
-  async function registerSet() {
-    await onAddSet({
-      workoutSessionId: sessionId,
-      exercisePlanId: exercise.id,
-      loadKg,
-      repetitions,
-      rir,
-    })
-
-    onStartRest(exercise.restSeconds)
-  }
+  const [loadKg, setLoadKg] = useState(exercise.previousLoadKg ?? 0)
+  const [repetitions, setRepetitions] = useState(exercise.minReps)
+  const [rir, setRir] = useState(exercise.targetRir)
 
   return (
     <Card>
@@ -63,8 +39,7 @@ export function ExerciseCard({
           <h2 className="mt-2 text-lg font-bold">{exercise.name}</h2>
           <p className="mt-1 text-sm text-slate-400">
             {exercise.targetSets} séries · {exercise.minReps}–
-            {exercise.maxReps} reps · RIR {exercise.targetRir} · descanso{' '}
-            {exercise.restSeconds}s
+            {exercise.maxReps} repetições · RIR {exercise.targetRir}
           </p>
         </div>
 
@@ -75,37 +50,6 @@ export function ExerciseCard({
           </p>
         </div>
       </div>
-
-      {exercise.bestEstimatedOneRepMaxKg !== null ? (
-        <div className="mt-4 flex items-center gap-2 rounded-2xl bg-amber-500/10 p-3 text-amber-300">
-          <Trophy size={17} aria-hidden="true" />
-          <span className="text-xs font-bold">
-            Melhor 1RM estimado:{' '}
-            {exercise.bestEstimatedOneRepMaxKg.toLocaleString('pt-BR', {
-              maximumFractionDigits: 1,
-            })}{' '}
-            kg
-          </span>
-        </div>
-      ) : null}
-
-      {sets.length > 0 ? (
-        <div className="mt-4 overflow-hidden rounded-2xl border border-white/10">
-          {sets.map((set) => (
-            <div
-              className="grid grid-cols-4 gap-2 border-b border-white/5 px-3 py-2 text-center text-xs last:border-b-0"
-              key={set.id}
-            >
-              <span className="font-bold text-slate-500">
-                S{set.setNumber}
-              </span>
-              <span>{set.loadKg} kg</span>
-              <span>{set.repetitions} reps</span>
-              <span>RIR {set.rir}</span>
-            </div>
-          ))}
-        </div>
-      ) : null}
 
       <div className="mt-5 grid grid-cols-3 gap-3">
         <NumberField
@@ -134,7 +78,18 @@ export function ExerciseCard({
       </div>
 
       <div className="mt-5 flex gap-3">
-        <Button fullWidth onClick={registerSet}>
+        <Button
+          fullWidth
+          onClick={() =>
+            onAddSet({
+              workoutSessionId: sessionId,
+              exercisePlanId: exercise.id,
+              loadKg,
+              repetitions,
+              rir,
+            })
+          }
+        >
           <Plus size={18} aria-hidden="true" />
           Registrar série
         </Button>
@@ -149,10 +104,6 @@ export function ExerciseCard({
           </Button>
         ) : null}
       </div>
-
-      <p className="mt-4 rounded-2xl bg-white/5 p-3 text-xs leading-5 text-slate-400">
-        {exercise.progressionSuggestion}
-      </p>
     </Card>
   )
 }

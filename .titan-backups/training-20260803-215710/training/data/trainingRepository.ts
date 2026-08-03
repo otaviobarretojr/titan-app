@@ -1,16 +1,11 @@
 import { getTitanLocalDate } from '../../../database/date'
 import {
   titanDatabase,
-  type ExercisePersonalRecord,
   type ExerciseSetRecord,
   type WorkoutSessionRecord,
 } from '../../../database/titanDatabase'
 import { TITAN_USER_ID } from '../../../database/seeds/seedToday'
 import type { TrainingWorkout } from '../types/training'
-import {
-  estimateOneRepMax,
-  getProgressionSuggestion,
-} from '../utils/trainingMath'
 
 export async function getTrainingWorkout(): Promise<TrainingWorkout | null> {
   const localDate = getTitanLocalDate()
@@ -40,81 +35,37 @@ export async function getTrainingWorkout(): Promise<TrainingWorkout | null> {
         .toArray()
     : []
 
-  const prs = await Promise.all(
-    exercises.map((exercise) =>
-      titanDatabase.exercisePersonalRecords
-        .where('[userId+exercisePlanId]')
-        .equals([TITAN_USER_ID, exercise.id])
-        .reverse()
-        .sortBy('estimatedOneRepMaxKg'),
-    ),
-  )
+  const completedSetCount = new Map<string, number>()
+
+  for (const set of sets) {
+    completedSetCount.set(
+      set.exercisePlanId,
+      (completedSetCount.get(set.exercisePlanId) ?? 0) + 1,
+    )
+  }
 
   return {
     id: workout.id,
     name: workout.name,
     plannedTime: workout.plannedTime,
     estimatedDurationMinutes: workout.estimatedDurationMinutes,
-    status:
-      session?.status === 'completed'
-        ? 'completed'
-        : session?.status === 'started'
-          ? 'started'
-          : 'planned',
+    status: session?.status ?? 'planned',
     sessionId: session?.id ?? null,
     startedAt: session?.startedAt ?? null,
     completedAt: session?.completedAt ?? null,
-    totalVolumeKg: sets.reduce(
-      (total, set) => total + set.loadKg * set.repetitions,
-      0,
-    ),
-    sets: sets
-      .sort((a, b) => a.setNumber - b.setNumber)
-      .map((set) => ({
-        id: set.id,
-        exercisePlanId: set.exercisePlanId,
-        setNumber: set.setNumber,
-        loadKg: set.loadKg,
-        repetitions: set.repetitions,
-        rir: set.rir,
-        estimatedOneRepMaxKg: estimateOneRepMax(
-          set.loadKg,
-          set.repetitions,
-        ),
-      })),
-    exercises: exercises.map((exercise, index) => {
-      const exerciseSets = sets
-        .filter((set) => set.exercisePlanId === exercise.id)
-        .sort((a, b) => a.setNumber - b.setNumber)
-
-      const bestPr = prs[index].at(-1)
-
-      return {
-        id: exercise.id,
-        name: exercise.name,
-        muscleGroup: exercise.muscleGroup,
-        sequence: exercise.sequence,
-        targetSets: exercise.targetSets,
-        minReps: exercise.minReps,
-        maxReps: exercise.maxReps,
-        targetRir: exercise.targetRir,
-        restSeconds: exercise.restSeconds,
-        previousLoadKg: exercise.previousLoadKg,
-        completedSets: exerciseSets.length,
-        bestEstimatedOneRepMaxKg:
-          bestPr?.estimatedOneRepMaxKg ?? null,
-        progressionSuggestion: getProgressionSuggestion({
-          completedSets: exerciseSets.length,
-          targetSets: exercise.targetSets,
-          repetitions: exerciseSets.map((set) => set.repetitions),
-          minReps: exercise.minReps,
-          maxReps: exercise.maxReps,
-          rirValues: exerciseSets.map((set) => set.rir),
-          targetRir: exercise.targetRir,
-          lastLoadKg: exerciseSets.at(-1)?.loadKg ?? exercise.previousLoadKg,
-        }),
-      }
-    }),
+    exercises: exercises.map((exercise) => ({
+      id: exercise.id,
+      name: exercise.name,
+      muscleGroup: exercise.muscleGroup,
+      sequence: exercise.sequence,
+      targetSets: exercise.targetSets,
+      minReps: exercise.minReps,
+      maxReps: exercise.maxReps,
+      targetRir: exercise.targetRir,
+      restSeconds: exercise.restSeconds,
+      previousLoadKg: exercise.previousLoadKg,
+      completedSets: completedSetCount.get(exercise.id) ?? 0,
+    })),
   }
 }
 
@@ -128,7 +79,6 @@ export async function startWorkout(workoutPlanId: string) {
   if (existing) return existing.id
 
   const now = new Date().toISOString()
-
   const session: WorkoutSessionRecord = {
     id: `workout-session-${crypto.randomUUID()}`,
     userId: TITAN_USER_ID,
@@ -159,15 +109,10 @@ export async function addExerciseSet(input: {
   const localDate = getTitanLocalDate()
   const now = new Date().toISOString()
 
-  const [existingSets, exercise] = await Promise.all([
-    titanDatabase.exerciseSets
-      .where('[workoutSessionId+exercisePlanId]')
-      .equals([input.workoutSessionId, input.exercisePlanId])
-      .count(),
-    titanDatabase.exercisePlans.get(input.exercisePlanId),
-  ])
-
-  if (!exercise) throw new Error('Exercício não encontrado.')
+  const existingSets = await titanDatabase.exerciseSets
+    .where('[workoutSessionId+exercisePlanId]')
+    .equals([input.workoutSessionId, input.exercisePlanId])
+    .count()
 
   const set: ExerciseSetRecord = {
     id: `exercise-set-${crypto.randomUUID()}`,
@@ -185,39 +130,6 @@ export async function addExerciseSet(input: {
   }
 
   await titanDatabase.exerciseSets.add(set)
-
-  const estimatedOneRepMaxKg = estimateOneRepMax(
-    input.loadKg,
-    input.repetitions,
-  )
-
-  const currentBest = await titanDatabase.exercisePersonalRecords
-    .where('[userId+exercisePlanId]')
-    .equals([TITAN_USER_ID, input.exercisePlanId])
-    .reverse()
-    .sortBy('estimatedOneRepMaxKg')
-
-  const best = currentBest.at(-1)
-
-  if (
-    estimatedOneRepMaxKg > 0 &&
-    (!best || estimatedOneRepMaxKg > best.estimatedOneRepMaxKg)
-  ) {
-    const record: ExercisePersonalRecord = {
-      id: `exercise-pr-${crypto.randomUUID()}`,
-      userId: TITAN_USER_ID,
-      exercisePlanId: input.exercisePlanId,
-      exerciseName: exercise.name,
-      localDate,
-      loadKg: input.loadKg,
-      repetitions: input.repetitions,
-      estimatedOneRepMaxKg,
-      createdAt: now,
-      updatedAt: now,
-    }
-
-    await titanDatabase.exercisePersonalRecords.add(record)
-  }
 }
 
 export async function removeLastExerciseSet(

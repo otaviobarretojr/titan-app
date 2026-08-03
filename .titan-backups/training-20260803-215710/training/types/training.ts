@@ -10,18 +10,6 @@ export type TrainingExercise = {
   restSeconds: number
   previousLoadKg: number | null
   completedSets: number
-  bestEstimatedOneRepMaxKg: number | null
-  progressionSuggestion: string
-}
-
-export type TrainingSet = {
-  id: string
-  exercisePlanId: string
-  setNumber: number
-  loadKg: number
-  repetitions: number
-  rir: number
-  estimatedOneRepMaxKg: number
 }
 
 export type TrainingWorkout = {
@@ -34,6 +22,4 @@ export type TrainingWorkout = {
   startedAt: string | null
   completedAt: string | null
   exercises: TrainingExercise[]
-  sets: TrainingSet[]
-  totalVolumeKg: number
 }

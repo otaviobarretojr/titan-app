@@ -1,9 +1,6 @@
-import type { ReactNode } from 'react'
-import { Check, Dumbbell, Gauge, Play } from 'lucide-react'
+import { Check, Dumbbell, Play } from 'lucide-react'
 import { Button, Card, ProgressBar } from '../../../shared/ui'
 import { ExerciseCard } from '../components/ExerciseCard'
-import { RestTimer } from '../components/RestTimer'
-import { useRestTimer } from '../hooks/useRestTimer'
 import { useTrainingWorkout } from '../hooks/useTrainingWorkout'
 
 export function TrainingPage() {
@@ -16,8 +13,6 @@ export function TrainingPage() {
     removeLastExerciseSet,
     finishWorkout,
   } = useTrainingWorkout()
-
-  const restTimer = useRestTimer()
 
   if (error) {
     return (
@@ -62,32 +57,11 @@ export function TrainingPage() {
         </p>
       </header>
 
-      <RestTimer
-        isRunning={restTimer.isRunning}
-        onPause={restTimer.pause}
-        onReset={restTimer.reset}
-        onResume={restTimer.resume}
-        secondsRemaining={restTimer.secondsRemaining}
-      />
-
       <Card elevated>
         <ProgressBar
           label={`${completedSets} de ${targetSets} séries registradas`}
           value={progress}
         />
-
-        <div className="mt-5 grid grid-cols-2 gap-3">
-          <Metric
-            icon={<Gauge size={18} aria-hidden="true" />}
-            label="Volume"
-            value={`${workout.totalVolumeKg.toLocaleString('pt-BR')} kg`}
-          />
-          <Metric
-            icon={<Dumbbell size={18} aria-hidden="true" />}
-            label="Exercícios"
-            value={`${workout.exercises.length}`}
-          />
-        </div>
 
         {workout.status === 'planned' ? (
           <Button
@@ -117,7 +91,7 @@ export function TrainingPage() {
               aria-hidden="true"
             />
             <p className="text-sm leading-6 text-slate-400">
-              Inicie o treino para liberar séries, descanso, volume e recordes.
+              Inicie o treino para liberar o registro das séries.
             </p>
           </div>
         </Card>
@@ -130,12 +104,8 @@ export function TrainingPage() {
               key={exercise.id}
               exercise={exercise}
               sessionId={workout.sessionId!}
-              sets={workout.sets.filter(
-                (set) => set.exercisePlanId === exercise.id,
-              )}
               onAddSet={addExerciseSet}
               onRemoveLastSet={removeLastExerciseSet}
-              onStartRest={restTimer.start}
             />
           ))}
         </section>
@@ -151,24 +121,6 @@ export function TrainingPage() {
           Finalizar treino
         </Button>
       ) : null}
-    </div>
-  )
-}
-
-type MetricProps = {
-  icon: ReactNode
-  label: string
-  value: string
-}
-
-function Metric({ icon, label, value }: MetricProps) {
-  return (
-    <div className="rounded-2xl bg-white/5 p-4">
-      <div className="flex items-center gap-2 text-slate-500">
-        {icon}
-        <span className="text-xs font-bold">{label}</span>
-      </div>
-      <p className="mt-2 text-xl font-black">{value}</p>
     </div>
   )
 }
