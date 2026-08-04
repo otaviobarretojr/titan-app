@@ -196,6 +196,9 @@ export async function getDashboardData(): Promise<DashboardData | null> {
         : null,
 
     consistency,
+    hasNutritionData: mealEntries.length > 0,
+    hasHydrationData: hydrationEntries.length > 0,
+    hasConsistencyData: mealEntries.length > 0,
   } as const
 
   return {

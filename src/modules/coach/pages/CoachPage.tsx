@@ -8,13 +8,24 @@ import { useCoachReport } from '../hooks/useCoachReport'
 export function CoachPage() {
   const { report, isLoading } = useCoachReport()
 
-  if (isLoading || !report) {
+  if (isLoading) {
     return (
       <div className="flex min-h-[70dvh] items-center justify-center">
         <p className="text-sm font-semibold text-slate-400">
           Preparando análise...
         </p>
       </div>
+    )
+  }
+
+  if (!report) {
+    return (
+      <Card>
+        <h1 className="text-xl font-black">Coach sem plano para hoje</h1>
+        <p className="mt-2 text-sm leading-6 text-slate-400">
+          O Coach não encontrou um plano diário no IndexedDB. Nenhuma análise foi criada.
+        </p>
+      </Card>
     )
   }
 
@@ -57,9 +68,16 @@ export function CoachPage() {
             {report.score.label}
           </span>
         </div>
+        <p className="mt-3 text-xs text-slate-500">
+          Score calculado com {report.coverage.measured} de{' '}
+          {report.coverage.total} categorias com dados.
+        </p>
       </Card>
 
-      <ScoreBreakdown breakdown={report.score.breakdown} />
+      <ScoreBreakdown
+        breakdown={report.score.breakdown}
+        measuredCategories={report.score.measuredCategories}
+      />
 
       <section>
         <SectionTitle
@@ -90,6 +108,13 @@ export function CoachPage() {
               trend={trend}
             />
           ))}
+          {report.weeklyTrends.length === 0 ? (
+            <Card>
+              <p className="text-sm text-slate-400">
+                Ainda não há registros suficientes para tendências semanais.
+              </p>
+            </Card>
+          ) : null}
         </div>
       </section>
     </div>

@@ -5,7 +5,7 @@ import type {
   TitanScoreBreakdown,
 } from '../types/coach'
 
-type CoachEngineInput = {
+export type CoachEngineInput = {
   currentMinutes: number
   proteinConsumedG: number
   proteinTargetG: number
@@ -20,6 +20,9 @@ type CoachEngineInput = {
   cardioStatus: 'none' | 'planned' | 'started' | 'completed'
   plannedWorkoutMinutes: number | null
   consistency: number
+  hasNutritionData: boolean
+  hasHydrationData: boolean
+  hasConsistencyData: boolean
 }
 
 type WeeklyTrendInput = {
@@ -68,36 +71,15 @@ function clampScore(value: number) {
 export function calculateTitanScore(
   input: CoachEngineInput,
 ): TitanScore {
-  const hasEnoughData =
-    input.proteinConsumedG > 0 ||
-    input.caloriesConsumedKcal > 0 ||
-    input.hydrationConsumedMl > 0 ||
-    input.sleepMinutes !== null ||
-    input.workoutStatus === 'completed' ||
-    input.cardioStatus === 'completed'
-
   const breakdown: TitanScoreBreakdown = {
     nutrition: clampScore(
-      (ratio(
-        input.proteinConsumedG,
-        input.proteinTargetG,
-      ) *
-        0.6 +
-        ratio(
-          input.caloriesConsumedKcal,
-          input.calorieTargetKcal,
-        ) *
-          0.4) *
+      (ratio(input.proteinConsumedG, input.proteinTargetG) * 0.6 +
+        ratio(input.caloriesConsumedKcal, input.calorieTargetKcal) * 0.4) *
         100,
     ),
-
     hydration: clampScore(
-      ratio(
-        input.hydrationConsumedMl,
-        input.hydrationTargetMl,
-      ) * 100,
+      ratio(input.hydrationConsumedMl, input.hydrationTargetMl) * 100,
     ),
-
     training:
       input.workoutStatus === 'completed'
         ? 100
@@ -106,7 +88,6 @@ export function calculateTitanScore(
           : input.workoutStatus === 'planned'
             ? 20
             : 0,
-
     cardio:
       input.cardioStatus === 'completed'
         ? 100
@@ -115,37 +96,48 @@ export function calculateTitanScore(
           : input.cardioStatus === 'planned'
             ? 20
             : 0,
-
     recovery:
       input.sleepMinutes === null
         ? 0
-        : clampScore(
-            ratio(
-              input.sleepMinutes,
-              input.sleepTargetMinutes,
-            ) * 100,
-          ),
-
+        : clampScore(ratio(input.sleepMinutes, input.sleepTargetMinutes) * 100),
     consistency: clampScore(input.consistency),
   }
 
-  if (!hasEnoughData) {
+  const categories = [
+    input.hasNutritionData
+      ? { category: 'nutrition' as const, value: breakdown.nutrition, weight: 0.25 }
+      : null,
+    input.hasHydrationData
+      ? { category: 'hydration' as const, value: breakdown.hydration, weight: 0.15 }
+      : null,
+    input.workoutStatus !== 'none'
+      ? { category: 'training' as const, value: breakdown.training, weight: 0.2 }
+      : null,
+    input.cardioStatus !== 'none'
+      ? { category: 'cardio' as const, value: breakdown.cardio, weight: 0.1 }
+      : null,
+    input.sleepMinutes !== null
+      ? { category: 'recovery' as const, value: breakdown.recovery, weight: 0.15 }
+      : null,
+    input.hasConsistencyData
+      ? { category: 'consistency' as const, value: breakdown.consistency, weight: 0.15 }
+      : null,
+  ].filter((item): item is NonNullable<typeof item> => item !== null)
+
+  if (categories.length === 0) {
     return {
       value: null,
       label: 'Sem dados',
       breakdown,
+      measuredCategories: [],
     }
   }
 
+  const totalWeight = categories.reduce((sum, item) => sum + item.weight, 0)
   const value = clampScore(
-    breakdown.nutrition * 0.25 +
-      breakdown.hydration * 0.15 +
-      breakdown.training * 0.2 +
-      breakdown.cardio * 0.1 +
-      breakdown.recovery * 0.15 +
-      breakdown.consistency * 0.15,
+    categories.reduce((sum, item) => sum + item.value * item.weight, 0) /
+      totalWeight,
   )
-
   const label =
     value >= 85
       ? 'Excelente'
@@ -159,6 +151,7 @@ export function calculateTitanScore(
     value,
     label,
     breakdown,
+    measuredCategories: categories.map((item) => item.category),
   }
 }
 
@@ -292,7 +285,7 @@ export function generateCoachInsights(
     })
   }
 
-  if (input.consistency < 50) {
+  if (input.hasConsistencyData && input.consistency < 50) {
     insights.push({
       id: 'consistency-low',
       category: 'consistency',
@@ -309,11 +302,11 @@ export function generateCoachInsights(
       id: 'on-track',
       category: 'consistency',
       priority: 'low',
-      title: 'Dia sob controle',
+      title: 'Nenhuma prioridade detectada',
       message:
         'Continue registrando suas ações para preservar a qualidade da análise.',
       evidence:
-        'Nenhum desvio prioritário foi detectado.',
+        'Nenhum desvio prioritário foi detectado nos registros disponíveis.',
     })
   }
 
@@ -336,172 +329,87 @@ export function generateWeeklyTrends(
   input: WeeklyTrendInput,
 ): CoachTrend[] {
   const trends: CoachTrend[] = []
-
-  const proteinByDay = input.dates.map((date) =>
-    input.mealEntries
+  const proteinByDay = input.dates
+    .map((date) => input.mealEntries
+      .filter((item) => item.localDate === date && item.status !== 'skipped')
+      .reduce((sum, item) => sum + item.proteinG, 0))
+    .filter((value) => value > 0)
+  const hydrationByDay = input.dates
+    .map((date) => input.hydrationEntries
       .filter((item) => item.localDate === date)
-      .reduce(
-        (sum, item) => sum + item.proteinG,
-        0,
-      ),
-  )
-
-  const hydrationByDay = input.dates.map((date) =>
-    input.hydrationEntries
-      .filter((item) => item.localDate === date)
-      .reduce(
-        (sum, item) => sum + item.amountMl,
-        0,
-      ),
-  )
-
+      .reduce((sum, item) => sum + item.amountMl, 0))
+    .filter((value) => value > 0)
   const sleepByDay = input.dates
-    .map((date) =>
-      input.sleepEntries.find(
-        (item) => item.localDate === date,
-      ),
-    )
-    .filter(
-      (
-        item,
-      ): item is NonNullable<typeof item> =>
-        item !== undefined,
-    )
+    .map((date) => input.sleepEntries.find((item) => item.localDate === date))
+    .filter((item): item is NonNullable<typeof item> => item !== undefined)
     .map((item) => item.durationMinutes)
 
-  const proteinAverage =
-    proteinByDay.reduce(
-      (sum, value) => sum + value,
-      0,
-    ) / input.dates.length
+  const addAverageTrend = (
+    values: number[],
+    id: string,
+    title: string,
+    target: number,
+    format: (average: number) => string,
+  ) => {
+    if (values.length === 0) return
+    const average = values.reduce((sum, value) => sum + value, 0) / values.length
+    trends.push({
+      id,
+      title,
+      direction: average >= target * 0.9 ? 'up' : average >= target * 0.7 ? 'stable' : 'down',
+      message: `${format(average)} em ${values.length} dia(s) registrado(s).`,
+      sampleSize: values.length,
+    })
+  }
 
-  const hydrationAverage =
-    hydrationByDay.reduce(
-      (sum, value) => sum + value,
-      0,
-    ) / input.dates.length
-
-  const sleepAverage =
-    sleepByDay.length > 0
-      ? sleepByDay.reduce(
-          (sum, value) => sum + value,
-          0,
-        ) / sleepByDay.length
-      : null
-
-  trends.push({
-    id: 'weekly-protein',
-    title: 'Proteína semanal',
-    direction:
-      proteinAverage >= input.proteinTargetG * 0.9
-        ? 'up'
-        : proteinAverage >=
-            input.proteinTargetG * 0.7
-          ? 'stable'
-          : 'down',
-    message: `Média de ${Math.round(
-      proteinAverage,
-    )} g por dia.`,
-  })
-
-  trends.push({
-    id: 'weekly-hydration',
-    title: 'Hidratação semanal',
-    direction:
-      hydrationAverage >=
-      input.hydrationTargetMl * 0.9
-        ? 'up'
-        : hydrationAverage >=
-            input.hydrationTargetMl * 0.7
-          ? 'stable'
-          : 'down',
-    message: `Média de ${(
-      hydrationAverage / 1000
-    ).toLocaleString('pt-BR', {
-      maximumFractionDigits: 1,
-    })} L por dia.`,
-  })
-
-  trends.push({
-    id: 'weekly-sleep',
-    title: 'Sono semanal',
-    direction:
-      sleepAverage === null
-        ? 'stable'
-        : sleepAverage >=
-            input.sleepTargetMinutes * 0.9
-          ? 'up'
-          : sleepAverage >=
-              input.sleepTargetMinutes * 0.75
-            ? 'stable'
-            : 'down',
-    message:
-      sleepAverage === null
-        ? 'Dados insuficientes de sono.'
-        : `Média de ${Math.floor(
-            sleepAverage / 60,
-          )}h${Math.round(sleepAverage % 60)
-            .toString()
-            .padStart(2, '0')}.`,
-  })
-
-  const completedWorkouts =
-    input.workoutSessions.filter(
-      (item) => item.status === 'completed',
-    ).length
-
-  const completedCardio =
-    input.cardioSessions.filter(
-      (item) => item.status === 'completed',
-    ).length
-
-  trends.push({
-    id: 'weekly-training',
-    title: 'Treino e cardio',
-    direction:
-      completedWorkouts >= 4
-        ? 'up'
-        : completedWorkouts >= 2
-          ? 'stable'
-          : 'down',
-    message: `${completedWorkouts} treino(s) e ${completedCardio} cardio(s) concluído(s).`,
-  })
-
-  const sortedMetrics = [
-    ...input.bodyMetrics,
-  ].sort((first, second) =>
-    first.localDate.localeCompare(
-      second.localDate,
-    ),
+  addAverageTrend(
+    proteinByDay,
+    'weekly-protein',
+    'Proteína semanal',
+    input.proteinTargetG,
+    (average) => `Média de ${Math.round(average)} g`,
+  )
+  addAverageTrend(
+    hydrationByDay,
+    'weekly-hydration',
+    'Hidratação semanal',
+    input.hydrationTargetMl,
+    (average) => `Média de ${(average / 1000).toLocaleString('pt-BR', { maximumFractionDigits: 1 })} L`,
+  )
+  addAverageTrend(
+    sleepByDay,
+    'weekly-sleep',
+    'Sono semanal',
+    input.sleepTargetMinutes,
+    (average) => `Média de ${Math.floor(average / 60)}h${Math.round(average % 60).toString().padStart(2, '0')}`,
   )
 
+  const completedWorkouts = input.workoutSessions.filter((item) => item.status === 'completed').length
+  const completedCardio = input.cardioSessions.filter((item) => item.status === 'completed').length
+  const activitySampleSize = input.workoutSessions.length + input.cardioSessions.length
+  if (activitySampleSize > 0) {
+    trends.push({
+      id: 'weekly-training',
+      title: 'Treino e cardio',
+      direction: completedWorkouts >= 4 ? 'up' : completedWorkouts >= 2 ? 'stable' : 'down',
+      message: `${completedWorkouts} treino(s) e ${completedCardio} cardio(s) concluído(s).`,
+      sampleSize: activitySampleSize,
+    })
+  }
+
+  const sortedMetrics = [...input.bodyMetrics].sort((first, second) =>
+    first.localDate.localeCompare(second.localDate),
+  )
   if (sortedMetrics.length >= 2) {
-    const previous =
-      sortedMetrics[sortedMetrics.length - 2]
-
-    const latest =
-      sortedMetrics[sortedMetrics.length - 1]
-
-    const difference =
-      latest.weightKg - previous.weightKg
-
+    const previous = sortedMetrics[sortedMetrics.length - 2]
+    const latest = sortedMetrics[sortedMetrics.length - 1]
+    const difference = latest.weightKg - previous.weightKg
     trends.push({
       id: 'weight-trend',
       title: 'Tendência corporal',
-      direction:
-        Math.abs(difference) < 0.2
-          ? 'stable'
-          : difference > 0
-            ? 'up'
-            : 'down',
-      message: `Variação recente de ${
-        difference > 0 ? '+' : ''
-      }${difference.toLocaleString(
-        'pt-BR',
-        {
-          maximumFractionDigits: 1,
-        },
-      )} kg.`,
+      direction: Math.abs(difference) < 0.2 ? 'stable' : difference > 0 ? 'up' : 'down',
+      message: `Variação recente de ${difference > 0 ? '+' : ''}${difference.toLocaleString('pt-BR', { maximumFractionDigits: 1 })} kg.`,
+      sampleSize: 2,
     })
   }
 

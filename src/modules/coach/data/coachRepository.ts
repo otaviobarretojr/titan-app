@@ -11,7 +11,7 @@ import {
   generateExecutiveSummary,
   generateWeeklyTrends,
 } from '../engine/coachEngine'
-import type { CoachReport } from '../types/coach'
+import type { CoachCategory, CoachReport } from '../types/coach'
 
 function getPreviousDates(count: number) {
   const formatter = new Intl.DateTimeFormat('en-CA', {
@@ -193,6 +193,9 @@ export async function getCoachReport(): Promise<CoachReport | null> {
       ? timeToMinutes(workout.plannedTime)
       : null,
     consistency,
+    hasNutritionData: mealEntries.length > 0,
+    hasHydrationData: hydrationEntries.length > 0,
+    hasConsistencyData: mealEntries.length > 0,
   } as const
 
   const score = calculateTitanScore(engineInput)
@@ -208,8 +211,19 @@ export async function getCoachReport(): Promise<CoachReport | null> {
     sleepEntries: weeklySleep,
     workoutSessions: weeklyWorkouts,
     cardioSessions: weeklyCardio,
-    bodyMetrics,
+    bodyMetrics: bodyMetrics.filter((item) =>
+      lastSevenDates.includes(item.localDate),
+    ),
   })
+
+  const categories: CoachCategory[] = [
+    'nutrition',
+    'hydration',
+    'training',
+    'cardio',
+    'recovery',
+    'consistency',
+  ]
 
   return {
     generatedAt: new Date().toISOString(),
@@ -221,5 +235,12 @@ export async function getCoachReport(): Promise<CoachReport | null> {
       insights: dailyInsights,
       trends: weeklyTrends,
     }),
+    coverage: {
+      measured: score.measuredCategories.length,
+      total: categories.length,
+      missing: categories.filter(
+        (category) => !score.measuredCategories.includes(category),
+      ),
+    },
   }
 }

@@ -31,6 +31,7 @@ export type TitanScore = {
   value: number | null
   label: 'Excelente' | 'Bom' | 'Atenção' | 'Crítico' | 'Sem dados'
   breakdown: TitanScoreBreakdown
+  measuredCategories: CoachCategory[]
 }
 
 export type CoachTrend = {
@@ -38,6 +39,13 @@ export type CoachTrend = {
   title: string
   direction: 'up' | 'down' | 'stable'
   message: string
+  sampleSize: number
+}
+
+export type CoachDataCoverage = {
+  measured: number
+  total: number
+  missing: CoachCategory[]
 }
 
 export type CoachReport = {
@@ -46,4 +54,5 @@ export type CoachReport = {
   weeklyTrends: CoachTrend[]
   score: TitanScore
   executiveSummary: string
+  coverage: CoachDataCoverage
 }

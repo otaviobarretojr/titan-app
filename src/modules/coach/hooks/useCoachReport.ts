@@ -6,6 +6,6 @@ export function useCoachReport() {
 
   return {
     report,
-    isLoading: report === undefined || report === null,
+    isLoading: report === undefined,
   }
 }
