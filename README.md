@@ -27,7 +27,7 @@ https://otaviobarretojr.github.io/titan-app/
 
 ## Dados
 
-Os registros permanecem no IndexedDB do navegador. Exporte backup antes de limpar dados ou trocar de aparelho.
+Os registros permanecem no IndexedDB do navegador. Exporte backup antes de limpar dados ou trocar de aparelho. A rota `/account` adiciona backup manual em nuvem opcional via Supabase quando `VITE_SUPABASE_URL` e `VITE_SUPABASE_ANON_KEY` estão configuradas; sem configuração ou offline, o app e o backup local continuam funcionando.
 
 ## PWA e confiabilidade
 
@@ -64,3 +64,8 @@ A rota `/analytics` oferece filtros de 7, 30, 90 dias e 1 ano, gráficos de Scor
 ## Notificações Inteligentes
 
 A rota `/notifications` reúne preferências locais, Inbox persistente, próximos lembretes e teste manual da Notification API. O app verifica lembretes aberto, ao iniciar e ao voltar ao primeiro plano; notificações de sistema dependem de permissão explícita e não são garantidas em segundo plano sem Push API. Consulte `docs/releases/SPRINT_014_NOTIFICACOES_INTELIGENTES.md`.
+
+
+## Backup em Nuvem — Sprint 015
+
+O backup em nuvem é opcional, manual e associado à conta autenticada. Ele armazena um JSON validado no Supabase Storage e metadados mínimos em tabela protegida por RLS. Fotos de evolução são excluídas por padrão do backup em nuvem, não há sincronização automática bidirecional e restaurações exigem confirmação explícita. Consulte `docs/CLOUD_BACKUP_SETUP.md`, `docs/SUPABASE_RLS.md` e `docs/releases/SPRINT_015_BACKUP_NUVEM.md`.
