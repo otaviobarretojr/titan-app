@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+### Sprint 009 — Evolução Corporal Avançada
+
+- Médias e comparações de peso sem zeros artificiais, medidas bilaterais e cobertura de registros.
+- Bioimpedância opcional com contexto e schema Dexie 10 aditivo.
+- Fotos WebP otimizadas, quatro poses, filtros e exclusões confirmadas.
+- Força recalculada a partir de séries existentes e métricas semanais de cardio.
+
 ### Added
 - Design System inicial.
 - Biblioteca de componentes reutilizáveis.

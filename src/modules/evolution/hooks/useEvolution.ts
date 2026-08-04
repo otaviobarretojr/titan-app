@@ -6,7 +6,9 @@ import {
   getEvolutionSummary,
   saveBodyMetric,
   saveProgressPhoto,
+  saveBioimpedance,
 } from '../data/evolutionRepository'
+import type { BioimpedanceInput, BodyMetricInput, PhotoPose } from '../types/evolution'
 
 export function useEvolution() {
   const [error, setError] = useState<string | null>(null)
@@ -30,21 +32,14 @@ export function useEvolution() {
     summary,
     error,
     isLoading: summary === undefined || summary === null,
-    saveBodyMetric: (input: {
-      weightKg: number
-      waistCm: number | null
-      armCm: number | null
-      chestCm: number | null
-      thighCm: number | null
-      calfCm: number | null
-      bodyFatPercentage: number | null
-      notes: string
-    }) => runAction(() => saveBodyMetric(input)),
+    saveBodyMetric: (input: BodyMetricInput) => runAction(() => saveBodyMetric(input)),
+    saveBioimpedance: (input: BioimpedanceInput) => runAction(() => saveBioimpedance(input)),
     deleteBodyMetric: (id: string) =>
       runAction(() => deleteBodyMetric(id)),
     saveProgressPhoto: (input: {
       imageDataUrl: string
-      pose: 'front' | 'side' | 'back' | 'other'
+      pose: PhotoPose
+      weightKg: number | null
       notes: string
     }) => runAction(() => saveProgressPhoto(input)),
     deleteProgressPhoto: (id: string) =>

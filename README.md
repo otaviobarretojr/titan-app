@@ -36,3 +36,7 @@ O TITAN pode ser instalado pelo botão **Instalar TITAN**. No iOS, use Safari �
 ## Analytics Executivo
 
 A rota `/analytics` consolida tendências, Score TITAN, streaks, cobertura e recordes exclusivamente a partir do IndexedDB. Consulte `docs/releases/SPRINT_007_ANALYTICS.md` para detalhes.
+
+## Evolução Corporal Avançada
+
+A rota `/evolution` reúne peso e tendência, medidas bilaterais, bioimpedância opcional, fotos otimizadas, força derivada das séries existentes e cardio semanal. Nenhum dia ausente é tratado como zero e nenhuma medida é inferida. Consulte `docs/releases/SPRINT_009_EVOLUCAO_AVANCADA.md`.

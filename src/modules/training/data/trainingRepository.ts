@@ -232,7 +232,38 @@ export async function removeLastExerciseSet(
   const lastSet = sets.at(-1)
 
   if (lastSet) {
-    await titanDatabase.exerciseSets.delete(lastSet.id)
+    await titanDatabase.transaction(
+      'rw',
+      titanDatabase.exerciseSets,
+      titanDatabase.exercisePersonalRecords,
+      titanDatabase.exercisePlans,
+      async () => {
+        await titanDatabase.exerciseSets.delete(lastSet.id)
+        // Personal records are a cache. Rebuild it from existing sets so a
+        // deleted source series can never leave a stale record behind.
+        await titanDatabase.exercisePersonalRecords
+          .where('[userId+exercisePlanId]')
+          .equals([TITAN_USER_ID, exercisePlanId])
+          .delete()
+        const remaining = await titanDatabase.exerciseSets
+          .where('exercisePlanId')
+          .equals(exercisePlanId)
+          .toArray()
+        const best = remaining
+          .map((set) => ({ set, value: estimateOneRepMax(set.loadKg, set.repetitions) }))
+          .sort((a, b) => b.value - a.value)[0]
+        const exercise = await titanDatabase.exercisePlans.get(exercisePlanId)
+        if (best && exercise && best.value > 0) {
+          const now = new Date().toISOString()
+          await titanDatabase.exercisePersonalRecords.add({
+            id: `exercise-pr-${crypto.randomUUID()}`, userId: TITAN_USER_ID,
+            exercisePlanId, exerciseName: exercise.name, localDate: best.set.localDate,
+            loadKg: best.set.loadKg, repetitions: best.set.repetitions,
+            estimatedOneRepMaxKg: best.value, createdAt: now, updatedAt: now,
+          })
+        }
+      },
+    )
   }
 }
 

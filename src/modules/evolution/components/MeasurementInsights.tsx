@@ -1,0 +1,11 @@
+import { useState } from 'react'
+import { Card } from '../../../shared/ui'
+import type { BodyMetric } from '../types/evolution'
+import { comparePeriods, normalizeChartValue } from '../utils/evolutionMath'
+const measures: Array<[keyof BodyMetric,string]>=[['waistCm','Cintura'],['rightArmCm','Braço direito'],['leftArmCm','Braço esquerdo'],['chestCm','Peito'],['rightThighCm','Coxa direita'],['leftThighCm','Coxa esquerda'],['rightCalfCm','Panturrilha direita'],['leftCalfCm','Panturrilha esquerda'],['hipCm','Quadril'],['neckCm','Pescoço']]
+export function MeasurementInsights({entries}:{entries:BodyMetric[]}) {
+ const [metric,setMetric]=useState<keyof BodyMetric>('waistCm'); const end=new Date().toISOString().slice(0,10)
+ const points=entries.flatMap(e=>typeof e[metric]==='number'?[{localDate:e.localDate,value:e[metric] as number}]:[]).sort((a,b)=>a.localDate.localeCompare(b.localDate))
+ const weekly=comparePeriods(points,end,7),monthly=comparePeriods(points,end,30),values=points.map(p=>p.value),min=Math.min(...values),max=Math.max(...values),delta=points.length>1?points.at(-1)!.value-points[0].value:null
+ return <Card><div className="flex items-center justify-between gap-3"><h2 className="font-bold">Medidas corporais</h2><select className="min-h-10 rounded-xl bg-slate-900 px-2 text-sm" value={metric} onChange={e=>setMetric(e.target.value as keyof BodyMetric)}>{measures.map(([v,l])=><option key={v} value={v}>{l}</option>)}</select></div>{points.length<2?<p className="mt-4 text-sm text-amber-300">Amostras insuficientes: registre esta medida em pelo menos duas datas.</p>:<><div className="mt-5 flex h-28 items-end gap-2">{points.slice(-12).map(p=><div title={`${p.localDate}: ${p.value} cm`} key={p.localDate} className="min-w-1 flex-1 rounded-t bg-gradient-to-t from-violet-600 to-blue-300" style={{height:`${25+normalizeChartValue(p.value,min,max)*.75}%`}}/>)}</div><div className="mt-4 grid grid-cols-3 gap-2 text-center text-xs"><span>Semana<br/><b>{weekly.variation===null?'—':`${weekly.variation.toFixed(1)} cm`}</b></span><span>Mês<br/><b>{monthly.variation===null?'—':`${monthly.variation.toFixed(1)} cm`}</b></span><span>Evolução total<br/><b>{delta?.toFixed(1)} cm</b></span></div></>}</Card>
+}

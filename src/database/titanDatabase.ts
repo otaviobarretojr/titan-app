@@ -118,6 +118,14 @@ export type BodyMetricRecord = {
   chestCm: number | null
   thighCm: number | null
   calfCm: number | null
+  rightArmCm?: number | null
+  leftArmCm?: number | null
+  rightThighCm?: number | null
+  leftThighCm?: number | null
+  rightCalfCm?: number | null
+  leftCalfCm?: number | null
+  hipCm?: number | null
+  neckCm?: number | null
   bodyFatPercentage: number | null
   notes: string
   createdAt: string
@@ -130,7 +138,26 @@ export type ProgressPhotoRecord = {
   userId: string
   localDate: string
   imageDataUrl: string
-  pose: 'front' | 'side' | 'back' | 'other'
+  pose: 'front' | 'side' | 'back' | 'other' | 'right-side' | 'left-side'
+  weightKg?: number | null
+  notes: string
+  createdAt: string
+  updatedAt: string
+}
+
+export type BioimpedanceRecord = {
+  id: string
+  userId: string
+  localDate: string
+  bodyFatPercentage: number | null
+  muscleMassKg: number | null
+  leanMassKg: number | null
+  visceralFat: number | null
+  bodyWaterPercentage: number | null
+  basalMetabolicRateKcal: number | null
+  metabolicAge: number | null
+  equipment: string
+  conditions: string
   notes: string
   createdAt: string
   updatedAt: string
@@ -255,6 +282,7 @@ class TitanDatabase extends Dexie {
   exerciseSets!: EntityTable<ExerciseSetRecord, 'id'>
   bodyMetrics!: EntityTable<BodyMetricRecord, 'id'>
   progressPhotos!: EntityTable<ProgressPhotoRecord, 'id'>
+  bioimpedance!: EntityTable<BioimpedanceRecord, 'id'>
   healthMetrics!: EntityTable<HealthMetricRecord, 'id'>
   healthExams!: EntityTable<HealthExamRecord, 'id'>
   cardioPlans!: EntityTable<CardioPlanRecord, 'id'>
@@ -474,6 +502,14 @@ class TitanDatabase extends Dexie {
     this.version(9).stores({
       coachRecommendations:
         'id, userId, localDate, priority, insightKey, category, createdAt, [userId+localDate], [userId+insightKey]',
+    })
+
+    // Additive schema: legacy body metrics and photos remain readable. New
+    // optional fields need no artificial backfill.
+    this.version(10).stores({
+      bodyMetrics: 'id, userId, localDate, [userId+localDate]',
+      progressPhotos: 'id, userId, localDate, pose, [userId+localDate], [userId+pose]',
+      bioimpedance: 'id, userId, localDate, [userId+localDate]',
     })
 
   }
