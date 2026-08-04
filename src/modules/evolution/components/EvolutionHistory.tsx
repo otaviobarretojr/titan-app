@@ -38,7 +38,8 @@ export function EvolutionHistory({
               <p className="mt-2 text-sm leading-6 text-slate-400">
                 {[
                   entry.waistCm ? `Cintura ${entry.waistCm} cm` : null,
-                  entry.armCm ? `Braço ${entry.armCm} cm` : null,
+                  entry.rightArmCm ? `Braço D ${entry.rightArmCm} cm` : null,
+                  entry.leftArmCm ? `Braço E ${entry.leftArmCm} cm` : null,
                   entry.chestCm ? `Peito ${entry.chestCm} cm` : null,
                   entry.bodyFatPercentage
                     ? `Gordura ${entry.bodyFatPercentage}%`
@@ -51,7 +52,7 @@ export function EvolutionHistory({
 
             <Button
               aria-label="Excluir medição"
-              onClick={() => onDelete(entry.id)}
+              onClick={() => { if (window.confirm('Excluir esta medição permanentemente?')) void onDelete(entry.id) }}
               variant="ghost"
             >
               <Trash2 size={18} aria-hidden="true" />

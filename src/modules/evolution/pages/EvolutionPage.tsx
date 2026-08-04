@@ -1,9 +1,11 @@
 import { ArrowDown, ArrowUp, Dumbbell, Minus } from 'lucide-react'
 import { Card, SectionTitle } from '../../../shared/ui'
 import { BodyMetricForm } from '../components/BodyMetricForm'
+import { BioimpedanceForm } from '../components/BioimpedanceForm'
 import { EvolutionChart } from '../components/EvolutionChart'
 import { EvolutionHistory } from '../components/EvolutionHistory'
 import { ProgressPhotos } from '../components/ProgressPhotos'
+import { MeasurementInsights } from '../components/MeasurementInsights'
 import { useEvolution } from '../hooks/useEvolution'
 
 export function EvolutionPage() {
@@ -14,6 +16,7 @@ export function EvolutionPage() {
     saveBodyMetric,
     deleteBodyMetric,
     saveProgressPhoto,
+    saveBioimpedance,
     deleteProgressPhoto,
   } = useEvolution()
 
@@ -49,6 +52,7 @@ export function EvolutionPage() {
       </header>
 
       <Card elevated>
+        <div className="mb-4 flex items-center justify-between"><span className="text-xs font-bold uppercase text-slate-500">Resumo da semana</span><span className="rounded-full bg-blue-500/15 px-3 py-1 text-xs font-bold text-blue-300">Cobertura {summary.coverage.measuredDays}/7 dias</span></div>
         <div className="grid grid-cols-2 gap-3">
           <Metric
             label="Peso atual"
@@ -100,11 +104,15 @@ export function EvolutionPage() {
             suffix="cm"
           />
         </div>
+        <p className="mt-4 rounded-xl bg-white/5 p-3 text-sm text-slate-300">Tendência: <strong>{{gain:'ganho',loss:'perda',stable:'estabilidade',insufficient:'amostras insuficientes'}[summary.weightTrend]}</strong>. Uma medição isolada pode oscilar; priorize médias e tendência.</p>
+        <div className="mt-3 grid grid-cols-2 gap-3"><Metric label="Semana vs. anterior" value={summary.weeklyWeight.variation===null?'Amostras insuficientes':`${summary.weeklyWeight.variation>0?'+':''}${summary.weeklyWeight.variation.toFixed(1)} kg`}/><Metric label="30 dias vs. anteriores" value={summary.monthlyWeight.variation===null?'Amostras insuficientes':`${summary.monthlyWeight.variation>0?'+':''}${summary.monthlyWeight.variation.toFixed(1)} kg`}/></div>
       </Card>
 
       <EvolutionChart trend={summary.trend} />
+      <MeasurementInsights entries={summary.entries} />
 
       <BodyMetricForm onSave={saveBodyMetric} />
+      <BioimpedanceForm onSave={saveBioimpedance} />
 
       <ProgressPhotos
         photos={summary.photos}
@@ -157,6 +165,7 @@ export function EvolutionPage() {
               label="Sessões"
               value={`${summary.cardioSummary.completedSessions}`}
             />
+            <Metric label="Ritmo médio" value={summary.cardioSummary.averagePace===null?'—':`${summary.cardioSummary.averagePace.toFixed(1)} min/km`}/>
             <Metric
               label="Minutos"
               value={`${summary.cardioSummary.totalMinutes}`}

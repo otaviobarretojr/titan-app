@@ -1,0 +1,8 @@
+import { useState } from 'react'
+import { Button, Card } from '../../../shared/ui'
+import type { BioimpedanceInput } from '../types/evolution'
+const numeric: Array<[keyof BioimpedanceInput, string]> = [['bodyFatPercentage','Gordura (%)'],['muscleMassKg','Massa muscular (kg)'],['leanMassKg','Massa magra (kg)'],['visceralFat','Gordura visceral'],['bodyWaterPercentage','Água corporal (%)'],['basalMetabolicRateKcal','Metabolismo basal (kcal)'],['metabolicAge','Idade metabólica']]
+export function BioimpedanceForm({ onSave }: { onSave: (value: BioimpedanceInput) => Promise<unknown> }) {
+ const [v,setV]=useState<Record<string,string>>({})
+ return <Card><h2 className="font-bold">Bioimpedância <span className="text-xs text-amber-300">estimativa</span></h2><p className="mt-2 text-sm text-slate-400">Não é diagnóstico. Compare somente medições feitas em condições semelhantes.</p><div className="mt-4 grid grid-cols-2 gap-3">{numeric.map(([key,label])=><label key={key}><span className="text-xs text-slate-500">{label}</span><input className="mt-1 min-h-11 w-full rounded-xl bg-white/5 px-3" type="number" value={v[key]??''} onChange={e=>setV(o=>({...o,[key]:e.target.value}))}/></label>)}</div>{['equipment','conditions','notes'].map(key=><input key={key} className="mt-3 min-h-11 w-full rounded-xl bg-white/5 px-3" placeholder={{equipment:'Equipamento',conditions:'Condições (jejum, horário, hidratação)',notes:'Observações'}[key]} value={v[key]??''} onChange={e=>setV(o=>({...o,[key]:e.target.value}))}/>)}<Button className="mt-4" fullWidth onClick={()=>onSave(Object.fromEntries([...numeric.map(([key])=>[key,v[key]?Number(v[key]):null]),...['equipment','conditions','notes'].map(key=>[key,v[key]??''])]) as BioimpedanceInput)}>Salvar estimativa</Button></Card>
+}
