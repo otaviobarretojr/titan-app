@@ -1,3 +1,4 @@
+import type { Table } from 'dexie'
 import { titanDatabase } from '../../../database/titanDatabase'
 import { TITAN_USER_ID } from '../../../database/seeds/seedToday'
 import type {
@@ -8,6 +9,20 @@ import {
   average,
   percentage,
 } from '../utils/analyticsMath'
+
+type DatedRecord = { localDate: string }
+
+function groupByDate<T extends DatedRecord>(records: T[]) {
+  const groups = new Map<string, T[]>()
+
+  for (const record of records) {
+    const group = groups.get(record.localDate)
+    if (group) group.push(record)
+    else groups.set(record.localDate, [record])
+  }
+
+  return groups
+}
 
 function getLastDates(count: number) {
   const formatter = new Intl.DateTimeFormat('en-CA', {
@@ -33,6 +48,21 @@ export async function getAnalyticsSummary(
 ): Promise<AnalyticsSummary> {
   const dates = getLastDates(daysCount)
 
+  if (dates.length === 0) {
+    throw new Error('O período do Analytics deve ter ao menos um dia.')
+  }
+
+  const dateRange = {
+    lower: [TITAN_USER_ID, dates[0]] as [string, string],
+    upper: [TITAN_USER_ID, dates[dates.length - 1]] as [string, string],
+  }
+
+  const inPeriod = <T extends DatedRecord>(table: Table<T, string>) =>
+    table
+      .where('[userId+localDate]')
+      .between(dateRange.lower, dateRange.upper, true, true)
+      .toArray()
+
   const [
     dailyPlans,
     mealEntries,
@@ -42,71 +72,62 @@ export async function getAnalyticsSummary(
     cardioSessions,
     bodyMetrics,
     personalRecords,
-  ] = await Promise.all([
-    titanDatabase.dailyPlans
-      .where('userId')
-      .equals(TITAN_USER_ID)
-      .filter((item) => dates.includes(item.localDate))
-      .toArray(),
-    titanDatabase.mealEntries
-      .where('userId')
-      .equals(TITAN_USER_ID)
-      .filter((item) => dates.includes(item.localDate))
-      .toArray(),
-    titanDatabase.hydrationEntries
-      .where('userId')
-      .equals(TITAN_USER_ID)
-      .filter((item) => dates.includes(item.localDate))
-      .toArray(),
-    titanDatabase.sleepEntries
-      .where('userId')
-      .equals(TITAN_USER_ID)
-      .filter((item) => dates.includes(item.localDate))
-      .toArray(),
-    titanDatabase.workoutSessions
-      .where('userId')
-      .equals(TITAN_USER_ID)
-      .filter((item) => dates.includes(item.localDate))
-      .toArray(),
-    titanDatabase.cardioSessions
-      .where('userId')
-      .equals(TITAN_USER_ID)
-      .filter((item) => dates.includes(item.localDate))
-      .toArray(),
-    titanDatabase.bodyMetrics
-      .where('userId')
-      .equals(TITAN_USER_ID)
-      .filter((item) => dates.includes(item.localDate))
-      .toArray(),
-    titanDatabase.exercisePersonalRecords
-      .where('userId')
-      .equals(TITAN_USER_ID)
-      .toArray(),
-  ])
+  ] = await titanDatabase.transaction(
+    'r',
+    [
+      titanDatabase.dailyPlans,
+      titanDatabase.mealEntries,
+      titanDatabase.hydrationEntries,
+      titanDatabase.sleepEntries,
+      titanDatabase.workoutSessions,
+      titanDatabase.cardioSessions,
+      titanDatabase.bodyMetrics,
+      titanDatabase.exercisePersonalRecords,
+    ],
+    () =>
+      Promise.all([
+        inPeriod(titanDatabase.dailyPlans),
+        inPeriod(titanDatabase.mealEntries),
+        inPeriod(titanDatabase.hydrationEntries),
+        inPeriod(titanDatabase.sleepEntries),
+        inPeriod(titanDatabase.workoutSessions),
+        inPeriod(titanDatabase.cardioSessions),
+        inPeriod(titanDatabase.bodyMetrics),
+        titanDatabase.exercisePersonalRecords
+          .where('userId')
+          .equals(TITAN_USER_ID)
+          .toArray(),
+      ]),
+  )
 
   const plansByDate = new Map(
     dailyPlans.map((item) => [item.localDate, item]),
   )
 
+  const mealsByDate = groupByDate(mealEntries)
+  const hydrationByDate = groupByDate(hydrationEntries)
+  const sleepByDate = new Map(
+    sleepEntries.map((item) => [item.localDate, item]),
+  )
+  const metricsByDate = new Map(
+    bodyMetrics.map((item) => [item.localDate, item]),
+  )
+  const completedWorkoutDates = new Set(
+    workoutSessions
+      .filter((item) => item.status === 'completed')
+      .map((item) => item.localDate),
+  )
+  const completedCardioDates = new Set(
+    cardioSessions
+      .filter((item) => item.status === 'completed')
+      .map((item) => item.localDate),
+  )
+
   const points: AnalyticsPoint[] = dates.map((localDate) => {
-    const dayMeals = mealEntries.filter(
-      (item) => item.localDate === localDate,
-    )
-    const dayHydration = hydrationEntries.filter(
-      (item) => item.localDate === localDate,
-    )
-    const daySleep = sleepEntries.find(
-      (item) => item.localDate === localDate,
-    )
-    const dayWorkout = workoutSessions.find(
-      (item) => item.localDate === localDate,
-    )
-    const dayCardio = cardioSessions.find(
-      (item) => item.localDate === localDate,
-    )
-    const dayMetric = bodyMetrics.find(
-      (item) => item.localDate === localDate,
-    )
+    const dayMeals = mealsByDate.get(localDate) ?? []
+    const dayHydration = hydrationByDate.get(localDate) ?? []
+    const daySleep = sleepByDate.get(localDate)
+    const dayMetric = metricsByDate.get(localDate)
 
     return {
       localDate,
@@ -123,8 +144,8 @@ export async function getAnalyticsSummary(
         0,
       ),
       sleepMinutes: daySleep?.durationMinutes ?? null,
-      workoutCompleted: dayWorkout?.status === 'completed',
-      cardioCompleted: dayCardio?.status === 'completed',
+      workoutCompleted: completedWorkoutDates.has(localDate),
+      cardioCompleted: completedCardioDates.has(localDate),
       weightKg: dayMetric?.weightKg ?? null,
       waistCm: dayMetric?.waistCm ?? null,
     }

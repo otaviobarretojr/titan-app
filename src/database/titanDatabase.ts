@@ -429,6 +429,39 @@ class TitanDatabase extends Dexie {
         'id, userId, localDate, priority, [userId+localDate]',
     })
 
+    // Date-range screens use the user/date compound keys below. Keeping the
+    // sort key in the meal-plan index also lets the dashboard read today's
+    // meals in display order without an in-memory sort.
+    this.version(8).stores({
+      users: 'id, displayName, createdAt',
+      dailyPlans: 'id, userId, localDate, [userId+localDate]',
+      mealPlans:
+        'id, userId, localDate, plannedTime, sequence, [userId+localDate], [userId+localDate+sequence]',
+      mealEntries:
+        'id, userId, mealPlanId, localDate, status, [userId+localDate]',
+      workoutPlans: 'id, userId, localDate, [userId+localDate]',
+      exercisePlans:
+        'id, userId, workoutPlanId, localDate, sequence, name, [workoutPlanId+sequence]',
+      workoutSessions:
+        'id, userId, workoutPlanId, localDate, status, [userId+localDate]',
+      exerciseSets:
+        'id, userId, workoutSessionId, exercisePlanId, localDate, setNumber, [workoutSessionId+exercisePlanId]',
+      exercisePersonalRecords:
+        'id, userId, exercisePlanId, exerciseName, localDate, estimatedOneRepMaxKg, [userId+exercisePlanId], [userId+localDate]',
+      bodyMetrics: 'id, userId, localDate, [userId+localDate]',
+      progressPhotos: 'id, userId, localDate, pose, [userId+localDate]',
+      healthMetrics: 'id, userId, localDate, [userId+localDate]',
+      healthExams: 'id, userId, examDate, category, [userId+examDate]',
+      cardioPlans: 'id, userId, localDate, type, [userId+localDate]',
+      cardioSessions:
+        'id, userId, cardioPlanId, localDate, status, [userId+localDate]',
+      hydrationEntries:
+        'id, userId, localDate, consumedAt, [userId+localDate]',
+      sleepEntries: 'id, userId, localDate, [userId+localDate]',
+      coachRecommendations:
+        'id, userId, localDate, priority, [userId+localDate]',
+    })
+
   }
 }
 
