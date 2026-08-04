@@ -44,3 +44,7 @@ A rota `/evolution` reúne peso e tendência, medidas bilaterais, bioimpedância
 ## TITAN Experience
 
 O dashboard mobile-first organiza Score, agenda, refeições pendentes, treino, cardio, Coach, peso, água e sono em cards independentes. Skeletons, estados explícitos, foco visível e animações que respeitam redução de movimento tornam a experiência estável sem alterar o modelo offline-first ou a persistência no IndexedDB. Consulte `docs/releases/SPRINT_010_TITAN_EXPERIENCE.md`.
+
+## Coach TITAN Intelligence
+
+O Coach analisa somente evidências armazenadas no IndexedDB, compara janelas de 7, 30 e 90 dias e apresenta alertas, próxima ação e Timeline TITAN. Sem amostra suficiente, o app informa a limitação em vez de inferir dados. Consulte `docs/releases/SPRINT_011_COACH_INTELLIGENCE.md`.

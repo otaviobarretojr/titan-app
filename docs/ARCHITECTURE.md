@@ -25,3 +25,9 @@ Regra principal: componentes de tela não concentram regras de negócio.
 - `modules/evolution`: regras puras de médias por janela, comparações, validação, métricas de força/cardio e processamento local de fotos. A UI não fabrica amostras ausentes.
 - O schema Dexie 10 adiciona `bioimpedance` e campos opcionais a medições/fotos. A evolução usa leitura adaptativa dos schemas anteriores e recordes de força derivados das séries existentes.
 - O Workbox usa precache, `NetworkFirst` para navegação e `CacheFirst` limitado para imagens, respeitando a base `/titan-app/` do GitHub Pages.
+
+## Coach TITAN Intelligence
+
+- `modules/coach/engine` contém regras puras e determinísticas de insights, alertas, priorização, tendências e timeline.
+- `coachRepository` é a fronteira de dados: agrega exclusivamente tabelas locais do Dexie, persiste recomendações e aplica cooldown antirrepetição.
+- Janelas de 7, 30 e 90 dias ignoram ausências e exigem duas ou mais amostras; explicações carregam evidência, período e tamanho da amostra.
