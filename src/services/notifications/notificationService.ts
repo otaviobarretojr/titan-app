@@ -1,154 +1,60 @@
-import type {
-  ReminderPreference,
-  ReminderType,
-} from '../../modules/notifications/types/notifications'
-
-const SETTINGS_KEY = 'titan-notification-preferences'
-const MASTER_KEY = 'titan-notifications-enabled'
-
-const defaultPreferences: ReminderPreference[] = [
-  {
-    id: 'meal',
-    label: 'Refeições',
-    description: 'Lembretes para refeições planejadas.',
-    enabled: true,
-    time: '12:30',
-  },
-  {
-    id: 'hydration',
-    label: 'Hidratação',
-    description: 'Lembrete diário de água.',
-    enabled: true,
-    time: '15:00',
-  },
-  {
-    id: 'workout',
-    label: 'Treino',
-    description: 'Aviso antes do horário de treino.',
-    enabled: true,
-    time: '18:30',
-  },
-  {
-    id: 'preWorkout',
-    label: 'Pré-treino',
-    description: 'Aviso para preparar o pré-treino.',
-    enabled: false,
-    time: '18:00',
-  },
-  {
-    id: 'dailySummary',
-    label: 'Resumo diário',
-    description: 'Balanço dos hábitos ao final do dia.',
-    enabled: false,
-    time: '21:00',
-  },
-  {
-    id: 'weeklySummary',
-    label: 'Resumo semanal',
-    description: 'Consolidado da semana aos domingos.',
-    enabled: false,
-    time: '19:00',
-  },
-  {
-    id: 'sleep',
-    label: 'Sono',
-    description: 'Aviso para iniciar a rotina noturna.',
-    enabled: true,
-    time: '21:30',
-  },
-]
+import { addInboxItem, getNotificationSnapshot, updateNotificationPreference } from '../../modules/notifications/data/notificationsRepository'
+import type { NotificationPermissionState, ReminderCandidate } from '../../modules/notifications/types/notifications'
 
 export function notificationsSupported() {
-  return (
-    typeof window !== 'undefined' &&
-    'Notification' in window &&
-    'serviceWorker' in navigator
-  )
+  return typeof globalThis.Notification !== 'undefined'
 }
 
-export function getNotificationPermission() {
+export function getNotificationPermission(): NotificationPermissionState {
   if (!notificationsSupported()) return 'unsupported'
-  return Notification.permission
+  return globalThis.Notification.permission
 }
+export function canDetectPwaInstall() { return typeof window !== 'undefined' && ('matchMedia' in window || 'navigator' in window) }
+export function getPwaInstallStatus() { if (typeof window === 'undefined') return 'unknown'; const standalone = window.matchMedia?.('(display-mode: standalone)').matches || ('standalone' in navigator && Boolean((navigator as Navigator & { standalone?: boolean }).standalone)); return standalone ? 'installed' : 'browser' }
+export async function requestNotificationPermission() { if (!notificationsSupported()) return 'unsupported'; return Notification.requestPermission() }
+export async function showTitanNotification(input: { title: string; body: string; tag?: string; url?: string }) { if (!notificationsSupported()) throw new Error('Notificações não suportadas neste navegador.'); if (Notification.permission !== 'granted') throw new Error('Permissão de notificação não concedida.'); const notification = new Notification(input.title, { body: input.body, tag: input.tag ?? 'titan', icon: './icons/titan.svg', data: { url: input.url ?? './' } }); notification.onclick = () => { window.focus(); if (input.url) window.location.hash = input.url.startsWith('/') ? input.url : `/${input.url}` } }
+export async function deliverReminder(candidate: ReminderCandidate) { await addInboxItem(candidate); try { await showTitanNotification({ title: candidate.title, body: candidate.message, tag: candidate.dedupeKey, url: candidate.actionPath }) } catch { /* Inbox persistente cobre ausência de suporte, permissão negada ou contexto suspenso. */ } }
+export async function checkDueNotifications() { const snapshot = await getNotificationSnapshot(); await Promise.all(snapshot.due.map(deliverReminder)); await Promise.all(snapshot.due.map((item) => updateNotificationPreference(item.category, { lastRunAt: new Date().toISOString() }))); return snapshot.due.length }
+export async function testNotification() { const candidate: ReminderCandidate = { category: 'coachPriority', title: 'TITAN', message: 'As notificações estão funcionando neste aparelho.', scheduledAt: new Date().toISOString(), actionLabel: 'Abrir central', actionPath: '/notifications', priority: 'low', dedupeKey: `test:${Date.now()}` }; await deliverReminder(candidate) }
 
-export async function requestNotificationPermission() {
-  if (!notificationsSupported()) {
-    throw new Error('Este navegador não oferece notificações.')
-  }
 
-  return Notification.requestPermission()
-}
+// Compatibilidade com a central local anterior à migração Dexie 11.
+// A nova central usa notificationPreferences no IndexedDB, mas estes helpers
+// permanecem disponíveis para não quebrar fluxos e testes legados.
+const LEGACY_NOTIFICATION_ENABLED_KEY =
+  'titan:notifications:enabled'
+
+const legacyReminderPreferences = [
+  { id: 'meal' },
+  { id: 'hydration' },
+  { id: 'workout' },
+  { id: 'preWorkout' },
+  { id: 'dailySummary' },
+  { id: 'weeklySummary' },
+  { id: 'sleep' },
+] as const
 
 export function notificationsEnabled() {
-  return localStorage.getItem(MASTER_KEY) === 'true'
-}
+  if (typeof localStorage === 'undefined') return false
 
-export function setNotificationsEnabled(enabled: boolean) {
-  localStorage.setItem(MASTER_KEY, String(enabled))
-}
-
-export function getReminderPreferences(): ReminderPreference[] {
-  const raw = localStorage.getItem(SETTINGS_KEY)
-
-  if (!raw) return defaultPreferences
-
-  try {
-    const parsed: unknown = JSON.parse(raw)
-    if (!Array.isArray(parsed)) return defaultPreferences
-    return defaultPreferences.map((defaultItem) => {
-      const saved = parsed.find((item) => item.id === defaultItem.id)
-      return saved ?? defaultItem
-    })
-  } catch {
-    return defaultPreferences
-  }
-}
-
-export function saveReminderPreferences(
-  preferences: ReminderPreference[],
-) {
-  localStorage.setItem(SETTINGS_KEY, JSON.stringify(preferences))
-}
-
-export function updateReminderPreference(
-  type: ReminderType,
-  changes: Partial<ReminderPreference>,
-) {
-  const preferences = getReminderPreferences().map((item) =>
-    item.id === type ? { ...item, ...changes } : item,
+  return (
+    localStorage.getItem(
+      LEGACY_NOTIFICATION_ENABLED_KEY,
+    ) === 'true'
   )
-
-  saveReminderPreferences(preferences)
-  return preferences
 }
 
-export async function showTitanNotification(input: {
-  title: string
-  body: string
-  tag?: string
-  url?: string
-}) {
-  if (!notificationsSupported()) {
-    throw new Error('Notificações não suportadas.')
-  }
+export function setNotificationsEnabled(
+  enabled: boolean,
+) {
+  if (typeof localStorage === 'undefined') return
 
-  if (Notification.permission !== 'granted') {
-    throw new Error('Permissão de notificação não concedida.')
-  }
+  localStorage.setItem(
+    LEGACY_NOTIFICATION_ENABLED_KEY,
+    String(enabled),
+  )
+}
 
-  if (!notificationsEnabled()) {
-    throw new Error('Notificações estão desativadas no TITAN.')
-  }
-
-  const registration = await navigator.serviceWorker.ready
-
-  await registration.showNotification(input.title, {
-    body: input.body,
-    tag: input.tag ?? 'titan',
-    icon: './icons/titan.svg',
-    badge: './icons/titan.svg',
-    data: {
-      url: input.url ?? './',
-    },
-  })
+export function getReminderPreferences() {
+  return [...legacyReminderPreferences]
 }

@@ -15,4 +15,5 @@
 - [x] Sprint 011 — Coach TITAN Intelligence
 - [x] Sprint 012 — Dashboard Inteligente
 - [x] Sprint 013.1 — Estabilização da Plataforma
+- [x] Sprint 014 — Notificações Inteligentes
 - [ ] v1.0 — Primeira versão estável

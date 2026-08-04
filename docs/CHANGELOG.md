@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+### Sprint 014 — Notificações Inteligentes
+
+- Central `/notifications` com consentimento explícito, status de suporte/PWA, teste manual e limitações do navegador.
+- Preferências e Inbox local persistidas no IndexedDB com migração Dexie 11 aditiva.
+- Engine local para refeições, atrasos, hidratação, treino, pré-treino, sono, relatórios semanais e prioridade do Coach.
+- Dashboard com contador de não lidas, próximo lembrete e aviso de permissão quando relevante.
+
 ### Sprint 013.1 — Estabilização da Plataforma
 
 - Refatoração do AppShell para separar ações rápidas, estabilizar callbacks e memoizar navegação.

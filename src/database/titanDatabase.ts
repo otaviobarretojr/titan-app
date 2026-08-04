@@ -1,4 +1,5 @@
 import Dexie, { type EntityTable } from 'dexie'
+import type { NotificationInboxItem, NotificationPreference } from '../modules/notifications/types/notifications'
 
 export type UserRecord = {
   id: string
@@ -286,6 +287,8 @@ class TitanDatabase extends Dexie {
   hydrationEntries!: EntityTable<HydrationEntryRecord, 'id'>
   sleepEntries!: EntityTable<SleepEntryRecord, 'id'>
   coachRecommendations!: EntityTable<CoachRecommendationRecord, 'id'>
+  notificationPreferences!: EntityTable<NotificationPreference, 'id'>
+  notificationInbox!: EntityTable<NotificationInboxItem, 'id'>
 
   constructor() {
     super('titan-database')
@@ -507,6 +510,15 @@ class TitanDatabase extends Dexie {
       bioimpedance: 'id, userId, localDate, [userId+localDate]',
     })
 
+
+    // Sprint 014: local notification preferences and inbox. Additive only; no
+    // backfill is required, so legacy IndexedDB data remains intact.
+    this.version(11).stores({
+      notificationPreferences:
+        'id, userId, category, enabled, nextRunAt, [userId+category]',
+      notificationInbox:
+        'id, userId, category, priority, createdAt, readAt, dismissedAt, dedupeKey, [userId+createdAt], [userId+dedupeKey]',
+    })
   }
 }
 
