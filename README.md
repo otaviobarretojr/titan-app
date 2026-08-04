@@ -48,3 +48,7 @@ O dashboard mobile-first organiza Score, agenda, refeições pendentes, treino, 
 ## Coach TITAN Intelligence
 
 O Coach analisa somente evidências armazenadas no IndexedDB, compara janelas de 7, 30 e 90 dias e apresenta alertas, próxima ação e Timeline TITAN. Sem amostra suficiente, o app informa a limitação em vez de inferir dados. Consulte `docs/releases/SPRINT_011_COACH_INTELLIGENCE.md`.
+
+## Dashboard Inteligente
+
+A Home segue uma experiência mobile-first inspirada no Samsung One UI: Score TITAN destacado, uma recomendação prioritária do Coach, estados claros de refeição e treino, pendências, resumo diário e cards totalmente acionáveis. A navegação inferior permanece fixa e o FAB permite registrar água ou acessar rapidamente os módulos. Consulte `docs/releases/SPRINT_012_DASHBOARD_INTELIGENTE.md`.

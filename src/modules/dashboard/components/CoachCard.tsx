@@ -1,6 +1,6 @@
 import { ChevronRight, Sparkles } from 'lucide-react'
 import { Link } from 'react-router-dom'
-import { Badge, Card } from '../../../shared/ui'
+import { Badge } from '../../../shared/ui'
 import type { CoachInsight } from '../../coach/types/coach'
 
 type CoachCardProps = {
@@ -15,7 +15,7 @@ const tones = {
 
 export function CoachCard({ insight }: CoachCardProps) {
   return (
-    <Card className="border-blue-500/20 bg-gradient-to-br from-blue-600/25 to-cyan-400/5">
+    <Link className="dashboard-card dashboard-link block border-blue-500/20 bg-gradient-to-br from-blue-600/25 to-cyan-400/5 p-5" to={insight.actionPath ?? '/coach'}>
       <div className="flex items-center justify-between gap-3">
         <div className="flex items-center gap-2 text-blue-300">
           <Sparkles size={18} aria-hidden="true" />
@@ -37,15 +37,9 @@ export function CoachCard({ insight }: CoachCardProps) {
         {insight.message}
       </p>
 
-      {insight.actionLabel && insight.actionPath ? (
-        <Link
-          className="mt-4 inline-flex min-h-11 items-center gap-2 rounded-2xl bg-white/10 px-4 text-sm font-bold text-white transition hover:bg-white/15"
-          to={insight.actionPath}
-        >
-          {insight.actionLabel}
-          <ChevronRight size={17} aria-hidden="true" />
-        </Link>
-      ) : null}
-    </Card>
+      <span className="mt-4 inline-flex min-h-11 items-center gap-2 rounded-2xl bg-white/10 px-4 text-sm font-bold text-white">
+        {insight.actionLabel ?? 'Ver análise'} <ChevronRight size={17} aria-hidden="true" />
+      </span>
+    </Link>
   )
 }

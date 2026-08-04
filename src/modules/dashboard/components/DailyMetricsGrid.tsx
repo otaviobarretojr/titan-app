@@ -1,83 +1,23 @@
-import type { ReactNode } from 'react'
-import { Droplets, Flame, Moon, Utensils } from 'lucide-react'
-import { Card } from '../../../shared/ui'
+import { Droplets, Flame, Moon, Salad } from 'lucide-react'
+import { Link } from 'react-router-dom'
 import type { DashboardSummary } from '../types/dashboard'
 
-type DailyMetricsGridProps = {
-  summary: DashboardSummary
-}
+const percent = (value: number, target: number) => Math.min(100, Math.round(value / target * 100))
+const sleep = (minutes: number | null) => minutes === null ? '—' : `${Math.floor(minutes / 60)}h${String(minutes % 60).padStart(2, '0')}`
 
-function formatSleep(minutes: number | null) {
-  if (minutes === null) return '—'
-  return `${Math.floor(minutes / 60)}h${(minutes % 60)
-    .toString()
-    .padStart(2, '0')}`
-}
-
-export function DailyMetricsGrid({
-  summary,
-}: DailyMetricsGridProps) {
-  return (
-    <div className="grid grid-cols-2 gap-3">
-      <Metric
-        icon={<Flame size={18} aria-hidden="true" />}
-        label="Calorias"
-        value={`${summary.caloriesConsumedKcal.toLocaleString('pt-BR')}`}
-        target={`/${summary.calorieTargetKcal.toLocaleString('pt-BR')} kcal`}
-      />
-      <Metric
-        icon={<Utensils size={18} aria-hidden="true" />}
-        label="Proteína"
-        value={`${summary.proteinConsumedG}`}
-        target={`/${summary.proteinTargetG} g`}
-      />
-      <Metric
-        icon={<Droplets size={18} aria-hidden="true" />}
-        label="Água"
-        value={`${(summary.hydrationConsumedMl / 1000).toLocaleString(
-          'pt-BR',
-          { maximumFractionDigits: 1 },
-        )}`}
-        target={`/${(summary.hydrationTargetMl / 1000).toLocaleString(
-          'pt-BR',
-          { maximumFractionDigits: 1 },
-        )} L`}
-      />
-      <Metric
-        icon={<Moon size={18} aria-hidden="true" />}
-        label="Sono"
-        value={formatSleep(summary.sleepMinutes)}
-        target={`/${formatSleep(summary.sleepTargetMinutes)}`}
-      />
-    </div>
-  )
-}
-
-type MetricProps = {
-  icon: ReactNode
-  label: string
-  value: string
-  target: string
-}
-
-function Metric({
-  icon,
-  label,
-  value,
-  target,
-}: MetricProps) {
-  return (
-    <Card className="p-4">
-      <div className="flex items-center gap-2 text-slate-500">
-        {icon}
-        <span className="text-xs font-bold">{label}</span>
-      </div>
-      <p className="mt-3 text-xl font-black">
-        {value}
-        <span className="ml-1 text-xs font-semibold text-slate-500">
-          {target}
-        </span>
-      </p>
-    </Card>
-  )
+export function DailyMetricsGrid({ summary }: { summary: DashboardSummary }) {
+  const metrics = [
+    { label: 'Proteína', value: `${summary.proteinConsumedG} g`, progress: percent(summary.proteinConsumedG, summary.proteinTargetG), icon: Salad, to: '/nutrition', tone: 'text-emerald-300' },
+    { label: 'Calorias', value: summary.caloriesConsumedKcal.toLocaleString('pt-BR'), progress: percent(summary.caloriesConsumedKcal, summary.calorieTargetKcal), icon: Flame, to: '/nutrition', tone: 'text-orange-300' },
+    { label: 'Água', value: `${(summary.hydrationConsumedMl / 1000).toLocaleString('pt-BR', { maximumFractionDigits: 1 })} L`, progress: percent(summary.hydrationConsumedMl, summary.hydrationTargetMl), icon: Droplets, to: '/nutrition', tone: 'text-sky-300' },
+    { label: 'Sono', value: sleep(summary.sleepMinutes), progress: percent(summary.sleepMinutes ?? 0, summary.sleepTargetMinutes), icon: Moon, to: '/health/sleep', tone: 'text-violet-300' },
+  ]
+  return <div className="grid grid-cols-2 gap-3">{metrics.map(({ icon: Icon, ...metric }) => (
+    <Link className="dashboard-card dashboard-link p-4" key={metric.label} to={metric.to}>
+      <div className={`flex items-center gap-2 ${metric.tone}`}><Icon size={17} /><span className="text-xs font-bold text-slate-400">{metric.label}</span></div>
+      <p className="mt-3 text-xl font-black">{metric.value}</p>
+      <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-white/8"><div className="h-full rounded-full bg-current" style={{ width: `${metric.progress}%` }} /></div>
+      <p className="mt-2 text-[11px] font-semibold text-slate-500">{metric.progress}% da meta</p>
+    </Link>
+  ))}</div>
 }

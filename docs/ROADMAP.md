@@ -12,4 +12,5 @@
 - [x] Sprint 009 — Evolução Corporal Avançada
 - [x] Sprint 010 — TITAN Experience (UX Premium)
 - [x] Sprint 011 — Coach TITAN Intelligence
+- [x] Sprint 012 — Dashboard Inteligente
 - [ ] v1.0 — Primeira versão estável

@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+### Sprint 012 — Dashboard Inteligente
+
+- Home redesenhada em padrão mobile-first inspirado no Samsung One UI, com hierarquia de leitura mais clara.
+- Score TITAN em destaque e apenas a recomendação prioritária do Coach.
+- Cards inteiramente clicáveis para refeição, treino, pendências e resumo diário, com estados operacionais explícitos.
+- Barra inferior fixa e FAB com atalhos de registro rápido, incluindo hidratação de 300 ml.
+
 ### Sprint 011 — Coach TITAN Intelligence
 
 - Engine local de insights e alertas explicáveis, com priorização e controle de duplicidade.
