@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+### Sprint 010 — TITAN Experience
+
+- Dashboard inteligente em cards reordenáveis com agenda, pendências, peso, água, sono, treino, cardio, Coach e Score TITAN.
+- Componentes reutilizáveis para vazio, carregamento, estatísticas, cabeçalhos, banners e confirmação.
+- Skeletons estáveis, feedback acessível, foco visível e transições compatíveis com redução de movimento.
+- Design system consolidado para superfícies, controles, espaçamento, tipografia, sombras e estados.
+
 ### Sprint 009 — Evolução Corporal Avançada
 
 - Médias e comparações de peso sem zeros artificiais, medidas bilaterais e cobertura de registros.

@@ -1,4 +1,4 @@
-import { Activity } from 'lucide-react'
+import { Activity, Minus } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { Badge, Card, ProgressBar } from '../../../shared/ui'
 import type { TitanScore } from '../../coach/types/coach'
@@ -55,6 +55,11 @@ export function ScoreCard({ score }: ScoreCardProps) {
       </div>
 
       <div className="mt-4"><Badge tone={toneByLabel[score.label]}>{score.label}</Badge></div>
+
+      <div className="mt-4 grid grid-cols-2 gap-3 border-t border-white/10 pt-4">
+        <div><p className="text-xs font-bold uppercase tracking-wider text-slate-500">Tendência</p><p className="mt-1 flex items-center gap-1.5 text-sm font-bold"><Minus aria-hidden="true" size={16} /> Hoje</p></div>
+        <div><p className="text-xs font-bold uppercase tracking-wider text-slate-500">Progresso semanal</p><p className="mt-1 text-sm font-bold">{score.value === null ? 'Aguardando dados' : `${score.value}% da referência`}</p></div>
+      </div>
 
       {score.value !== null ? (
         <div className="mt-5">

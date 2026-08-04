@@ -8,6 +8,7 @@ const requiredFiles = [
   'docs/releases/SPRINT_007_ANALYTICS.md',
   'docs/releases/SPRINT_008_PWA_CONFIABILIDADE.md',
   'docs/releases/SPRINT_009_EVOLUCAO_AVANCADA.md',
+  'docs/releases/SPRINT_010_TITAN_EXPERIENCE.md',
 ]
 
 for (const file of requiredFiles) {

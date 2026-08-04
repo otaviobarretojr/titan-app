@@ -10,4 +10,5 @@
 - [ ] v0.9 — Polimento
 - [x] Sprint 008 — Plataforma PWA e Confiabilidade
 - [x] Sprint 009 — Evolução Corporal Avançada
+- [x] Sprint 010 — TITAN Experience (UX Premium)
 - [ ] v1.0 — Primeira versão estável

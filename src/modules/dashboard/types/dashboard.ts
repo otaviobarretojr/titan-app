@@ -42,6 +42,11 @@ export type DashboardSummary = {
 export type DashboardData = {
   userName: string
   nextMeal: DashboardMeal | null
+  pendingMeals: number
+  weight: {
+    currentKg: number | null
+    changeKg: number | null
+  }
   workout: DashboardWorkout | null
   cardio: DashboardCardio | null
   insights: CoachInsight[]
