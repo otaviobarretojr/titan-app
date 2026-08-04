@@ -117,13 +117,14 @@ export async function getDashboardData(): Promise<DashboardData | null> {
       currentMinutes,
   )
 
-  const nextMeal =
+  const highlightedMeal =
     unresolvedMeals.find(
       (meal) =>
         timeToMinutes(meal.plannedTime) >=
         currentMinutes,
     ) ??
     unresolvedMeals[0] ??
+    meals.find((meal) => mealEntryByPlanId.get(meal.id)?.status !== 'skipped') ??
     null
 
   const caloriesConsumedKcal =
@@ -232,22 +233,28 @@ export async function getDashboardData(): Promise<DashboardData | null> {
     },
 
     nextMeal:
-      nextMeal
+      highlightedMeal
         ? {
             id:
-              nextMeal.id,
+              highlightedMeal.id,
 
             name:
-              nextMeal.name,
+              highlightedMeal.name,
 
             plannedTime:
-              nextMeal.plannedTime,
+              highlightedMeal.plannedTime,
 
             caloriesKcal:
-              nextMeal.caloriesKcal,
+              highlightedMeal.caloriesKcal,
 
             proteinG:
-              nextMeal.proteinG,
+              highlightedMeal.proteinG,
+
+            status: mealEntryByPlanId.has(highlightedMeal.id)
+              ? 'completed'
+              : timeToMinutes(highlightedMeal.plannedTime) < currentMinutes
+                ? 'overdue'
+                : 'normal',
           }
         : null,
 

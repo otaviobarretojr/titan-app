@@ -9,6 +9,7 @@ export type DashboardMeal = {
   plannedTime: string
   caloriesKcal: number
   proteinG: number
+  status: 'normal' | 'overdue' | 'completed'
 }
 
 export type DashboardWorkout = {
