@@ -1,7 +1,7 @@
 import { AlertCircle, Bell, ChevronRight, Sparkles } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { InfoBanner, LoadingCard } from '../../../shared/ui'
+import { InfoBanner, SkeletonPage } from '../../../shared/ui'
 import { CoachCard } from '../components/CoachCard'
 import { DailyMetricsGrid } from '../components/DailyMetricsGrid'
 import { MealCard } from '../components/MealCard'
@@ -21,7 +21,7 @@ export function DashboardPage() {
   const permission = getNotificationPermission()
   useEffect(() => { void Promise.all([unreadCount(), getNotificationSnapshot()]).then(([count, snapshot]) => { setUnreadNotifications(count); setNextReminder(snapshot.next[0]?.nextRunAt ?? null) }) }, [])
   if (error) return <InfoBanner title="Não foi possível abrir o TITAN" tone="error">{error} Seus registros locais permanecem seguros.</InfoBanner>
-  if (isLoading || !data) return <div aria-label="Carregando dashboard" className="space-y-4" role="status"><div className="skeleton h-28 rounded-[28px]" /><LoadingCard lines={3} /><LoadingCard lines={2} /></div>
+  if (isLoading || !data) return <SkeletonPage label="Carregando dashboard premium" variant="dashboard" />
 
   const insight = data.insights[0]
   return <div className="stagger-in space-y-6 pb-4">

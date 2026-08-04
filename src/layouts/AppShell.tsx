@@ -130,7 +130,7 @@ export function AppShell() {
 
       <nav
         aria-label="Navegação principal"
-        className="fixed inset-x-0 bottom-0 z-50 mx-auto flex w-full max-w-md items-center justify-around border-t border-white/10 bg-[#111827]/90 px-2 pb-[calc(0.65rem+env(safe-area-inset-bottom))] pt-2 backdrop-blur-2xl"
+        className="fixed inset-x-0 bottom-0 z-50 mx-auto flex w-full max-w-md items-center justify-around border-t border-white/10 bg-[#111827]/88 px-2 pb-[calc(0.65rem+env(safe-area-inset-bottom))] pt-2 shadow-[0_-12px_36px_rgb(0_0_0_/_24%)] backdrop-blur-2xl"
       >
         {renderedNavigation}
       </nav>
@@ -164,7 +164,7 @@ function QuickActionSheet({
       />
       <div
         aria-label="Registro rápido"
-        className="fixed inset-x-4 bottom-28 z-[60] mx-auto max-w-sm rounded-[28px] border border-white/10 bg-[#172033] p-5 shadow-2xl"
+        className="fixed inset-x-4 bottom-28 z-[60] mx-auto max-w-sm rounded-[28px] border border-white/10 bg-[#172033]/95 p-5 shadow-2xl backdrop-blur-2xl"
         role="dialog"
       >
         <div className="flex items-center justify-between gap-4">
@@ -186,7 +186,7 @@ function QuickActionSheet({
         </div>
 
         <div className="mt-4 grid grid-cols-2 gap-3">
-          <button className="quick-action" onClick={handleAddWater}>
+          <button className={`quick-action ${waterAdded ? 'hydration-complete' : ''}`} onClick={handleAddWater}>
             <Droplets className="text-sky-300" size={21} />
             {waterAdded ? 'Água registrada' : '+ 300 ml água'}
           </button>

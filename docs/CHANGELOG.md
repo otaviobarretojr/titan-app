@@ -2,6 +2,15 @@
 
 ## Unreleased
 
+### Sprint 016 — Experiência Premium (UX/UI)
+
+- Design system premium com tokens CSS reutilizáveis para superfícies, radius, espaçamento, bordas, elevação, foco e movimento.
+- Home, navegação inferior, FAB e quick actions refinados com hierarquia visual, indicador ativo, sombras discretas, contraste e feedback de hidratação.
+- Skeleton loading padronizado para Dashboard, Coach, Analytics, Evolução, Notificações e Conta.
+- Dark premium, transições leves, ripple, suporte a `prefers-reduced-motion`, foco visível e responsividade ampliada para mobile, tablet e desktop.
+- Performance preservada com rotas lazy/code splitting existentes e componentes reutilizáveis sem novas dependências.
+
+
 ### Sprint 015 — Backup em Nuvem e Sincronização Segura
 
 - Rota `/account` para conta opcional, login por e-mail, status, histórico de backups e restauração confirmada.

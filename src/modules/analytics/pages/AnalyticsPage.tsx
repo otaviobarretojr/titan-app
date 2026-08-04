@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Activity, Award, CalendarCheck, Download, Dumbbell, FileJson, Flame, Gauge, Scale, ShieldCheck } from 'lucide-react'
-import { Button, Card, ProgressBar, SectionTitle } from '../../../shared/ui'
+import { Button, Card, ProgressBar, SectionTitle, SkeletonPage } from '../../../shared/ui'
 import { AnalyticsBarChart } from '../components/AnalyticsBarChart'
 import { AnalyticsMetricCard } from '../components/AnalyticsMetricCard'
 import { TrendList } from '../components/TrendList'
@@ -13,7 +13,7 @@ const comparison = (value: number | null) => value === null ? 'Dados insuficient
 export function AnalyticsPage() {
   const { period, setPeriod, summary, isLoading } = useAnalytics()
   const [reportPeriod, setReportPeriod] = useState<ReportPeriod>('weekly')
-  if (isLoading || !summary) return <div className="flex min-h-[70dvh] items-center justify-center"><p className="text-sm font-semibold text-slate-400">Calculando Analytics no dispositivo...</p></div>
+  if (isLoading || !summary) return <SkeletonPage label="Calculando Analytics no dispositivo" />
   const charts = [
     ['Peso', (p: typeof summary.days[number]) => p.weightKg, 'kg'], ['Cintura', (p: typeof summary.days[number]) => p.waistCm, 'cm'],
     ['Proteína', (p: typeof summary.days[number]) => p.proteinG || null, 'g'], ['Calorias', (p: typeof summary.days[number]) => p.caloriesKcal || null, 'kcal'],

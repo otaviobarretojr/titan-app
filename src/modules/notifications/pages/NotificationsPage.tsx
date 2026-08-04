@@ -1,7 +1,7 @@
 import { Bell, Check, Trash2 } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { Button, Card, InfoBanner } from '../../../shared/ui'
+import { Button, Card, InfoBanner, SkeletonPage } from '../../../shared/ui'
 import { getNotificationPermission, getPwaInstallStatus, notificationsSupported, requestNotificationPermission, testNotification } from '../../../services/notifications/notificationService'
 import { clearOldInbox, dismissInboxItem, ensureNotificationPreferences, getNotificationSnapshot, listInbox, markInboxRead, updateNotificationPreference } from '../data/notificationsRepository'
 import type { NotificationInboxItem, NotificationPermissionState, NotificationPreference, ReminderCandidate } from '../types/notifications'
@@ -14,7 +14,8 @@ export function NotificationsPage() {
   const [next, setNext] = useState<Array<{ category: string; nextRunAt: string | null }>>([])
   const [due, setDue] = useState<ReminderCandidate[]>([])
   const [message, setMessage] = useState('')
-  async function refresh() { const [snapshot, items] = await Promise.all([getNotificationSnapshot(), listInbox()]); setPreferences(snapshot.preferences); setNext(snapshot.next); setDue(snapshot.due); setInbox(items) }
+  const [initialLoading, setInitialLoading] = useState(true)
+  async function refresh() { const [snapshot, items] = await Promise.all([getNotificationSnapshot(), listInbox()]); setPreferences(snapshot.preferences); setNext(snapshot.next); setDue(snapshot.due); setInbox(items); setInitialLoading(false) }
   useEffect(() => { void ensureNotificationPreferences().then(refresh) }, [])
   async function askPermission() { const result = await requestNotificationPermission(); setPermission(result); setMessage(result === 'granted' ? 'Permissão concedida. Os lembretes também continuam salvos na Inbox.' : result === 'denied' ? 'Permissão negada. Ative manualmente nas configurações do navegador se mudar de ideia.' : 'Permissão ainda não definida.'); await refresh() }
   async function togglePreference(item: NotificationPreference) { await updateNotificationPreference(item.category, { enabled: !item.enabled }); setMessage(`${getCategoryLabel(item.category)} ${item.enabled ? 'desativado' : 'ativado'}.`); await refresh() }
@@ -22,6 +23,7 @@ export function NotificationsPage() {
   async function dismiss(id: string) { await dismissInboxItem(id); await refresh() }
   async function clearOld() { const count = await clearOldInbox(); setMessage(`${count} avisos antigos removidos.`); await refresh() }
   const unread = inbox.filter((item) => !item.readAt && !item.dismissedAt).length
+  if (initialLoading) return <SkeletonPage label="Carregando central de notificações" />
   return <div className="space-y-6 pb-4"><header><p className="text-sm font-bold uppercase tracking-widest text-amber-300">Sprint 014</p><h1 className="mt-2 text-3xl font-black">Notificações Inteligentes</h1><p className="mt-2 text-sm leading-6 text-slate-400">Central local de lembretes baseada apenas no IndexedDB, com consentimento explícito e avisos internos persistentes.</p></header>
     <InfoBanner title="Limite importante" tone="info">O TITAN verifica lembretes com o app aberto, ao abrir e ao voltar ao primeiro plano. Navegadores e PWAs não garantem timers em segundo plano sem Push API e backend, que não foram implementados.</InfoBanner>
     <Card elevated><div className="grid gap-3 text-sm text-slate-300"><p><strong>Permissão:</strong> {permission}</p><p><strong>Suporte:</strong> {notificationsSupported() ? 'Notification API disponível' : 'unsupported'}</p><p><strong>PWA:</strong> {getPwaInstallStatus()}</p><p><strong>Não lidas:</strong> {unread}</p></div><div className="mt-5 grid gap-3"><Button fullWidth onClick={askPermission} disabled={permission === 'unsupported'}><Bell size={18} />Solicitar permissão</Button><Button fullWidth variant="ghost" onClick={async () => { await testNotification(); setMessage('Teste registrado na Inbox e enviado ao sistema quando permitido.'); await refresh() }}>Testar notificação</Button></div></Card>

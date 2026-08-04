@@ -7,7 +7,7 @@
 - [x] v0.6 — Saúde e evolução
 - [x] v0.7 — Coach
 - [x] v0.8 — Relatórios
-- [ ] v0.9 — Polimento
+- [x] v0.9 — Polimento
 - [x] Sprint 013 — Analytics e Relatórios
 - [x] Sprint 008 — Plataforma PWA e Confiabilidade
 - [x] Sprint 009 — Evolução Corporal Avançada
@@ -17,4 +17,5 @@
 - [x] Sprint 013.1 — Estabilização da Plataforma
 - [x] Sprint 014 — Notificações Inteligentes
 - [x] Sprint 015 — Backup em Nuvem e Sincronização Segura
+- [x] Sprint 016 — Experiência Premium (UX/UI)
 - [ ] v1.0 — Primeira versão estável
