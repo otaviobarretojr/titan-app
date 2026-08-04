@@ -47,13 +47,13 @@ export function AppShell() {
   return (
     <div className="min-h-dvh bg-titan-background text-white">
       <PwaStatus />
-      <main className="mx-auto min-h-dvh w-full max-w-md px-4 pb-28 pt-6">
+      <main className="mx-auto min-h-dvh w-full max-w-md px-5 pb-28 pt-[max(1.25rem,env(safe-area-inset-top))]">
         <Outlet />
       </main>
 
       <nav
         aria-label="Navegação principal"
-        className="fixed inset-x-0 bottom-0 z-50 mx-auto flex w-full max-w-md items-center justify-around border-t border-white/10 bg-[#111827]/95 px-2 pb-[calc(0.75rem+env(safe-area-inset-bottom))] pt-3 backdrop-blur-xl"
+        className="fixed inset-x-0 bottom-0 z-50 mx-auto flex w-full max-w-md items-center justify-around border-t border-white/10 bg-[#111827]/90 px-2 pb-[calc(0.65rem+env(safe-area-inset-bottom))] pt-2 backdrop-blur-2xl"
       >
         {navigationItems.map((item) => {
           const Icon = item.icon

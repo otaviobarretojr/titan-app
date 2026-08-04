@@ -1,6 +1,5 @@
 import { Card, SectionTitle } from '../../../shared/ui'
 import { CoachInsightsList } from '../components/CoachInsightsList'
-import { DailyMetricsGrid } from '../components/DailyMetricsGrid'
 import { ScoreBreakdown } from '../components/ScoreBreakdown'
 import { CardioCard } from '../components/CardioCard'
 import { MealCard } from '../components/MealCard'
@@ -57,66 +56,58 @@ export function DashboardPage() {
   }
 
   return (
-    <div className="space-y-6">
-      <header className="flex items-start justify-between gap-4">
+    <div className="space-y-8 pb-3">
+      <header className="flex items-start justify-between gap-4 pt-2">
         <div>
           <p className="text-sm font-medium text-slate-400">
             {getCurrentDayLabel()}
           </p>
 
-          <h1 className="mt-1 text-3xl font-black tracking-tight">
+          <h1 className="mt-2 text-[2.45rem] font-black leading-[1.05] tracking-[-0.045em]">
             {getGreeting()}, {data.userName}
           </h1>
 
           <p className="mt-1 text-sm leading-6 text-slate-400">
-            Sua próxima decisão está logo abaixo.
+            Seu dia, no ritmo certo.
           </p>
         </div>
 
         <div
           aria-label="TITAN"
-          className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-blue-600 font-black shadow-lg shadow-blue-600/20"
+          className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-blue-600 font-black shadow-lg shadow-blue-600/20"
         >
           T
         </div>
       </header>
 
-      <CoachInsightsList insights={data.insights} />
-
       <section>
-        <SectionTitle supportingText="Próxima ação" title="Agora" />
-        <MealCard meal={data.nextMeal} />
-      </section>
-
-      <section>
-        <SectionTitle title="Treino do dia" />
-        <WorkoutCard workout={data.workout} />
-      </section>
-
-      <section>
-        <SectionTitle title="Cardio do dia" />
-        <CardioCard cardio={data.cardio} />
-      </section>
-
-      <section>
-        <SectionTitle title="Resumo do dia" />
-        <DailyMetricsGrid summary={data.summary} />
-      </section>
-
-      <section>
-        <SectionTitle title="Score TITAN" />
+        <SectionTitle supportingText="Atualizado agora" title="Visão geral" />
         <ScoreCard score={data.score} />
-        <div className="mt-3">
-          <ScoreBreakdown breakdown={data.score.breakdown} />
-        </div>
       </section>
 
       <section>
-        <SectionTitle title="Resumo de hoje" />
-        <MetricsGrid
-          onAddWater={registerWater}
-          summary={data.summary}
+        <SectionTitle supportingText="Metas diárias" title="Hoje" />
+        <MetricsGrid onAddWater={registerWater} summary={data.summary} />
+      </section>
+
+      <section>
+        <SectionTitle
+          supportingText={`${data.insights.length} prioridade${data.insights.length === 1 ? '' : 's'}`}
+          title="Coach TITAN"
         />
+        <CoachInsightsList insights={data.insights} />
+      </section>
+
+      <section>
+        <SectionTitle supportingText="Próxima ação" title="Sua agenda" />
+        <MealCard meal={data.nextMeal} />
+        <div className="mt-3"><WorkoutCard workout={data.workout} /></div>
+        <div className="mt-3"><CardioCard cardio={data.cardio} /></div>
+      </section>
+
+      <section>
+        <SectionTitle supportingText="Como calculamos" title="Detalhes do score" />
+        <ScoreBreakdown breakdown={data.score.breakdown} />
       </section>
     </div>
   )
