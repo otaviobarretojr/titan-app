@@ -1,5 +1,5 @@
 import { ArrowDown, ArrowUp, Dumbbell, Minus } from 'lucide-react'
-import { Card, SectionTitle } from '../../../shared/ui'
+import { Card, SectionTitle, SkeletonPage } from '../../../shared/ui'
 import { BodyMetricForm } from '../components/BodyMetricForm'
 import { BioimpedanceForm } from '../components/BioimpedanceForm'
 import { EvolutionChart } from '../components/EvolutionChart'
@@ -30,13 +30,7 @@ export function EvolutionPage() {
   }
 
   if (isLoading || !summary) {
-    return (
-      <div className="flex min-h-[70dvh] items-center justify-center">
-        <p className="text-sm font-semibold text-slate-400">
-          Carregando evolução...
-        </p>
-      </div>
-    )
+    return <SkeletonPage label="Carregando evolução corporal" />
   }
 
   return (

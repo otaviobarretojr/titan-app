@@ -69,3 +69,7 @@ A rota `/notifications` reúne preferências locais, Inbox persistente, próximo
 ## Backup em Nuvem — Sprint 015
 
 O backup em nuvem é opcional, manual e associado à conta autenticada. Ele armazena um JSON validado no Supabase Storage e metadados mínimos em tabela protegida por RLS. Fotos de evolução são excluídas por padrão do backup em nuvem, não há sincronização automática bidirecional e restaurações exigem confirmação explícita. Consulte `docs/CLOUD_BACKUP_SETUP.md`, `docs/SUPABASE_RLS.md` e `docs/releases/SPRINT_015_BACKUP_NUVEM.md`.
+
+## Experiência Premium — Sprint 016
+
+A Sprint 016 refina a experiência visual do TITAN com design system tokenizado, dark premium, skeleton loading nas rotas principais, microinterações discretas, navegação com indicador ativo, foco visível e transições que respeitam `prefers-reduced-motion`. Não altera regras de negócio, APIs públicas nem schemas do IndexedDB. Consulte `docs/releases/SPRINT_016_EXPERIENCIA_PREMIUM.md`.

@@ -51,3 +51,11 @@ Regra principal: componentes de tela não concentram regras de negócio.
 ## Sprint 015 — Backup em Nuvem
 
 O IndexedDB permanece como fonte operacional principal. Supabase é usado apenas para Auth, Storage de arquivos JSON e metadados de backups manuais quando configurado por variáveis de ambiente públicas. O modo sem configuração ou offline preserva o uso local e não cria filas automáticas. Restaurações em nuvem validam estrutura, versão, checksum, tabelas e contagens antes de criar snapshot local e substituir dados em transação.
+
+## Sprint 016 — Experiência Premium
+
+- `styles/globals.css` concentra tokens reutilizáveis de UX premium para superfícies, bordas, radius, espaçamento, elevação, foco e movimento.
+- `shared/ui/SkeletonPage` padroniza skeleton loading para Dashboard, Coach, Analytics, Evolução, Notificações e Conta, reduzindo instabilidade visual sem consultar novas fontes de dados.
+- `layouts/AppShell` mantém navegação e FAB como camada de shell, com indicador ativo, ações rápidas, feedback de hidratação e callbacks estáveis.
+- Rotas continuam em `React.lazy`/`Suspense`, preservando code splitting por módulo e carregamento sob demanda.
+- A Sprint não altera regras de negócio, contratos públicos nem schema IndexedDB; as mudanças ficam restritas à apresentação, performance percebida e acessibilidade.

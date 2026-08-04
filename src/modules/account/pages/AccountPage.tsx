@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
+import { SkeletonPage } from '../../../shared/ui'
 import { clearCloudSession, getCloudConfig, getStoredSession, refreshSessionFromUrl, requestEmailLogin, type CloudSession } from '../../../services/cloudBackup/cloudAuthService'
 import { createCloudBackup, deleteCloudBackup, downloadCloudBackup, listCloudBackups, type CloudBackupMetadata } from '../../../services/cloudBackup/cloudBackupService'
 import { getDeviceIdentity, updateDeviceName } from '../../../services/cloudBackup/deviceIdentityService'
@@ -16,11 +17,12 @@ export function AccountPage() {
   const [selected, setSelected] = useState<{ meta: CloudBackupMetadata; backup: TitanCloudBackup } | null>(null)
   const [localCounts, setLocalCounts] = useState<Record<string, number>>({})
   const [deviceName, setDeviceName] = useState(() => getDeviceIdentity().name)
+  const [initialLoading, setInitialLoading] = useState(true)
   const offline = typeof navigator !== 'undefined' && !navigator.onLine
 
   const status = useMemo(() => !config.configured ? 'não configurado' : session ? 'conectado' : 'desconectado', [config.configured, session])
 
-  useEffect(() => { refreshSessionFromUrl().then((next) => { if (next) setSession(next) }).catch((error: Error) => setMessage(error.message)) }, [])
+  useEffect(() => { refreshSessionFromUrl().then((next) => { if (next) setSession(next) }).catch((error: Error) => setMessage(error.message)).finally(() => setInitialLoading(false)) }, [])
   useEffect(() => { if (!session || offline) return; listCloudBackups(session).then(setBackups).catch((error: Error) => setMessage(error.message)) }, [session, offline])
 
   async function signIn() { setBusy(true); setMessage(''); try { await requestEmailLogin(email); setMessage('Enviamos um link seguro para seu e-mail. O app local continua disponível sem login.') } catch (error) { setMessage(error instanceof Error ? error.message : 'Não foi possível entrar.') } finally { setBusy(false) } }
@@ -29,6 +31,8 @@ export function AccountPage() {
   async function confirmRestore() { if (!selected || busy) return; setBusy(true); try { await replaceLocalDataFromBackup(selected.backup); setMessage('Restauração concluída. Um snapshot local de segurança foi criado antes da substituição.'); setSelected(null) } catch (error) { setMessage(error instanceof Error ? error.message : 'A restauração foi interrompida sem alterar os dados.') } finally { setBusy(false) } }
 
   const selectedSummary = selected ? summarizeBackup(selected.backup) : null
+
+  if (initialLoading) return <SkeletonPage label="Carregando conta e backup" />
 
   return <section className="space-y-5" aria-live="polite">
     <header><p className="text-xs font-bold uppercase tracking-widest text-blue-300">Conta opcional</p><h1 className="mt-2 text-3xl font-black">Backup em nuvem</h1><p className="mt-2 text-sm text-slate-300">Seus dados permanecem locais por padrão. Não há sincronização automática nesta Sprint; você escolhe quando enviar ou restaurar.</p></header>
