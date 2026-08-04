@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+### Sprint 015 — Backup em Nuvem e Sincronização Segura
+
+- Rota `/account` para conta opcional, login por e-mail, status, histórico de backups e restauração confirmada.
+- Backup v3 com checksum determinístico, device ID local, contagens, tamanho estimado e metadados de compatibilidade.
+- Integração Supabase opcional via variáveis `VITE_SUPABASE_URL` e `VITE_SUPABASE_ANON_KEY`, com modo degradado sem configuração e offline.
+- Documentação de setup, bucket, tabela de metadados e políticas RLS; sem sincronização automática bidirecional nesta Sprint.
+
+
 ### Sprint 014 — Notificações Inteligentes
 
 - Central `/notifications` com consentimento explícito, status de suporte/PWA, teste manual e limitações do navegador.

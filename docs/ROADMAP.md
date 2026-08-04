@@ -16,4 +16,5 @@
 - [x] Sprint 012 — Dashboard Inteligente
 - [x] Sprint 013.1 — Estabilização da Plataforma
 - [x] Sprint 014 — Notificações Inteligentes
+- [x] Sprint 015 — Backup em Nuvem e Sincronização Segura
 - [ ] v1.0 — Primeira versão estável

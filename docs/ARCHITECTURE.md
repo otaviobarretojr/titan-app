@@ -20,7 +20,8 @@ Regra principal: componentes de tela não concentram regras de negócio.
 
 - `services/pwa`: detecção segura de instalação e diferenças do iOS.
 - `services/notifications`: permissão sob ação do usuário e preferências persistidas.
-- `services/backup`: envelope JSON v2, validação anterior à escrita e transação única do IndexedDB.
+- `services/backup`: envelope JSON compatível com o backup local e restauração transacional do IndexedDB.
+- `services/cloudBackup`: Sprint 015 separa `cloudAuthService`, `cloudBackupService`, `backupSerializer`, `backupValidator`, `backupRepository` e `deviceIdentityService`; a UI não acessa Supabase diretamente.
 - `services/storage`: estimativas da Storage API e contagens do IndexedDB.
 - `modules/evolution`: regras puras de médias por janela, comparações, validação, métricas de força/cardio e processamento local de fotos. A UI não fabrica amostras ausentes.
 - O schema Dexie 10 adiciona `bioimpedance` e campos opcionais a medições/fotos. A evolução usa leitura adaptativa dos schemas anteriores e recordes de força derivados das séries existentes.
@@ -45,3 +46,8 @@ Regra principal: componentes de tela não concentram regras de negócio.
 - `services/notifications` trata suporte, permissão explícita, entrega via Notification API e fallback para Inbox persistente.
 - O schema Dexie 11 adiciona `notificationPreferences` e `notificationInbox` de forma aditiva, mantendo dados antigos compatíveis.
 - O hook do AppShell verifica lembretes com o app aberto e no retorno ao primeiro plano, sem prometer execução em segundo plano.
+
+
+## Sprint 015 — Backup em Nuvem
+
+O IndexedDB permanece como fonte operacional principal. Supabase é usado apenas para Auth, Storage de arquivos JSON e metadados de backups manuais quando configurado por variáveis de ambiente públicas. O modo sem configuração ou offline preserva o uso local e não cria filas automáticas. Restaurações em nuvem validam estrutura, versão, checksum, tabelas e contagens antes de criar snapshot local e substituir dados em transação.

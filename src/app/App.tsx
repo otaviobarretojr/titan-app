@@ -85,6 +85,12 @@ const SettingsPage = lazy(() =>
   })),
 )
 
+const AccountPage = lazy(() =>
+  import('../modules/account/pages/AccountPage').then((module) => ({
+    default: module.AccountPage,
+  })),
+)
+
 function RouteLoading() {
   return (
     <div
@@ -127,6 +133,7 @@ export function App() {
               element={<NotificationsPage />}
             />
             <Route path="/more" element={<SettingsPage />} />
+            <Route path="/account" element={<AccountPage />} />
           </Route>
 
           <Route path="*" element={<Navigate to="/" replace />} />
