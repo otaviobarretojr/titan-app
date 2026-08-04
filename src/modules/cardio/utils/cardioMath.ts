@@ -9,8 +9,9 @@ export function calculatePace(
 export function formatPace(paceMinutesPerKm: number | null) {
   if (paceMinutesPerKm === null) return '—'
 
-  const minutes = Math.floor(paceMinutesPerKm)
-  const seconds = Math.round((paceMinutesPerKm - minutes) * 60)
+  const totalSeconds = Math.round(paceMinutesPerKm * 60)
+  const minutes = Math.floor(totalSeconds / 60)
+  const seconds = totalSeconds % 60
 
   return `${minutes}:${seconds.toString().padStart(2, '0')} min/km`
 }
