@@ -15,6 +15,7 @@ import { NavLink, Outlet, useLocation } from 'react-router-dom'
 import { InstallPwa } from '../components/feedback/InstallPwa'
 import { PwaStatus } from '../components/feedback/PwaStatus'
 import { addHydration } from '../modules/dashboard/data/dashboardRepository'
+import { useNotificationScheduler } from '../modules/notifications/hooks/useNotificationScheduler'
 
 type NavigationItem = {
   label: string
@@ -54,6 +55,7 @@ const quickActions = [
 ]
 
 export function AppShell() {
+  useNotificationScheduler()
   const location = useLocation()
   const [quickOpen, setQuickOpen] = useState(false)
   const [waterAdded, setWaterAdded] = useState(false)

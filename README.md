@@ -60,3 +60,7 @@ A Sprint 013.1 estabiliza a base sem novas funcionalidades: refatora o shell mob
 ## Analytics e Relatórios — Sprint 013
 
 A rota `/analytics` oferece filtros de 7, 30, 90 dias e 1 ano, gráficos de Score TITAN, composição corporal, força, nutrição, hidratação e sono, além da Timeline do Coach. Relatórios semanais e mensais e exportações JSON, CSV e PDF são gerados localmente a partir do IndexedDB. Consulte `docs/releases/SPRINT_013_ANALYTICS_RELATORIOS.md`.
+
+## Notificações Inteligentes
+
+A rota `/notifications` reúne preferências locais, Inbox persistente, próximos lembretes e teste manual da Notification API. O app verifica lembretes aberto, ao iniciar e ao voltar ao primeiro plano; notificações de sistema dependem de permissão explícita e não são garantidas em segundo plano sem Push API. Consulte `docs/releases/SPRINT_014_NOTIFICACOES_INTELIGENTES.md`.

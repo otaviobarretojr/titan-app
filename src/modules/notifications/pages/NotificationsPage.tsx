@@ -1,266 +1,34 @@
-import {
-  Bell,
-  BellRing,
-  Save,
-} from 'lucide-react'
-import { useState } from 'react'
-import { Button, Card } from '../../../shared/ui'
-import {
-  getNotificationPermission,
-  getReminderPreferences,
-  notificationsEnabled,
-  requestNotificationPermission,
-  saveReminderPreferences,
-  setNotificationsEnabled,
-  showTitanNotification,
-} from '../../../services/notifications/notificationService'
-import type {
-  ReminderPreference,
-  ReminderType,
-} from '../types/notifications'
+import { Bell, Check, Trash2 } from 'lucide-react'
+import { useEffect, useState } from 'react'
+import { Link } from 'react-router-dom'
+import { Button, Card, InfoBanner } from '../../../shared/ui'
+import { getNotificationPermission, getPwaInstallStatus, notificationsSupported, requestNotificationPermission, testNotification } from '../../../services/notifications/notificationService'
+import { clearOldInbox, dismissInboxItem, ensureNotificationPreferences, getNotificationSnapshot, listInbox, markInboxRead, updateNotificationPreference } from '../data/notificationsRepository'
+import type { NotificationInboxItem, NotificationPermissionState, NotificationPreference, ReminderCandidate } from '../types/notifications'
+import { getCategoryLabel } from '../utils/notificationEngine'
 
 export function NotificationsPage() {
-  const [
-    preferences,
-    setPreferences,
-  ] = useState<ReminderPreference[]>(
-    () => getReminderPreferences(),
-  )
-
-  const [
-    masterEnabled,
-    setMasterEnabled,
-  ] = useState(() => notificationsEnabled())
-
-  const [
-    permission,
-    setPermission,
-  ] = useState(() =>
-    getNotificationPermission(),
-  )
-
-  const [
-    message,
-    setMessage,
-  ] = useState<string | null>(null)
-
-  async function enableNotifications() {
-    if (masterEnabled) {
-      setNotificationsEnabled(false)
-      setMasterEnabled(false)
-      setMessage('Notificações desativadas. Suas preferências foram mantidas.')
-      return
-    }
-    try {
-      const result =
-        await requestNotificationPermission()
-
-      const enabled =
-        result === 'granted'
-
-      setNotificationsEnabled(enabled)
-      setMasterEnabled(enabled)
-      setPermission(result)
-
-      setMessage(
-        enabled
-          ? 'Notificações ativadas neste aparelho.'
-          : 'Permissão de notificação não concedida.',
-      )
-    } catch (reason) {
-      setMessage(
-        reason instanceof Error
-          ? reason.message
-          : 'Não foi possível ativar notificações.',
-      )
-    }
-  }
-
-  function updatePreference(
-    id: ReminderType,
-    changes: Partial<ReminderPreference>,
-  ) {
-    setPreferences((current) =>
-      current.map((item) =>
-        item.id === id
-          ? {
-              ...item,
-              ...changes,
-            }
-          : item,
-      ),
-    )
-  }
-
-  function savePreferences() {
-    saveReminderPreferences(preferences)
-    setMessage('Preferências salvas.')
-  }
-
-  async function testNotification() {
-    try {
-      await showTitanNotification({
-        title: 'TITAN',
-        body: 'As notificações estão funcionando neste aparelho.',
-        tag: 'titan-test',
-        url: './',
-      })
-
-      setMessage(
-        'Notificação de teste enviada.',
-      )
-    } catch (reason) {
-      setMessage(
-        reason instanceof Error
-          ? reason.message
-          : 'Não foi possível testar a notificação.',
-      )
-    }
-  }
-
-  return (
-    <div className="space-y-6">
-      <header>
-        <p className="text-sm font-bold uppercase tracking-widest text-amber-300">
-          TITAN LEMBRETES
-        </p>
-
-        <h1 className="mt-2 text-3xl font-black">
-          Notificações
-        </h1>
-
-        <p className="mt-2 text-sm leading-6 text-slate-400">
-          Configure lembretes locais de acordo
-          com sua rotina.
-        </p>
-      </header>
-
-      <Card elevated>
-        <div className="flex items-center gap-3">
-          <BellRing
-            className="text-amber-300"
-            size={24}
-            aria-hidden="true"
-          />
-
-          <div>
-            <h2 className="font-bold">
-              Permissão do aparelho
-            </h2>
-
-            <p className="mt-1 text-sm text-slate-400">
-              Estado atual: {permission}
-            </p>
-          </div>
-        </div>
-
-        <Button
-          className="mt-5"
-          fullWidth
-          onClick={enableNotifications}
-        >
-          <Bell
-            size={18}
-            aria-hidden="true"
-          />
-
-          {masterEnabled
-            ? 'Desativar notificações'
-            : 'Ativar notificações'}
-        </Button>
-
-        <Button
-          className="mt-3"
-          disabled={permission !== 'granted'}
-          fullWidth
-          onClick={testNotification}
-          variant="ghost"
-        >
-          Testar notificação
-        </Button>
-      </Card>
-
-      <Card>
-        <p className="text-sm leading-6 text-slate-400">
-          Lembretes dependem do navegador e do sistema. iOS exige instalação na tela inicial;
-          navegadores podem suspender o app e não garantem agendamento em segundo plano sem um serviço de push.
-        </p>
-      </Card>
-
-      <div className="space-y-3">
-        {preferences.map((item) => (
-          <Card key={item.id}>
-            <div className="flex items-start justify-between gap-4">
-              <div>
-                <h2 className="font-bold">
-                  {item.label}
-                </h2>
-
-                <p className="mt-1 text-sm leading-6 text-slate-400">
-                  {item.description}
-                </p>
-              </div>
-
-              <input
-                checked={item.enabled}
-                className="h-5 w-5 accent-blue-500"
-                onChange={(event) =>
-                  updatePreference(
-                    item.id,
-                    {
-                      enabled:
-                        event.target.checked,
-                    },
-                  )
-                }
-                type="checkbox"
-              />
-            </div>
-
-            <label className="mt-4 block">
-              <span className="mb-2 block text-xs font-bold text-slate-500">
-                Horário
-              </span>
-
-              <input
-                className="min-h-12 w-full rounded-2xl border border-white/10 bg-white/5 px-4 text-white outline-none"
-                onChange={(event) =>
-                  updatePreference(
-                    item.id,
-                    {
-                      time:
-                        event.target.value,
-                    },
-                  )
-                }
-                type="time"
-                value={item.time}
-              />
-            </label>
-          </Card>
-        ))}
-      </div>
-
-      <Button
-        fullWidth
-        onClick={savePreferences}
-      >
-        <Save
-          size={18}
-          aria-hidden="true"
-        />
-
-        Salvar lembretes
-      </Button>
-
-      {message ? (
-        <p
-          className="rounded-2xl bg-white/5 p-4 text-sm text-slate-300"
-          role="status"
-        >
-          {message}
-        </p>
-      ) : null}
-    </div>
-  )
+  const [permission, setPermission] = useState<NotificationPermissionState>(() => getNotificationPermission())
+  const [preferences, setPreferences] = useState<NotificationPreference[]>([])
+  const [inbox, setInbox] = useState<NotificationInboxItem[]>([])
+  const [next, setNext] = useState<Array<{ category: string; nextRunAt: string | null }>>([])
+  const [due, setDue] = useState<ReminderCandidate[]>([])
+  const [message, setMessage] = useState('')
+  async function refresh() { const [snapshot, items] = await Promise.all([getNotificationSnapshot(), listInbox()]); setPreferences(snapshot.preferences); setNext(snapshot.next); setDue(snapshot.due); setInbox(items) }
+  useEffect(() => { void ensureNotificationPreferences().then(refresh) }, [])
+  async function askPermission() { const result = await requestNotificationPermission(); setPermission(result); setMessage(result === 'granted' ? 'Permissão concedida. Os lembretes também continuam salvos na Inbox.' : result === 'denied' ? 'Permissão negada. Ative manualmente nas configurações do navegador se mudar de ideia.' : 'Permissão ainda não definida.'); await refresh() }
+  async function togglePreference(item: NotificationPreference) { await updateNotificationPreference(item.category, { enabled: !item.enabled }); setMessage(`${getCategoryLabel(item.category)} ${item.enabled ? 'desativado' : 'ativado'}.`); await refresh() }
+  async function markRead(id: string) { await markInboxRead(id); await refresh() }
+  async function dismiss(id: string) { await dismissInboxItem(id); await refresh() }
+  async function clearOld() { const count = await clearOldInbox(); setMessage(`${count} avisos antigos removidos.`); await refresh() }
+  const unread = inbox.filter((item) => !item.readAt && !item.dismissedAt).length
+  return <div className="space-y-6 pb-4"><header><p className="text-sm font-bold uppercase tracking-widest text-amber-300">Sprint 014</p><h1 className="mt-2 text-3xl font-black">Notificações Inteligentes</h1><p className="mt-2 text-sm leading-6 text-slate-400">Central local de lembretes baseada apenas no IndexedDB, com consentimento explícito e avisos internos persistentes.</p></header>
+    <InfoBanner title="Limite importante" tone="info">O TITAN verifica lembretes com o app aberto, ao abrir e ao voltar ao primeiro plano. Navegadores e PWAs não garantem timers em segundo plano sem Push API e backend, que não foram implementados.</InfoBanner>
+    <Card elevated><div className="grid gap-3 text-sm text-slate-300"><p><strong>Permissão:</strong> {permission}</p><p><strong>Suporte:</strong> {notificationsSupported() ? 'Notification API disponível' : 'unsupported'}</p><p><strong>PWA:</strong> {getPwaInstallStatus()}</p><p><strong>Não lidas:</strong> {unread}</p></div><div className="mt-5 grid gap-3"><Button fullWidth onClick={askPermission} disabled={permission === 'unsupported'}><Bell size={18} />Solicitar permissão</Button><Button fullWidth variant="ghost" onClick={async () => { await testNotification(); setMessage('Teste registrado na Inbox e enviado ao sistema quando permitido.'); await refresh() }}>Testar notificação</Button></div></Card>
+    {message ? <p aria-live="polite" className="rounded-2xl bg-white/5 p-4 text-sm text-slate-300" role="status">{message}</p> : null}
+    <section><h2 className="one-ui-title">Categorias</h2><div className="space-y-3">{preferences.map((item) => <Card key={item.id}><div className="flex items-start justify-between gap-4"><div><h3 className="font-bold">{getCategoryLabel(item.category)}</h3><p className="mt-1 text-sm text-slate-400">{item.enabled ? 'Ativo' : 'Desativado'} · {item.time} · antecedência {item.leadTimeMinutes} min</p><p className="mt-1 text-xs text-slate-500">Próxima execução: {item.nextRunAt ? new Date(item.nextRunAt).toLocaleString('pt-BR') : 'sem agendamento'}</p></div><button aria-label={`Alternar ${getCategoryLabel(item.category)}`} className="min-h-12 rounded-2xl bg-white/8 px-4 text-sm font-bold focus-visible:outline focus-visible:outline-2 focus-visible:outline-blue-300" onClick={() => void togglePreference(item)}>{item.enabled ? 'Desativar' : 'Ativar'}</button></div></Card>)}</div></section>
+    <section><h2 className="one-ui-title">Próximos lembretes</h2>{next.length ? <div className="space-y-3">{next.slice(0, 6).map((item) => <Card key={`${item.category}-${item.nextRunAt}`}><p className="font-bold">{item.category}</p><p className="text-sm text-slate-400">{item.nextRunAt ? new Date(item.nextRunAt).toLocaleString('pt-BR') : 'Sem data'}</p></Card>)}</div> : <Card><p className="text-sm text-slate-400">Nenhum próximo lembrete ativo.</p></Card>}</section>
+    <section><h2 className="one-ui-title">Lembretes ativos agora</h2>{due.length ? due.map((item) => <Card key={item.dedupeKey}><p className="font-bold">{item.title}</p><p className="text-sm text-slate-400">{item.message}</p><Link className="mt-3 inline-block text-sm font-bold text-blue-300" to={item.actionPath}>{item.actionLabel}</Link></Card>) : <Card><p className="text-sm text-slate-400">Nenhuma pendência prioritária neste momento.</p></Card>}</section>
+    <section><div className="mb-3 flex items-center justify-between"><h2 className="one-ui-title mb-0">Inbox local recente</h2><button className="text-xs font-bold text-slate-300" onClick={() => void clearOld()}>Limpar antigos</button></div>{inbox.length ? <div className="space-y-3">{inbox.slice(0, 12).map((item) => <Card key={item.id}><p className="text-xs font-bold uppercase tracking-widest text-slate-500">{getCategoryLabel(item.category)} · {item.priority}</p><h3 className="mt-1 font-bold">{item.title}</h3><p className="mt-1 text-sm text-slate-400">{item.message}</p><div className="mt-4 flex flex-wrap gap-2"><Link className="rounded-2xl bg-blue-500 px-4 py-3 text-sm font-bold" to={item.actionPath}>{item.actionLabel}</Link><button aria-label="Marcar como lida" className="rounded-2xl bg-white/8 px-4 py-3" onClick={() => void markRead(item.id)}><Check size={18} /></button><button aria-label="Dispensar aviso" className="rounded-2xl bg-white/8 px-4 py-3" onClick={() => void dismiss(item.id)}><Trash2 size={18} /></button></div></Card>)}</div> : <Card><p className="text-sm text-slate-400">A Inbox local ainda está vazia.</p></Card>}</section>
+  </div>
 }

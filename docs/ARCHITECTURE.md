@@ -37,3 +37,11 @@ Regra principal: componentes de tela não concentram regras de negócio.
 - `modules/coach/engine` contém regras puras e determinísticas de insights, alertas, priorização, tendências e timeline.
 - `coachRepository` é a fronteira de dados: agrega exclusivamente tabelas locais do Dexie, persiste recomendações e aplica cooldown antirrepetição.
 - Janelas de 7, 30 e 90 dias ignoram ausências e exigem duas ou mais amostras; explicações carregam evidência, período e tamanho da amostra.
+
+## Sprint 014 — Notificações Inteligentes
+
+- `modules/notifications/utils/notificationEngine.ts` concentra o cálculo determinístico de lembretes sem efeitos colaterais.
+- `modules/notifications/data/notificationsRepository.ts` é a fronteira IndexedDB para preferências, Inbox local e snapshots dos dados existentes.
+- `services/notifications` trata suporte, permissão explícita, entrega via Notification API e fallback para Inbox persistente.
+- O schema Dexie 11 adiciona `notificationPreferences` e `notificationInbox` de forma aditiva, mantendo dados antigos compatíveis.
+- O hook do AppShell verifica lembretes com o app aberto e no retorno ao primeiro plano, sem prometer execução em segundo plano.

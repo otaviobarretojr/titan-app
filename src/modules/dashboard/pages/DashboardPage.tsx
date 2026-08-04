@@ -1,4 +1,5 @@
 import { AlertCircle, Bell, ChevronRight, Sparkles } from 'lucide-react'
+import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { InfoBanner, LoadingCard } from '../../../shared/ui'
 import { CoachCard } from '../components/CoachCard'
@@ -6,6 +7,8 @@ import { DailyMetricsGrid } from '../components/DailyMetricsGrid'
 import { MealCard } from '../components/MealCard'
 import { ScoreCard } from '../components/ScoreCard'
 import { WorkoutCard } from '../components/WorkoutCard'
+import { unreadCount, getNotificationSnapshot } from '../../notifications/data/notificationsRepository'
+import { getNotificationPermission } from '../../../services/notifications/notificationService'
 import { useDashboard } from '../hooks/useDashboard'
 
 function dayLabel() { const value = new Intl.DateTimeFormat('pt-BR', { timeZone: 'America/Manaus', weekday: 'long', day: '2-digit', month: 'long' }).format(new Date()); return value.charAt(0).toUpperCase() + value.slice(1) }
@@ -13,6 +16,10 @@ function greeting() { const hour = Number(new Intl.DateTimeFormat('pt-BR', { tim
 
 export function DashboardPage() {
   const { data, error, isLoading } = useDashboard()
+  const [unreadNotifications, setUnreadNotifications] = useState(0)
+  const [nextReminder, setNextReminder] = useState<string | null>(null)
+  const permission = getNotificationPermission()
+  useEffect(() => { void Promise.all([unreadCount(), getNotificationSnapshot()]).then(([count, snapshot]) => { setUnreadNotifications(count); setNextReminder(snapshot.next[0]?.nextRunAt ?? null) }) }, [])
   if (error) return <InfoBanner title="Não foi possível abrir o TITAN" tone="error">{error} Seus registros locais permanecem seguros.</InfoBanner>
   if (isLoading || !data) return <div aria-label="Carregando dashboard" className="space-y-4" role="status"><div className="skeleton h-28 rounded-[28px]" /><LoadingCard lines={3} /><LoadingCard lines={2} /></div>
 
@@ -20,8 +27,12 @@ export function DashboardPage() {
   return <div className="stagger-in space-y-6 pb-4">
     <header className="flex items-start justify-between gap-4 pb-1 pt-5">
       <div><p className="text-sm font-medium text-slate-400">{dayLabel()}</p><h1 className="mt-2 text-[2.35rem] font-black leading-none tracking-[-0.045em]">{greeting()},<br />{data.userName}</h1></div>
-      <Link aria-label="Notificações" className="grid h-12 w-12 shrink-0 place-items-center rounded-full bg-white/6 text-slate-300" to="/notifications"><Bell size={21} /></Link>
+      <Link aria-label={`Notificações${unreadNotifications ? `, ${unreadNotifications} não lidas` : ""}`} className="relative grid h-12 w-12 shrink-0 place-items-center rounded-full bg-white/6 text-slate-300" to="/notifications"><Bell size={21} />{unreadNotifications ? <span className="absolute -right-1 -top-1 grid min-h-5 min-w-5 place-items-center rounded-full bg-rose-500 px-1 text-[0.65rem] font-black text-white">{unreadNotifications}</span> : null}</Link>
     </header>
+
+    {permission === 'denied' || permission === 'default' ? <Link className="dashboard-card dashboard-link block p-4 text-sm text-slate-300" to="/notifications">Notificações do sistema estão {permission === 'denied' ? 'bloqueadas' : 'pendentes de permissão'}. A Inbox local continua funcionando.</Link> : null}
+
+    {nextReminder ? <Link className="dashboard-card dashboard-link block p-4 text-sm text-slate-300" to="/notifications">Próximo lembrete: {new Date(nextReminder).toLocaleString('pt-BR')}</Link> : null}
 
     <Link className="block rounded-[28px]" to="/analytics" aria-label="Abrir detalhes do Score TITAN"><ScoreCard score={data.score} /></Link>
 
