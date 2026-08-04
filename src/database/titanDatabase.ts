@@ -106,8 +106,6 @@ export type ExerciseSetRecord = {
   updatedAt: string
 }
 
-
-
 export type BodyMetricRecord = {
   id: string
   userId: string
@@ -131,7 +129,6 @@ export type BodyMetricRecord = {
   createdAt: string
   updatedAt: string
 }
-
 
 export type ProgressPhotoRecord = {
   id: string
@@ -162,7 +159,6 @@ export type BioimpedanceRecord = {
   createdAt: string
   updatedAt: string
 }
-
 
 export type HealthMetricRecord = {
   id: string
@@ -219,7 +215,6 @@ export type CardioSessionRecord = {
   createdAt: string
   updatedAt: string
 }
-
 
 export type ExercisePersonalRecord = {
   id: string

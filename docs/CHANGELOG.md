@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+### Sprint 013.1 — Estabilização da Plataforma
+
+- Refatoração do AppShell para separar ações rápidas, estabilizar callbacks e memoizar navegação.
+- Cobertura de testes ampliada para integridade do schema Dexie/IndexedDB e índices compostos críticos.
+- Documentação atualizada para PWA offline, cache, Service Worker e release notes de estabilização.
+
 ### Sprint 013 — Analytics e Relatórios
 
 - Analytics mobile-first com filtros de 7, 30, 90 dias e 1 ano.
