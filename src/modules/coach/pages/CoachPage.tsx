@@ -1,4 +1,4 @@
-import { Brain, Sparkles } from 'lucide-react'
+import { Brain, CalendarDays, Database, History, Info, Sparkles } from 'lucide-react'
 import { Card, SectionTitle } from '../../../shared/ui'
 import { ScoreBreakdown } from '../../dashboard/components/ScoreBreakdown'
 import { CoachInsightCard } from '../components/CoachInsightCard'
@@ -7,116 +7,18 @@ import { useCoachReport } from '../hooks/useCoachReport'
 
 export function CoachPage() {
   const { report, isLoading } = useCoachReport()
-
-  if (isLoading) {
-    return (
-      <div className="flex min-h-[70dvh] items-center justify-center">
-        <p className="text-sm font-semibold text-slate-400">
-          Preparando análise...
-        </p>
-      </div>
-    )
-  }
-
-  if (!report) {
-    return (
-      <Card>
-        <h1 className="text-xl font-black">Coach sem plano para hoje</h1>
-        <p className="mt-2 text-sm leading-6 text-slate-400">
-          O Coach não encontrou um plano diário no IndexedDB. Nenhuma análise foi criada.
-        </p>
-      </Card>
-    )
-  }
-
-  return (
-    <div className="space-y-6">
-      <header>
-        <div className="flex items-center gap-2 text-blue-300">
-          <Brain size={22} aria-hidden="true" />
-          <p className="text-sm font-bold uppercase tracking-widest">
-            COACH TITAN
-          </p>
-        </div>
-
-        <h1 className="mt-3 text-3xl font-black">
-          Análise inteligente
-        </h1>
-
-        <p className="mt-2 text-sm leading-6 text-slate-400">
-          Recomendações geradas a partir dos registros reais do TITAN.
-        </p>
-      </header>
-
-      <Card elevated>
-        <div className="flex items-center gap-2 text-blue-300">
-          <Sparkles size={18} aria-hidden="true" />
-          <span className="text-sm font-bold">
-            RESUMO EXECUTIVO
-          </span>
-        </div>
-
-        <p className="mt-4 text-lg font-bold leading-7">
-          {report.executiveSummary}
-        </p>
-
-        <div className="mt-5 flex items-end gap-3">
-          <span className="text-5xl font-black">
-            {report.score.value ?? '—'}
-          </span>
-          <span className="pb-1 text-sm font-bold text-slate-400">
-            {report.score.label}
-          </span>
-        </div>
-        <p className="mt-3 text-xs text-slate-500">
-          Score calculado com {report.coverage.measured} de{' '}
-          {report.coverage.total} categorias com dados.
-        </p>
-      </Card>
-
-      <ScoreBreakdown
-        breakdown={report.score.breakdown}
-        measuredCategories={report.score.measuredCategories}
-      />
-
-      <section>
-        <SectionTitle
-          title="Prioridades de hoje"
-          supportingText={`${report.dailyInsights.length} análises`}
-        />
-
-        <div className="space-y-3">
-          {report.dailyInsights.map((insight) => (
-            <CoachInsightCard
-              insight={insight}
-              key={insight.id}
-            />
-          ))}
-        </div>
-      </section>
-
-      <section>
-        <SectionTitle
-          title="Tendências semanais"
-          supportingText={`${report.weeklyTrends.length} indicadores`}
-        />
-
-        <div className="space-y-3">
-          {report.weeklyTrends.map((trend) => (
-            <CoachTrendCard
-              key={trend.id}
-              trend={trend}
-            />
-          ))}
-          {report.weeklyTrends.length === 0 ? (
-            <Card>
-              <p className="text-sm text-slate-400">
-                Ainda não há registros suficientes para tendências semanais.
-              </p>
-            </Card>
-          ) : null}
-        </div>
-      </section>
-    </div>
-  )
+  if (isLoading) return <div className="flex min-h-[70dvh] items-center justify-center"><p className="text-sm font-semibold text-slate-400">Analisando histórico local...</p></div>
+  if (!report) return <Card><h1 className="text-xl font-black">Coach sem plano para hoje</h1><p className="mt-2 text-sm leading-6 text-slate-400">O Coach não encontrou um plano diário no IndexedDB. Nenhuma conclusão foi criada.</p></Card>
+  const priority=report.dailyInsights[0]
+  return <div className="space-y-7">
+    <header><div className="flex items-center gap-2 text-blue-300"><Brain size={22}/><p className="text-sm font-bold uppercase tracking-widest">COACH TITAN AVANÇADO</p></div><h1 className="mt-3 text-3xl font-black">Seu histórico, explicado</h1><p className="mt-2 text-sm leading-6 text-slate-400">Análise local, segura e baseada exclusivamente nos registros persistidos.</p></header>
+    <Card elevated><div className="flex items-center gap-2 text-blue-300"><Sparkles size={18}/><span className="text-sm font-bold">PRIORIDADE DO DIA</span></div>{priority?<><h2 className="mt-4 text-2xl font-black">{priority.title}</h2><p className="mt-2 text-sm leading-6 text-slate-300">{priority.message}</p><p className="mt-3 text-xs text-slate-500">{priority.evidence} · {priority.sampleSize} amostra(s)</p></>:<p className="mt-4 text-sm text-slate-400">Nenhuma nova recomendação: alertas recentes permanecem no histórico e respeitam o intervalo antirrepetição.</p>}</Card>
+    <div className="grid gap-4 md:grid-cols-2"><Card><CalendarDays className="text-blue-300" size={20}/><h2 className="mt-3 font-black">Resumo semanal</h2><p className="mt-2 text-sm leading-6 text-slate-400">{report.weeklySummary}</p></Card><Card><CalendarDays className="text-violet-300" size={20}/><h2 className="mt-3 font-black">Resumo mensal</h2><p className="mt-2 text-sm leading-6 text-slate-400">{report.monthlySummary}</p></Card></div>
+    <Card elevated><div className="flex items-center justify-between"><div><p className="text-xs font-bold uppercase tracking-widest text-blue-300">Score TITAN</p><div className="mt-2 flex items-end gap-3"><span className="text-5xl font-black">{report.score.value??'—'}</span><span className="pb-1 text-sm font-bold text-slate-400">{report.score.label}</span></div></div><Info className="text-slate-500"/></div><p className="mt-4 text-sm leading-6 text-slate-300">{report.executiveSummary}</p><p className="mt-3 text-xs leading-5 text-slate-500">Média ponderada apenas das categorias com dados: nutrição 25%, hidratação 15%, treino 20%, cardio 10%, recuperação 15% e consistência 15%. Pesos ausentes são redistribuídos; ausência de registro nunca vale zero.</p></Card>
+    <ScoreBreakdown breakdown={report.score.breakdown} measuredCategories={report.score.measuredCategories}/>
+    <section><SectionTitle title="Recomendações de hoje" supportingText={`${report.dailyInsights.length} novas`}/><div className="space-y-3">{report.dailyInsights.map(x=><CoachInsightCard insight={x} key={x.id}/>)}</div></section>
+    {(['weekly','monthly'] as const).map(period=><section key={period}><SectionTitle title={period==='weekly'?'Tendências semanais':'Tendências mensais'} supportingText={`${(period==='weekly'?report.weeklyTrends:report.monthlyTrends).length} indicadores confiáveis`}/><div className="grid gap-3 md:grid-cols-2">{(period==='weekly'?report.weeklyTrends:report.monthlyTrends).map(x=><CoachTrendCard trend={x} key={x.id}/>)}</div>{(period==='weekly'?report.weeklyTrends:report.monthlyTrends).length===0?<Card><p className="text-sm text-slate-400">São necessárias pelo menos duas amostras reais no período. Dias sem registro foram ignorados.</p></Card>:null}</section>)}
+    <section><SectionTitle title="Cobertura dos dados" supportingText={`${report.coverage.daysWithAnyData} de ${report.coverage.periodDays} dias com algum registro`}/><Card><Database className="text-blue-300" size={20}/><div className="mt-4 grid grid-cols-3 gap-2 sm:grid-cols-5">{report.coverage.byMetric.map(x=><div className="rounded-xl bg-white/5 p-3" key={x.metric}><p className="text-xs capitalize text-slate-500">{x.metric}</p><p className="mt-1 font-black">{x.samples}</p></div>)}</div><p className="mt-4 text-xs leading-5 text-slate-500">Cobertura descreve presença, não desempenho. Um dia ausente não entra em médias nem reduz o Score.</p></Card></section>
+    <section><SectionTitle title="Histórico de recomendações" supportingText={`${report.history.length} itens locais`}/><div className="space-y-3">{report.history.map(x=><Card key={x.id}><div className="flex gap-3"><History className="mt-1 shrink-0 text-slate-500" size={18}/><div><p className="text-xs font-bold uppercase text-blue-300">{x.localDate} · {x.category}</p><h3 className="mt-1 font-bold">{x.title}</h3><p className="mt-2 text-sm text-slate-400">{x.evidence}</p><p className="mt-2 text-xs text-slate-500">{x.period} · {x.sampleSize} amostra(s)</p></div></div></Card>)}{!report.history.length?<Card><p className="text-sm text-slate-400">O histórico será criado quando houver uma recomendação sustentada pelos seus registros.</p></Card>:null}</div></section>
+  </div>
 }

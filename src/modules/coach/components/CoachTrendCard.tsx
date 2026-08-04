@@ -32,6 +32,7 @@ export function CoachTrendCard({
           <p className="mt-1 text-sm text-slate-400">
             {trend.message}
           </p>
+          <p className="mt-1 text-xs text-slate-500">{trend.sampleSize} amostra(s) atuais · {trend.previousSampleSize} anteriores</p>
         </div>
       </div>
     </Card>

@@ -40,7 +40,7 @@ export function CoachInsightCard({
       </p>
 
       <p className="mt-3 rounded-2xl bg-white/5 p-3 text-xs leading-5 text-slate-500">
-        Evidência: {insight.evidence}
+        Evidência: {insight.evidence}<br />Período: {insight.period} · Amostra: {insight.sampleSize}
       </p>
 
       {insight.actionLabel && insight.actionPath ? (

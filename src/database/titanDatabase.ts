@@ -233,6 +233,13 @@ export type CoachRecommendationRecord = {
   title: string
   message: string
   priority: 'low' | 'medium' | 'high'
+  insightKey?: string
+  category?: string
+  evidence?: string
+  period?: string
+  sampleSize?: number
+  action?: string
+  actionPath?: string
   createdAt: string
   updatedAt: string
 }
@@ -460,6 +467,13 @@ class TitanDatabase extends Dexie {
       sleepEntries: 'id, userId, localDate, [userId+localDate]',
       coachRecommendations:
         'id, userId, localDate, priority, [userId+localDate]',
+    })
+
+    // Optional fields keep recommendation rows from every previous schema
+    // readable while adding indexes for history and repetition control.
+    this.version(9).stores({
+      coachRecommendations:
+        'id, userId, localDate, priority, insightKey, category, createdAt, [userId+localDate], [userId+insightKey]',
     })
 
   }

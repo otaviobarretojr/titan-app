@@ -1,455 +1,119 @@
-import type {
-  CoachInsight,
-  CoachTrend,
-  TitanScore,
-  TitanScoreBreakdown,
-} from '../types/coach'
+import type { CoachInsight, CoachTrend, TitanScore, TitanScoreBreakdown, TrendMetric, TrendPeriod } from '../types/coach'
 
 export type CoachEngineInput = {
-  currentMinutes: number
-  proteinConsumedG: number
-  proteinTargetG: number
-  caloriesConsumedKcal: number
-  calorieTargetKcal: number
-  hydrationConsumedMl: number
-  hydrationTargetMl: number
-  sleepMinutes: number | null
-  sleepTargetMinutes: number
-  pendingMeals: number
+  currentMinutes: number; proteinConsumedG: number; proteinTargetG: number
+  caloriesConsumedKcal: number; calorieTargetKcal: number
+  hydrationConsumedMl: number; hydrationTargetMl: number
+  sleepMinutes: number | null; sleepTargetMinutes: number; pendingMeals: number
   workoutStatus: 'none' | 'planned' | 'started' | 'completed'
   cardioStatus: 'none' | 'planned' | 'started' | 'completed'
-  plannedWorkoutMinutes: number | null
-  consistency: number
-  hasNutritionData: boolean
-  hasHydrationData: boolean
-  hasConsistencyData: boolean
+  plannedWorkoutMinutes: number | null; consistency: number
+  hasNutritionData: boolean; hasHydrationData: boolean; hasConsistencyData: boolean
+}
+export type DailyCoachSnapshot = {
+  date: string
+  protein?: number; calories?: number; hydration?: number; sleep?: number
+  weight?: number; waist?: number; training?: number; cardio?: number; score?: number
+  proteinTarget?: number; calorieTarget?: number; hydrationTarget?: number; sleepTarget?: number
+  adherence?: number; strength?: number
 }
 
-type WeeklyTrendInput = {
-  dates: string[]
-  proteinTargetG: number
-  hydrationTargetMl: number
-  sleepTargetMinutes: number
-  mealEntries: Array<{
-    localDate: string
-    proteinG: number
-    status: string
-  }>
-  hydrationEntries: Array<{
-    localDate: string
-    amountMl: number
-  }>
-  sleepEntries: Array<{
-    localDate: string
-    durationMinutes: number
-  }>
-  workoutSessions: Array<{
-    localDate: string
-    status: string
-  }>
-  cardioSessions: Array<{
-    localDate: string
-    status: string
-  }>
-  bodyMetrics: Array<{
-    localDate: string
-    weightKg: number
-    waistCm: number | null
-  }>
-}
-
-function ratio(value: number, target: number) {
-  if (target <= 0) return 0
-
-  return Math.min(1, Math.max(0, value / target))
-}
-
-function clampScore(value: number) {
-  return Math.min(100, Math.max(0, Math.round(value)))
-}
-
-export function calculateTitanScore(
-  input: CoachEngineInput,
-): TitanScore {
+const ratio = (value: number, target: number) => target > 0 ? Math.min(1, Math.max(0, value / target)) : 0
+const clampScore = (value: number) => Math.min(100, Math.max(0, Math.round(value)))
+export function calculateTitanScore(input: CoachEngineInput): TitanScore {
   const breakdown: TitanScoreBreakdown = {
-    nutrition: clampScore(
-      (ratio(input.proteinConsumedG, input.proteinTargetG) * 0.6 +
-        ratio(input.caloriesConsumedKcal, input.calorieTargetKcal) * 0.4) *
-        100,
-    ),
-    hydration: clampScore(
-      ratio(input.hydrationConsumedMl, input.hydrationTargetMl) * 100,
-    ),
-    training:
-      input.workoutStatus === 'completed'
-        ? 100
-        : input.workoutStatus === 'started'
-          ? 60
-          : input.workoutStatus === 'planned'
-            ? 20
-            : 0,
-    cardio:
-      input.cardioStatus === 'completed'
-        ? 100
-        : input.cardioStatus === 'started'
-          ? 60
-          : input.cardioStatus === 'planned'
-            ? 20
-            : 0,
-    recovery:
-      input.sleepMinutes === null
-        ? 0
-        : clampScore(ratio(input.sleepMinutes, input.sleepTargetMinutes) * 100),
+    nutrition: clampScore((ratio(input.proteinConsumedG, input.proteinTargetG) * .6 + ratio(input.caloriesConsumedKcal, input.calorieTargetKcal) * .4) * 100),
+    hydration: clampScore(ratio(input.hydrationConsumedMl, input.hydrationTargetMl) * 100),
+    training: input.workoutStatus === 'completed' ? 100 : input.workoutStatus === 'started' ? 60 : input.workoutStatus === 'planned' ? 20 : 0,
+    cardio: input.cardioStatus === 'completed' ? 100 : input.cardioStatus === 'started' ? 60 : input.cardioStatus === 'planned' ? 20 : 0,
+    recovery: input.sleepMinutes === null ? 0 : clampScore(ratio(input.sleepMinutes, input.sleepTargetMinutes) * 100),
     consistency: clampScore(input.consistency),
   }
-
   const categories = [
-    input.hasNutritionData
-      ? { category: 'nutrition' as const, value: breakdown.nutrition, weight: 0.25 }
-      : null,
-    input.hasHydrationData
-      ? { category: 'hydration' as const, value: breakdown.hydration, weight: 0.15 }
-      : null,
-    input.workoutStatus !== 'none'
-      ? { category: 'training' as const, value: breakdown.training, weight: 0.2 }
-      : null,
-    input.cardioStatus !== 'none'
-      ? { category: 'cardio' as const, value: breakdown.cardio, weight: 0.1 }
-      : null,
-    input.sleepMinutes !== null
-      ? { category: 'recovery' as const, value: breakdown.recovery, weight: 0.15 }
-      : null,
-    input.hasConsistencyData
-      ? { category: 'consistency' as const, value: breakdown.consistency, weight: 0.15 }
-      : null,
+    input.hasNutritionData ? { category: 'nutrition' as const, value: breakdown.nutrition, weight: .25 } : null,
+    input.hasHydrationData ? { category: 'hydration' as const, value: breakdown.hydration, weight: .15 } : null,
+    input.workoutStatus !== 'none' ? { category: 'training' as const, value: breakdown.training, weight: .2 } : null,
+    input.cardioStatus !== 'none' ? { category: 'cardio' as const, value: breakdown.cardio, weight: .1 } : null,
+    input.sleepMinutes !== null ? { category: 'recovery' as const, value: breakdown.recovery, weight: .15 } : null,
+    input.hasConsistencyData ? { category: 'consistency' as const, value: breakdown.consistency, weight: .15 } : null,
   ].filter((item): item is NonNullable<typeof item> => item !== null)
-
-  if (categories.length === 0) {
-    return {
-      value: null,
-      label: 'Sem dados',
-      breakdown,
-      measuredCategories: [],
-    }
-  }
-
+  if (!categories.length) return { value: null, label: 'Sem dados', breakdown, measuredCategories: [] }
   const totalWeight = categories.reduce((sum, item) => sum + item.weight, 0)
-  const value = clampScore(
-    categories.reduce((sum, item) => sum + item.value * item.weight, 0) /
-      totalWeight,
-  )
-  const label =
-    value >= 85
-      ? 'Excelente'
-      : value >= 70
-        ? 'Bom'
-        : value >= 50
-          ? 'Atenção'
-          : 'Crítico'
-
-  return {
-    value,
-    label,
-    breakdown,
-    measuredCategories: categories.map((item) => item.category),
-  }
+  const value = clampScore(categories.reduce((sum, item) => sum + item.value * item.weight, 0) / totalWeight)
+  return { value, label: value >= 85 ? 'Excelente' : value >= 70 ? 'Bom' : value >= 50 ? 'Atenção' : 'Crítico', breakdown, measuredCategories: categories.map(item => item.category) }
 }
 
-export function generateCoachInsights(
-  input: CoachEngineInput,
-): CoachInsight[] {
+const metricConfig: Record<TrendMetric, { label: string; unit: string }> = {
+  protein: { label: 'Proteína', unit: 'g' }, calories: { label: 'Calorias', unit: 'kcal' },
+  hydration: { label: 'Hidratação', unit: 'ml' }, sleep: { label: 'Sono', unit: 'min' },
+  weight: { label: 'Peso', unit: 'kg' }, waist: { label: 'Cintura', unit: 'cm' },
+  training: { label: 'Treino', unit: 'sessões' }, cardio: { label: 'Cardio', unit: 'sessões' },
+  score: { label: 'Score TITAN', unit: 'pontos' },
+}
+const average = (values: number[]) => values.reduce((sum, value) => sum + value, 0) / values.length
+export function calculateTrends(snapshots: DailyCoachSnapshot[], period: TrendPeriod): CoachTrend[] {
+  const days = period === 'weekly' ? 7 : 30
+  const sorted = [...snapshots].sort((a, b) => a.date.localeCompare(b.date)).slice(-days * 2)
+  const current = sorted.slice(-days); const previous = sorted.slice(-(days * 2), -days)
+  return (Object.keys(metricConfig) as TrendMetric[]).flatMap(metric => {
+    const currentValues = current.flatMap(day => typeof day[metric] === 'number' ? [day[metric] as number] : [])
+    if (currentValues.length < 2) return []
+    const previousValues = previous.flatMap(day => typeof day[metric] === 'number' ? [day[metric] as number] : [])
+    const currentAverage = average(currentValues); const previousAverage = previousValues.length >= 2 ? average(previousValues) : null
+    const changePercent = previousAverage !== null && previousAverage !== 0 ? ((currentAverage - previousAverage) / Math.abs(previousAverage)) * 100 : null
+    const direction = changePercent === null || Math.abs(changePercent) < 5 ? 'stable' : changePercent > 0 ? 'up' : 'down'
+    const config = metricConfig[metric]
+    return [{ id: `${period}-${metric}`, metric, period, title: `${config.label} ${period === 'weekly' ? 'semanal' : 'mensal'}`, direction, changePercent, currentAverage, previousAverage, unit: config.unit, sampleSize: currentValues.length, previousSampleSize: previousValues.length, message: previousAverage === null ? `Média de ${currentAverage.toLocaleString('pt-BR', { maximumFractionDigits: 1 })} ${config.unit}; histórico anterior insuficiente para comparação.` : `${changePercent! >= 0 ? '+' : ''}${changePercent!.toLocaleString('pt-BR', { maximumFractionDigits: 1 })}% em relação ao período anterior.` }]
+  })
+}
+
+const createInsight = (id: string, data: Omit<CoachInsight, 'id'>): CoachInsight => ({ id, ...data })
+export function generateHistoricalInsights(snapshots: DailyCoachSnapshot[]): CoachInsight[] {
+  const recent = [...snapshots].sort((a,b) => a.date.localeCompare(b.date)).slice(-14)
   const insights: CoachInsight[] = []
-
-  const hydrationRatio = ratio(
-    input.hydrationConsumedMl,
-    input.hydrationTargetMl,
-  )
-
-  const proteinRatio = ratio(
-    input.proteinConsumedG,
-    input.proteinTargetG,
-  )
-
-  if (input.pendingMeals > 0) {
-    insights.push({
-      id: 'pending-meals',
-      category: 'nutrition',
-      priority: 'high',
-      title:
-        input.pendingMeals === 1
-          ? 'Existe 1 refeição pendente'
-          : `Existem ${input.pendingMeals} refeições pendentes`,
-      message:
-        'Resolva cada pendência como consumida, parcial, substituída ou não realizada.',
-      evidence: `${input.pendingMeals} pendência(s) identificada(s) pelo horário planejado.`,
-      actionLabel: 'Abrir nutrição',
-      actionPath: '/nutrition',
-    })
-  }
-
-  if (
-    input.currentMinutes >= 12 * 60 &&
-    hydrationRatio < 0.35
-  ) {
-    insights.push({
-      id: 'hydration-low',
-      category: 'hydration',
-      priority: 'high',
-      title: 'Hidratação abaixo do esperado',
-      message:
-        'Aumente o consumo gradualmente ao longo das próximas horas.',
-      evidence: `${input.hydrationConsumedMl} ml registrados de ${input.hydrationTargetMl} ml.`,
-      actionLabel: 'Registrar água',
-      actionPath: '/nutrition',
-    })
-  }
-
-  if (
-    input.currentMinutes >= 16 * 60 &&
-    proteinRatio < 0.55
-  ) {
-    insights.push({
-      id: 'protein-low',
-      category: 'nutrition',
-      priority: 'medium',
-      title: 'Proteína atrasada',
-      message:
-        'Distribua a proteína restante entre as próximas refeições.',
-      evidence: `${input.proteinConsumedG} g registrados de ${input.proteinTargetG} g.`,
-      actionLabel: 'Revisar refeições',
-      actionPath: '/nutrition',
-    })
-  }
-
-  if (input.workoutStatus === 'started') {
-    insights.push({
-      id: 'workout-running',
-      category: 'training',
-      priority: 'high',
-      title: 'Treino em andamento',
-      message:
-        'Continue registrando carga, repetições e RIR em cada série.',
-      evidence: 'Existe uma sessão de treino ativa.',
-      actionLabel: 'Continuar treino',
-      actionPath: '/training',
-    })
-  } else if (
-    input.workoutStatus === 'planned' &&
-    input.plannedWorkoutMinutes !== null &&
-    input.currentMinutes >=
-      input.plannedWorkoutMinutes - 30
-  ) {
-    insights.push({
-      id: 'workout-soon',
-      category: 'training',
-      priority: 'medium',
-      title: 'Treino se aproxima',
-      message:
-        'Revise hidratação, refeição pré-treino e primeira carga.',
-      evidence:
-        'O horário planejado está a menos de 30 minutos.',
-      actionLabel: 'Abrir treino',
-      actionPath: '/training',
-    })
-  }
-
-  if (input.cardioStatus === 'started') {
-    insights.push({
-      id: 'cardio-running',
-      category: 'cardio',
-      priority: 'medium',
-      title: 'Cardio em andamento',
-      message:
-        'Finalize registrando duração, distância, frequência cardíaca e esforço.',
-      evidence: 'Existe uma sessão de cardio ativa.',
-      actionLabel: 'Continuar cardio',
-      actionPath: '/cardio',
-    })
-  }
-
-  if (
-    input.sleepMinutes !== null &&
-    input.sleepMinutes <
-      input.sleepTargetMinutes * 0.8
-  ) {
-    insights.push({
-      id: 'sleep-low',
-      category: 'recovery',
-      priority: 'medium',
-      title: 'Sono abaixo da meta',
-      message:
-        'A recuperação pode estar comprometida. Evite aumentar volume sem necessidade.',
-      evidence: `${input.sleepMinutes} minutos registrados de ${input.sleepTargetMinutes}.`,
-      actionLabel: 'Abrir sono',
-      actionPath: '/health/sleep',
-    })
-  }
-
-  if (input.hasConsistencyData && input.consistency < 50) {
-    insights.push({
-      id: 'consistency-low',
-      category: 'consistency',
-      priority: 'medium',
-      title: 'Consistência baixa hoje',
-      message:
-        'Priorize concluir as ações essenciais antes de buscar perfeição.',
-      evidence: `Consistência atual estimada em ${input.consistency}%.`,
-    })
-  }
-
-  if (insights.length === 0) {
-    insights.push({
-      id: 'on-track',
-      category: 'consistency',
-      priority: 'low',
-      title: 'Nenhuma prioridade detectada',
-      message:
-        'Continue registrando suas ações para preservar a qualidade da análise.',
-      evidence:
-        'Nenhum desvio prioritário foi detectado nos registros disponíveis.',
-    })
-  }
-
-  const priorityOrder = {
-    high: 0,
-    medium: 1,
-    low: 2,
-  }
-
-  return insights
-    .sort(
-      (first, second) =>
-        priorityOrder[first.priority] -
-        priorityOrder[second.priority],
-    )
-    .slice(0, 5)
+  const values = (key: keyof DailyCoachSnapshot, days = 7) => recent.slice(-days).flatMap(day => typeof day[key] === 'number' ? [day[key] as number] : [])
+  const targets = (key: keyof DailyCoachSnapshot, days = 7) => recent.slice(-days).flatMap(day => typeof day[key] === 'number' ? [day[key] as number] : [])
+  const add = (id: string, title: string, priority: CoachInsight['priority'], category: CoachInsight['category'], evidence: string, period: string, sampleSize: number, message: string, actionLabel: string, actionPath: string) => insights.push(createInsight(id, { title, priority, category, evidence, period, sampleSize, message, actionLabel, actionPath }))
+  const protein = values('protein'); const priorProtein = recent.slice(-14,-7).flatMap(d => d.protein === undefined ? [] : [d.protein])
+  if (protein.length >= 3 && priorProtein.length >= 3 && average(protein) < average(priorProtein) * .85) add('protein-drop','Queda relevante de proteína','high','nutrition',`Média caiu ${Math.round((1-average(protein)/average(priorProtein))*100)}% entre períodos registrados.`,'últimos 7 dias versus 7 anteriores',protein.length+priorProtein.length,'Revise os registros e planeje fontes de proteína compatíveis com seu plano.','Abrir nutrição','/nutrition')
+  const hydration = values('hydration'); const hydrationTargets = targets('hydrationTarget')
+  if (hydration.length >= 3 && hydrationTargets.length >= 3 && hydration.filter((v,i) => v < hydrationTargets[i] * .7).length >= 3) add('recurring-low-hydration','Baixa hidratação recorrente','high','hydration',`${hydration.filter((v,i) => v < hydrationTargets[i] * .7).length} registros ficaram abaixo de 70% da meta.`,'últimos 7 dias',hydration.length,'Distribua lembretes de água ao longo do dia e continue registrando.','Registrar água','/nutrition')
+  const sleep = values('sleep'); const sleepTargets = targets('sleepTarget')
+  if (sleep.length >= 3 && sleepTargets.length >= 3 && average(sleep) < average(sleepTargets) * .85) add('sleep-below-target','Sono abaixo da meta','high','recovery',`Média registrada de ${Math.round(average(sleep)/60*10)/10} h para meta média de ${Math.round(average(sleepTargets)/60*10)/10} h.`,'últimos 7 dias',sleep.length,'Proteja uma janela regular de sono; procure orientação profissional se houver preocupação persistente.','Revisar sono','/health/sleep')
+  const training = recent.slice(-7).filter(d => (d.training ?? 0) > 0)
+  let streak=0,maxStreak=0; recent.slice(-7).forEach(d => { streak=(d.training ?? 0)>0?streak+1:0; maxStreak=Math.max(maxStreak,streak) })
+  if (maxStreak >= 6) add('training-streak','Sequência excessiva de treinos','medium','training',`${maxStreak} dias consecutivos com treino concluído.`,'últimos 7 dias',training.length,'Considere um dia de recuperação conforme seu planejamento e sua percepção de esforço.','Abrir treino','/training')
+  const cardio = values('cardio',14)
+  if (recent.length >= 7 && cardio.length === 0) add('cardio-absence','Ausência prolongada de cardio','medium','cardio','Nenhuma sessão de cardio registrada no período observado.','últimos 14 dias',recent.length,'Se cardio fizer parte do seu plano, programe uma sessão adequada à sua rotina.','Abrir cardio','/cardio')
+  const strength = values('strength',14)
+  if (strength.length >= 2 && strength.at(-1)! > strength[0] * 1.03) add('strength-improvement','Melhora de força','low','training',`Melhor estimativa de força subiu ${Math.round((strength.at(-1)!/strength[0]-1)*100)}%.`,'últimos 14 dias',strength.length,'Mantenha progressão gradual e técnica consistente.','Ver treino','/training')
+  const weight = values('weight',14)
+  if (weight.length >= 4) { const change=weight.at(-1)!-weight[0]; if (Math.abs(change)<.3) add('weight-plateau','Estagnação de peso','low','body',`Variação de ${change.toLocaleString('pt-BR',{maximumFractionDigits:1})} kg entre registros.`,'últimos 14 dias',weight.length,'Avalie a tendência junto ao objetivo e à cintura, sem reagir a uma medição isolada.','Ver evolução','/evolution'); else if (Math.abs(change)/weight[0] > .02) add('rapid-weight-change','Variação acelerada de peso','high','body',`Variação de ${change>0?'+':''}${change.toLocaleString('pt-BR',{maximumFractionDigits:1})} kg (${Math.abs(change/weight[0]*100).toFixed(1)}%).`,'últimos 14 dias',weight.length,'Confirme novas medições em condições semelhantes e procure orientação profissional se a mudança for inesperada.','Ver evolução','/evolution') }
+  const adherence = values('adherence'); const priorAdherence=recent.slice(-14,-7).flatMap(d=>d.adherence===undefined?[]:[d.adherence])
+  if (adherence.length>=4 && average(adherence)>=85) add('high-consistency','Consistência alta','low','consistency',`Aderência média de ${Math.round(average(adherence))}% nos dias registrados.`,'últimos 7 dias',adherence.length,'Preserve a rotina sustentável que gerou essa consistência.','Ver relatório','/reports')
+  else if (adherence.length>=3 && priorAdherence.length>=3 && average(adherence)<average(priorAdherence)-15) add('adherence-drop','Queda de aderência','medium','consistency',`Aderência média caiu ${Math.round(average(priorAdherence)-average(adherence))} pontos percentuais.`,'últimos 7 dias versus 7 anteriores',adherence.length+priorAdherence.length,'Escolha uma ação essencial e retome a rotina gradualmente.','Ver relatório','/reports')
+  return insights.sort((a,b)=>({high:0,medium:1,low:2}[a.priority]-({high:0,medium:1,low:2}[b.priority])))
 }
 
-export function generateWeeklyTrends(
-  input: WeeklyTrendInput,
-): CoachTrend[] {
-  const trends: CoachTrend[] = []
-  const proteinByDay = input.dates
-    .map((date) => input.mealEntries
-      .filter((item) => item.localDate === date && item.status !== 'skipped')
-      .reduce((sum, item) => sum + item.proteinG, 0))
-    .filter((value) => value > 0)
-  const hydrationByDay = input.dates
-    .map((date) => input.hydrationEntries
-      .filter((item) => item.localDate === date)
-      .reduce((sum, item) => sum + item.amountMl, 0))
-    .filter((value) => value > 0)
-  const sleepByDay = input.dates
-    .map((date) => input.sleepEntries.find((item) => item.localDate === date))
-    .filter((item): item is NonNullable<typeof item> => item !== undefined)
-    .map((item) => item.durationMinutes)
-
-  const addAverageTrend = (
-    values: number[],
-    id: string,
-    title: string,
-    target: number,
-    format: (average: number) => string,
-  ) => {
-    if (values.length === 0) return
-    const average = values.reduce((sum, value) => sum + value, 0) / values.length
-    trends.push({
-      id,
-      title,
-      direction: average >= target * 0.9 ? 'up' : average >= target * 0.7 ? 'stable' : 'down',
-      message: `${format(average)} em ${values.length} dia(s) registrado(s).`,
-      sampleSize: values.length,
-    })
-  }
-
-  addAverageTrend(
-    proteinByDay,
-    'weekly-protein',
-    'Proteína semanal',
-    input.proteinTargetG,
-    (average) => `Média de ${Math.round(average)} g`,
-  )
-  addAverageTrend(
-    hydrationByDay,
-    'weekly-hydration',
-    'Hidratação semanal',
-    input.hydrationTargetMl,
-    (average) => `Média de ${(average / 1000).toLocaleString('pt-BR', { maximumFractionDigits: 1 })} L`,
-  )
-  addAverageTrend(
-    sleepByDay,
-    'weekly-sleep',
-    'Sono semanal',
-    input.sleepTargetMinutes,
-    (average) => `Média de ${Math.floor(average / 60)}h${Math.round(average % 60).toString().padStart(2, '0')}`,
-  )
-
-  const completedWorkouts = input.workoutSessions.filter((item) => item.status === 'completed').length
-  const completedCardio = input.cardioSessions.filter((item) => item.status === 'completed').length
-  const activitySampleSize = input.workoutSessions.length + input.cardioSessions.length
-  if (activitySampleSize > 0) {
-    trends.push({
-      id: 'weekly-training',
-      title: 'Treino e cardio',
-      direction: completedWorkouts >= 4 ? 'up' : completedWorkouts >= 2 ? 'stable' : 'down',
-      message: `${completedWorkouts} treino(s) e ${completedCardio} cardio(s) concluído(s).`,
-      sampleSize: activitySampleSize,
-    })
-  }
-
-  const sortedMetrics = [...input.bodyMetrics].sort((first, second) =>
-    first.localDate.localeCompare(second.localDate),
-  )
-  if (sortedMetrics.length >= 2) {
-    const previous = sortedMetrics[sortedMetrics.length - 2]
-    const latest = sortedMetrics[sortedMetrics.length - 1]
-    const difference = latest.weightKg - previous.weightKg
-    trends.push({
-      id: 'weight-trend',
-      title: 'Tendência corporal',
-      direction: Math.abs(difference) < 0.2 ? 'stable' : difference > 0 ? 'up' : 'down',
-      message: `Variação recente de ${difference > 0 ? '+' : ''}${difference.toLocaleString('pt-BR', { maximumFractionDigits: 1 })} kg.`,
-      sampleSize: 2,
-    })
-  }
-
-  return trends.slice(0, 5)
+// Immediate, record-based guidance kept for the dashboard. Missing categories
+// never produce a warning: an actual persisted measurement is required.
+export function generateCoachInsights(input: CoachEngineInput): CoachInsight[] {
+  const insights: CoachInsight[] = []
+  const add = (id: string, title: string, priority: CoachInsight['priority'], category: CoachInsight['category'], evidence: string, message: string, actionLabel: string, actionPath: string) => insights.push({ id, title, priority, category, evidence, message, actionLabel, actionPath, period: 'hoje', sampleSize: 1 })
+  if (input.pendingMeals > 0) add('pending-meals', `${input.pendingMeals} refeição(ões) pendente(s)`, 'high','nutrition',`${input.pendingMeals} plano(s) sem resolução após o horário.`, 'Resolva as pendências conforme o que realmente ocorreu.','Abrir nutrição','/nutrition')
+  if (input.hasHydrationData && input.currentMinutes >= 720 && ratio(input.hydrationConsumedMl,input.hydrationTargetMl)<.35) add('hydration-low','Hidratação abaixo do esperado','high','hydration',`${input.hydrationConsumedMl} ml de ${input.hydrationTargetMl} ml registrados.`,'Aumente o consumo gradualmente nas próximas horas.','Registrar água','/nutrition')
+  if (input.hasNutritionData && input.currentMinutes >= 960 && ratio(input.proteinConsumedG,input.proteinTargetG)<.55) add('protein-low','Proteína atrasada','medium','nutrition',`${input.proteinConsumedG} g de ${input.proteinTargetG} g registrados.`,'Distribua o restante entre as refeições previstas.','Revisar refeições','/nutrition')
+  if (input.workoutStatus === 'started') add('workout-running','Treino em andamento','high','training','Uma sessão iniciada está persistida.','Continue registrando séries, carga, repetições e RIR.','Continuar treino','/training')
+  if (input.cardioStatus === 'started') add('cardio-running','Cardio em andamento','medium','cardio','Uma sessão iniciada está persistida.','Finalize registrando os dados reais da sessão.','Continuar cardio','/cardio')
+  if (input.sleepMinutes !== null && input.sleepMinutes < input.sleepTargetMinutes*.8) add('sleep-low','Sono abaixo da meta','medium','recovery',`${input.sleepMinutes} min de ${input.sleepTargetMinutes} min registrados.`,'Priorize recuperação sem interpretar este registro como diagnóstico.','Abrir sono','/health/sleep')
+  if (!insights.length) add('on-track','Nenhuma prioridade detectada','low','consistency','Nenhum desvio foi detectado nas categorias registradas.','Continue registrando para melhorar a cobertura.','Abrir Coach','/coach')
+  return insights.slice(0,5)
 }
 
-export function generateExecutiveSummary(input: {
-  score: TitanScore
-  insights: CoachInsight[]
-  trends: CoachTrend[]
-}) {
-  if (input.score.value === null) {
-    return 'Ainda não há dados suficientes para uma leitura confiável do dia.'
-  }
-
-  const highPriorityInsights =
-    input.insights.filter(
-      (item) => item.priority === 'high',
-    )
-
-  const negativeTrends =
-    input.trends.filter(
-      (item) => item.direction === 'down',
-    )
-
-  if (highPriorityInsights.length > 0) {
-    return `O dia exige atenção imediata em ${highPriorityInsights
-      .map((item) =>
-        item.title.toLowerCase(),
-      )
-      .join(', ')}.`
-  }
-
-  if (negativeTrends.length > 0) {
-    return `O dia está controlado, mas a semana mostra queda em ${negativeTrends
-      .map((item) =>
-        item.title.toLowerCase(),
-      )
-      .join(', ')}.`
-  }
-
-  return 'Seu dia está consistente e as tendências semanais permanecem sob controle.'
+export function generateExecutiveSummary(input: { score: TitanScore; insights: CoachInsight[]; trends: CoachTrend[] }) {
+  if (input.score.value === null) return 'Ainda não há dados suficientes para calcular o Score TITAN.'
+  const priority = input.insights.find(item => item.priority === 'high')
+  if (priority) return `Prioridade atual: ${priority.title.toLowerCase()}. A recomendação usa somente registros persistidos.`
+  const down = input.trends.find(item => item.direction === 'down')
+  return down ? `O Score atual é ${input.score.value}; acompanhe a tendência de ${down.title.toLowerCase()}.` : `O Score atual é ${input.score.value}; nenhuma queda relevante foi identificada nos dados disponíveis.`
 }
