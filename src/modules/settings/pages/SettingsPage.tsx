@@ -21,8 +21,10 @@ import { Button, Card } from '../../../shared/ui'
 import {
   downloadBackup,
   restoreBackup,
+  readBackup,
 } from '../../../services/backup/backupService'
 import { titanDatabase } from '../../../database/titanDatabase'
+import { formatBytes, getStorageDiagnostics, type StorageDiagnostics } from '../../../services/storage/storageDiagnostics'
 
 export function SettingsPage() {
   const fileInputRef = useRef<HTMLInputElement>(null)
@@ -30,6 +32,7 @@ export function SettingsPage() {
   const [isBusy, setIsBusy] = useState(false)
   const [theme, setTheme] = useState(() => localStorage.getItem('titan-theme') ?? 'premium')
   const [compact, setCompact] = useState(() => localStorage.getItem('titan-compact') === 'true')
+  const [diagnostics, setDiagnostics] = useState<StorageDiagnostics | null>(null)
 
   function changeTheme(value: string) {
     setTheme(value)
@@ -59,8 +62,15 @@ export function SettingsPage() {
   }
 
   async function importData(file: File) {
+    let summary
+    try {
+      summary = (await readBackup(file)).summary
+    } catch (reason) {
+      setMessage(reason instanceof Error ? reason.message : 'Backup inválido.')
+      return
+    }
     const confirmed = window.confirm(
-      'A restauração substituirá todos os dados atuais. Continuar?',
+      `Backup de ${new Date(summary.exportedAt).toLocaleString('pt-BR')}: ${summary.records} registros em ${summary.tables} tabelas (banco v${summary.databaseVersion}). A restauração substituirá todos os dados atuais. Continuar?`,
     )
 
     if (!confirmed) return
@@ -138,6 +148,19 @@ export function SettingsPage() {
       <Card className="border-red-500/20">
         <div className="flex gap-3"><Trash2 className="text-red-300"/><div><h2 className="font-bold">Reset do banco</h2><p className="mt-1 text-sm text-slate-400">Remove definitivamente registros, planos e histórico deste aparelho.</p></div></div>
         <Button className="mt-4 bg-red-600 hover:bg-red-500" disabled={isBusy} fullWidth onClick={() => void resetDatabase()}>Apagar dados locais</Button>
+      </Card>
+
+      <Card>
+        <h2 className="font-bold">Diagnóstico de armazenamento</h2>
+        {diagnostics ? (
+          <dl className="mt-3 grid grid-cols-2 gap-3 text-sm" aria-live="polite">
+            <div><dt className="text-slate-500">Utilizado</dt><dd>{formatBytes(diagnostics.usage)}</dd></div>
+            <div><dt className="text-slate-500">Quota aproximada</dt><dd>{formatBytes(diagnostics.quota)}</dd></div>
+            <div><dt className="text-slate-500">Persistente</dt><dd>{diagnostics.persisted === null ? 'Indisponível' : diagnostics.persisted ? 'Sim' : 'Não'}</dd></div>
+            <div><dt className="text-slate-500">Registros / fotos</dt><dd>{diagnostics.records} / {diagnostics.photos}</dd></div>
+          </dl>
+        ) : <p className="mt-2 text-sm text-slate-400">Execute o diagnóstico para consultar este aparelho.</p>}
+        <Button className="mt-4" fullWidth onClick={() => void getStorageDiagnostics().then(setDiagnostics).catch(() => setMessage('Diagnóstico indisponível neste navegador.'))}>Executar diagnóstico</Button>
       </Card>
 
       <Card elevated>

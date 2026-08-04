@@ -6,6 +6,7 @@ const requiredFiles = [
   'dist/manifest.webmanifest',
   'dist/sw.js',
   'docs/releases/SPRINT_007_ANALYTICS.md',
+  'docs/releases/SPRINT_008_PWA_CONFIABILIDADE.md',
 ]
 
 for (const file of requiredFiles) {

@@ -2,8 +2,10 @@ export type ReminderType =
   | 'meal'
   | 'hydration'
   | 'workout'
-  | 'cardio'
+  | 'preWorkout'
   | 'sleep'
+  | 'dailySummary'
+  | 'weeklySummary'
 
 export type ReminderPreference = {
   id: ReminderType

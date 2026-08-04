@@ -11,7 +11,12 @@ export function PwaStatus() {
   const {
     needRefresh: [needRefresh],
     updateServiceWorker,
-  } = useRegisterSW()
+  } = useRegisterSW({
+    onRegisteredSW(_url, registration) {
+      if (!registration) return
+      window.setInterval(() => void registration.update(), 60 * 60 * 1000)
+    },
+  })
 
   useEffect(() => {
     function updateConnection() {

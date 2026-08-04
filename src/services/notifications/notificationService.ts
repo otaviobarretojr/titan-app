@@ -29,11 +29,25 @@ const defaultPreferences: ReminderPreference[] = [
     time: '18:30',
   },
   {
-    id: 'cardio',
-    label: 'Cardio',
-    description: 'Lembrete para cardio planejado.',
+    id: 'preWorkout',
+    label: 'Pré-treino',
+    description: 'Aviso para preparar o pré-treino.',
     enabled: false,
     time: '18:00',
+  },
+  {
+    id: 'dailySummary',
+    label: 'Resumo diário',
+    description: 'Balanço dos hábitos ao final do dia.',
+    enabled: false,
+    time: '21:00',
+  },
+  {
+    id: 'weeklySummary',
+    label: 'Resumo semanal',
+    description: 'Consolidado da semana aos domingos.',
+    enabled: false,
+    time: '19:00',
   },
   {
     id: 'sleep',
@@ -79,7 +93,8 @@ export function getReminderPreferences(): ReminderPreference[] {
   if (!raw) return defaultPreferences
 
   try {
-    const parsed = JSON.parse(raw) as ReminderPreference[]
+    const parsed: unknown = JSON.parse(raw)
+    if (!Array.isArray(parsed)) return defaultPreferences
     return defaultPreferences.map((defaultItem) => {
       const saved = parsed.find((item) => item.id === defaultItem.id)
       return saved ?? defaultItem
@@ -119,6 +134,10 @@ export async function showTitanNotification(input: {
 
   if (Notification.permission !== 'granted') {
     throw new Error('Permissão de notificação não concedida.')
+  }
+
+  if (!notificationsEnabled()) {
+    throw new Error('Notificações estão desativadas no TITAN.')
   }
 
   const registration = await navigator.serviceWorker.ready

@@ -22,7 +22,10 @@ export default defineConfig({
         theme_color: '#09090b',
         background_color: '#09090b',
         display: 'standalone',
+        display_override: ['standalone'],
         orientation: 'portrait',
+        lang: 'pt-BR',
+        id: './',
         start_url: './',
         scope: './',
         icons: [
@@ -49,6 +52,11 @@ export default defineConfig({
           '**/*.{js,css,html,svg,png,webp,json}',
         ],
         runtimeCaching: [
+          {
+            urlPattern: ({ request }) => request.mode === 'navigate',
+            handler: 'NetworkFirst',
+            options: { cacheName: 'titan-pages', networkTimeoutSeconds: 3 },
+          },
           {
             urlPattern: ({ request }) =>
               request.destination === 'image',
