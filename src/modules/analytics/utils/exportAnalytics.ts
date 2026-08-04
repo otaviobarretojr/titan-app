@@ -7,8 +7,19 @@ const escapeCsv = (value: string | number | boolean | null) => {
   return /[,"\n]/.test(text) ? `"${text.replaceAll('"', '""')}"` : text
 }
 
-const download = (content: BlobPart, type: string, extension: string) => {
-  const url = URL.createObjectURL(new Blob([content], { type }))
+const download = (
+  content: string | Uint8Array,
+  type: string,
+  extension: string,
+) => {
+  const blobContent: BlobPart =
+    typeof content === 'string'
+      ? content
+      : new Uint8Array(content).buffer
+
+  const url = URL.createObjectURL(
+    new Blob([blobContent], { type }),
+  )
   const anchor = document.createElement('a')
   anchor.href = url
   anchor.download = `titan-analytics-${new Date().toISOString().slice(0, 10)}.${extension}`

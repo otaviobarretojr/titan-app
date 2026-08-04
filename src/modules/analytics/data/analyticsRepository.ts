@@ -8,6 +8,20 @@ import { aggregateTrends, calculateStreaks, calculateTitanScore, compareScores, 
 type DatedRecord = { localDate: string }
 const groupByDate = <T extends DatedRecord>(records: T[]) => records.reduce((map, record) => map.set(record.localDate, [...(map.get(record.localDate) ?? []), record]), new Map<string, T[]>())
 
+const normalizeCoachPriority = (
+  priority: string,
+): 'low' | 'medium' | 'high' => {
+  if (
+    priority === 'high' ||
+    priority === 'medium' ||
+    priority === 'low'
+  ) {
+    return priority
+  }
+
+  return 'low'
+}
+
 function getLastDates(count: number) {
   const dates: string[] = []; const today = new Date()
   for (let index = count - 1; index >= 0; index -= 1) { const date = new Date(today); date.setUTCDate(today.getUTCDate() - index); dates.push(date.toISOString().slice(0, 10)) }
@@ -25,5 +39,16 @@ export async function getAnalyticsSummary(daysCount = 90): Promise<AnalyticsSumm
   const values = <T extends number>(items: (T | null)[]) => items.filter((x): x is T => x !== null); const adherence = (selector: (p: AnalyticsPoint) => number, target: (p: AnalyticsPoint) => number | null) => Math.round(average(days.map((p) => target(p) ? percentage(selector(p), target(p)!) : null).filter((x): x is number => x !== null)) ?? 0)
   const best = new Map<string, typeof records[number]>(); records.forEach((x) => { if (!best.has(x.exerciseName) || best.get(x.exerciseName)!.estimatedOneRepMaxKg < x.estimatedOneRepMaxKg) best.set(x.exerciseName, x) })
   const scores = values(days.map((x) => x.titanScore)); const dataCoverage = coverage(days)
-  return { days, weeklyTrends: aggregateTrends(days, 'week'), monthlyTrends: aggregateTrends(days, 'month'), averages: { caloriesKcal: Math.round(average(days.map((x) => x.caloriesKcal)) ?? 0), proteinG: Math.round(average(days.map((x) => x.proteinG)) ?? 0), hydrationMl: Math.round(average(days.map((x) => x.hydrationMl)) ?? 0), sleepMinutes: average(values(days.map((x) => x.sleepMinutes))), weightKg: average(values(days.map((x) => x.weightKg))) }, totals: { workouts: workoutDates.size, cardios: cardioDone.length, cardioMinutes: cardioDone.reduce((s, x) => s + x.durationMinutes, 0), cardioDistanceKm: cardioDone.reduce((s, x) => s + (x.distanceKm ?? 0), 0) }, adherence: { nutrition: adherence((x) => x.proteinG, (x) => x.proteinTargetG), hydration: adherence((x) => x.hydrationMl, (x) => x.hydrationTargetMl), sleep: adherence((x) => x.sleepMinutes ?? 0, (x) => x.sleepMinutes === null ? null : x.sleepTargetMinutes), training: Math.round(workoutDates.size / daysCount * 100) }, evolution: { weightKg: metricEvolution(days, (x) => x.weightKg), waistCm: metricEvolution(days, (x) => x.waistCm), titanScore: scores.length > 1 ? scores.at(-1)! - scores[0] : null }, streaks: calculateStreaks(days), consistency: scores.length ? Math.round(average(scores)!) : 0, coverage: dataCoverage, comparisons: { weekly: compareScores(days, 7), monthly: compareScores(days, 30) }, personalRecords: [...best.values()].sort((a, b) => b.estimatedOneRepMaxKg - a.estimatedOneRepMaxKg).slice(0, 10).map(({ exerciseName, estimatedOneRepMaxKg, localDate }) => ({ exerciseName, estimatedOneRepMaxKg, localDate })), coachTimeline: recommendations.sort((a, b) => b.createdAt.localeCompare(a.createdAt)).map(({ id, localDate, title, message, priority, createdAt }) => ({ id, localDate, title, message, priority, occurredAt: createdAt })) }
+  return { days, weeklyTrends: aggregateTrends(days, 'week'), monthlyTrends: aggregateTrends(days, 'month'), averages: { caloriesKcal: Math.round(average(days.map((x) => x.caloriesKcal)) ?? 0), proteinG: Math.round(average(days.map((x) => x.proteinG)) ?? 0), hydrationMl: Math.round(average(days.map((x) => x.hydrationMl)) ?? 0), sleepMinutes: average(values(days.map((x) => x.sleepMinutes))), weightKg: average(values(days.map((x) => x.weightKg))) }, totals: { workouts: workoutDates.size, cardios: cardioDone.length, cardioMinutes: cardioDone.reduce((s, x) => s + x.durationMinutes, 0), cardioDistanceKm: cardioDone.reduce((s, x) => s + (x.distanceKm ?? 0), 0) }, adherence: { nutrition: adherence((x) => x.proteinG, (x) => x.proteinTargetG), hydration: adherence((x) => x.hydrationMl, (x) => x.hydrationTargetMl), sleep: adherence((x) => x.sleepMinutes ?? 0, (x) => x.sleepMinutes === null ? null : x.sleepTargetMinutes), training: Math.round(workoutDates.size / daysCount * 100) }, evolution: { weightKg: metricEvolution(days, (x) => x.weightKg), waistCm: metricEvolution(days, (x) => x.waistCm), titanScore: scores.length > 1 ? scores.at(-1)! - scores[0] : null }, streaks: calculateStreaks(days), consistency: scores.length ? Math.round(average(scores)!) : 0, coverage: dataCoverage, comparisons: { weekly: compareScores(days, 7), monthly: compareScores(days, 30) }, personalRecords: [...best.values()].sort((a, b) => b.estimatedOneRepMaxKg - a.estimatedOneRepMaxKg).slice(0, 10).map(({ exerciseName, estimatedOneRepMaxKg, localDate }) => ({ exerciseName, estimatedOneRepMaxKg, localDate })), coachTimeline: recommendations
+    .sort((a, b) => b.createdAt.localeCompare(a.createdAt))
+    .map<AnalyticsSummary['coachTimeline'][number]>(
+      ({ id, localDate, title, message, priority, createdAt }) => ({
+      id: String(id),
+      localDate,
+      title,
+      message,
+      priority: normalizeCoachPriority(priority),
+      occurredAt: createdAt,
+      }),
+    ) }
 }
