@@ -9,7 +9,8 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "typecheck": "tsc --noEmit",
-    "validate": "npm run lint && npm run typecheck && npm run test && npm run build && npm run validate:release",
+    "validate": "npm run lint && npm run typecheck && npm run test && npm run build && npm run validate:release && npm run validate:binary-diff",
+    "validate:binary-diff": "node scripts/validate-binary-diff.mjs",
     "validate:release": "node scripts/validate-release.mjs",
     "test": "vitest run"
   },
