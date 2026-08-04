@@ -6,7 +6,7 @@ import {
   MoreHorizontal,
   Utensils,
 } from 'lucide-react'
-import { NavLink, Outlet } from 'react-router-dom'
+import { NavLink, Outlet, useLocation } from 'react-router-dom'
 import { PwaStatus } from '../components/feedback/PwaStatus'
 import { InstallPwa } from '../components/feedback/InstallPwa'
 
@@ -45,12 +45,13 @@ const navigationItems = [
 ]
 
 export function AppShell() {
+  const location = useLocation()
   return (
     <div className="min-h-dvh bg-titan-background text-white">
       <PwaStatus />
       <main className="mx-auto min-h-dvh w-full max-w-md px-5 pb-28 pt-[max(1.25rem,env(safe-area-inset-top))]">
         <InstallPwa />
-        <Outlet />
+        <div className="route-transition" key={location.pathname}><Outlet /></div>
       </main>
 
       <nav

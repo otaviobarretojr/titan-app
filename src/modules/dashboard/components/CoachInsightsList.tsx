@@ -1,6 +1,6 @@
 import { ChevronRight, Sparkles } from 'lucide-react'
 import { Link } from 'react-router-dom'
-import { Badge, Card } from '../../../shared/ui'
+import { Badge, Card, EmptyState } from '../../../shared/ui'
 import type { CoachInsight } from '../../coach/types/coach'
 
 type CoachInsightsListProps = {
@@ -24,6 +24,9 @@ export function CoachInsightsList({
       </div>
 
       <div className="mt-4 space-y-4">
+        {insights.length === 0 ? (
+          <EmptyState title="Tudo em equilíbrio" description="Continue registrando sua rotina. O Coach criará prioridades somente quando houver evidências locais." />
+        ) : null}
         {insights.map((insight, index) => (
           <div
             className={index > 0 ? 'border-t border-white/10 pt-4' : ''}
@@ -49,7 +52,7 @@ export function CoachInsightsList({
                 className="mt-3 inline-flex min-h-10 items-center gap-2 rounded-xl bg-white/10 px-3 text-sm font-bold text-white"
                 to={insight.actionPath}
               >
-                {insight.actionLabel}
+                Ver detalhes
                 <ChevronRight size={16} aria-hidden="true" />
               </Link>
             ) : null}

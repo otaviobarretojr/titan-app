@@ -40,3 +40,7 @@ A rota `/analytics` consolida tendências, Score TITAN, streaks, cobertura e rec
 ## Evolução Corporal Avançada
 
 A rota `/evolution` reúne peso e tendência, medidas bilaterais, bioimpedância opcional, fotos otimizadas, força derivada das séries existentes e cardio semanal. Nenhum dia ausente é tratado como zero e nenhuma medida é inferida. Consulte `docs/releases/SPRINT_009_EVOLUCAO_AVANCADA.md`.
+
+## TITAN Experience
+
+O dashboard mobile-first organiza Score, agenda, refeições pendentes, treino, cardio, Coach, peso, água e sono em cards independentes. Skeletons, estados explícitos, foco visível e animações que respeitam redução de movimento tornam a experiência estável sem alterar o modelo offline-first ou a persistência no IndexedDB. Consulte `docs/releases/SPRINT_010_TITAN_EXPERIENCE.md`.

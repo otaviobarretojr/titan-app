@@ -29,6 +29,7 @@ export async function getDashboardData(): Promise<DashboardData | null> {
     cardioSession,
     hydrationEntries,
     sleepEntry,
+    bodyMetrics,
   ] = await titanDatabase.transaction(
     'r',
     [
@@ -42,6 +43,7 @@ export async function getDashboardData(): Promise<DashboardData | null> {
       titanDatabase.cardioSessions,
       titanDatabase.hydrationEntries,
       titanDatabase.sleepEntries,
+      titanDatabase.bodyMetrics,
     ],
     () =>
       Promise.all([
@@ -85,6 +87,10 @@ export async function getDashboardData(): Promise<DashboardData | null> {
           .where('[userId+localDate]')
           .equals([TITAN_USER_ID, localDate])
           .first(),
+        titanDatabase.bodyMetrics
+          .where('userId')
+          .equals(TITAN_USER_ID)
+          .sortBy('localDate'),
       ]),
   )
 
@@ -215,6 +221,15 @@ export async function getDashboardData(): Promise<DashboardData | null> {
   return {
     userName:
       user.displayName,
+
+    pendingMeals: pendingMeals.length,
+
+    weight: {
+      currentKg: bodyMetrics.at(-1)?.weightKg ?? null,
+      changeKg: bodyMetrics.length > 1
+        ? Number((bodyMetrics.at(-1)!.weightKg - bodyMetrics.at(-2)!.weightKg).toFixed(1))
+        : null,
+    },
 
     nextMeal:
       nextMeal

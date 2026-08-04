@@ -7,6 +7,13 @@
 - `services`: serviços transversais.
 - `styles`: tokens e estilos globais.
 
+## Camada de experiência
+
+- `shared/ui` concentra as primitivas visuais e os estados reutilizáveis (`EmptyState`, `LoadingCard`, `StatCard`, `SectionHeader`, `InfoBanner` e `ConfirmDialog`).
+- O dashboard compõe cards independentes por uma lista de ordem declarativa, permitindo reorganização futura sem misturar regras de domínio à tela.
+- Rotas continuam carregadas sob demanda e usam transições CSS progressivas; `prefers-reduced-motion` desativa movimento não essencial.
+- Estados do dashboard são derivados exclusivamente das consultas reativas ao IndexedDB. Nenhuma API externa ou estado remoto foi introduzido.
+
 Regra principal: componentes de tela não concentram regras de negócio.
 
 ## Plataforma local
