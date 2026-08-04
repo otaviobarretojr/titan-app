@@ -1,0 +1,3 @@
+import { Card } from '../../../shared/ui'
+import type { TrendPeriod } from '../types/analytics'
+export function TrendList({ title, items }: { title: string; items: TrendPeriod[] }) { return <Card><h2 className="font-bold">{title}</h2><div className="mt-4 space-y-2">{items.slice(-6).reverse().map((item) => <div className="grid grid-cols-[1fr_auto_auto] items-center gap-3 rounded-xl bg-white/5 p-3" key={item.label}><div><p className="text-xs font-bold capitalize">{item.label}</p><p className="text-[10px] text-slate-500">{item.daysWithData} dias com dados</p></div><span className="text-xs text-slate-400">{item.consistency}%</span><strong className="text-cyan-300">{item.score ?? '—'}</strong></div>)}</div></Card> }
