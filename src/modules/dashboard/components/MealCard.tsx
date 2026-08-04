@@ -1,5 +1,6 @@
-import { Utensils } from 'lucide-react'
-import { Badge, Button, Card } from '../../../shared/ui'
+import { ChevronRight, Utensils } from 'lucide-react'
+import { Link } from 'react-router-dom'
+import { Badge, Card } from '../../../shared/ui'
 import type { DashboardMeal } from '../types/dashboard'
 
 type MealCardProps = {
@@ -37,9 +38,9 @@ export function MealCard({ meal }: MealCardProps) {
         </div>
       </div>
 
-      <Button className="mt-5" fullWidth>
-        Abrir refeição
-      </Button>
+      <Link aria-label={`Abrir ${meal.name}`} className="mt-5 inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-full bg-blue-600 px-5 font-bold text-white transition hover:bg-blue-500 active:scale-[0.98]" to={`/nutrition/${meal.id}`}>
+        Abrir refeição <ChevronRight size={18} aria-hidden="true" />
+      </Link>
     </Card>
   )
 }

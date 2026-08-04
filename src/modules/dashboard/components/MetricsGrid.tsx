@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react'
-import { Droplets, Dumbbell, Flame, Moon, Plus } from 'lucide-react'
+import { Check, Droplets, Dumbbell, Flame, Moon, Plus } from 'lucide-react'
+import { useState } from 'react'
 import { Button, Card } from '../../../shared/ui'
 import type { DashboardSummary } from '../types/dashboard'
 
@@ -27,6 +28,14 @@ export function MetricsGrid({
   summary,
   onAddWater,
 }: MetricsGridProps) {
+  const [waterRegistered, setWaterRegistered] = useState(false)
+
+  async function handleAddWater() {
+    await onAddWater(300)
+    setWaterRegistered(true)
+    window.setTimeout(() => setWaterRegistered(false), 2200)
+  }
+
   const metrics = [
     {
       icon: <Flame size={19} aria-hidden="true" />,
@@ -65,11 +74,12 @@ export function MetricsGrid({
       <Button
         className="mt-3"
         fullWidth
-        onClick={() => onAddWater(300)}
+        aria-live="polite"
+        onClick={handleAddWater}
         variant="ghost"
       >
-        <Plus size={18} aria-hidden="true" />
-        Registrar 300 ml de água
+        {waterRegistered ? <Check size={18} aria-hidden="true" /> : <Plus size={18} aria-hidden="true" />}
+        {waterRegistered ? '300 ml registrados' : 'Registrar 300 ml de água'}
       </Button>
     </div>
   )
@@ -89,7 +99,7 @@ function MetricCard({
   target,
 }: MetricCardProps) {
   return (
-    <Card className="p-4">
+    <Card className="p-4 shadow-[0_8px_30px_rgb(0_0_0/0.12)]">
       <div className="flex items-center gap-2 text-slate-400">
         {icon}
         <span className="text-xs font-bold">{label}</span>
