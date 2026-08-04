@@ -1,11 +1,11 @@
 export type CoachPriority = 'high' | 'medium' | 'low'
 export type CoachCategory =
   | 'nutrition' | 'hydration' | 'training' | 'cardio'
-  | 'recovery' | 'body' | 'consistency'
+  | 'recovery' | 'body' | 'consistency' | 'evolution'
 export type TrendMetric =
   | 'protein' | 'calories' | 'hydration' | 'sleep' | 'weight'
-  | 'waist' | 'training' | 'cardio' | 'score'
-export type TrendPeriod = 'weekly' | 'monthly'
+  | 'waist' | 'training' | 'trainingVolume' | 'strength' | 'cardio' | 'score'
+export type TrendPeriod = 'weekly' | 'monthly' | 'quarterly'
 
 export type CoachInsight = {
   id: string
@@ -18,6 +18,7 @@ export type CoachInsight = {
   sampleSize: number
   actionLabel: string
   actionPath: string
+  generatedAt: string
 }
 
 export type TitanScoreBreakdown = {
@@ -73,10 +74,16 @@ export type CoachReport = {
   dailyInsights: CoachInsight[]
   weeklyTrends: CoachTrend[]
   monthlyTrends: CoachTrend[]
+  quarterlyTrends: CoachTrend[]
   score: TitanScore
   executiveSummary: string
   weeklySummary: string
   monthlySummary: string
   coverage: CoachDataCoverage
   history: RecommendationHistory[]
+  timeline: TitanTimelineEvent[]
 }
+
+export type TitanTimelineEventType = 'workout' | 'record' | 'protein' | 'hydration' | 'weight' | 'photo' | 'coach'
+export type TitanTimelineEvent = { id: string; type: TitanTimelineEventType; title: string; occurredAt: string; localDate: string; detail: string }
+export type TitanTimelineGroup = 'Hoje' | 'Ontem' | 'Últimos 7 dias' | 'Últimos 30 dias'

@@ -1,6 +1,7 @@
 import { useLiveQuery } from 'dexie-react-hooks'
 import { useEffect, useState } from 'react'
 import { seedToday } from '../../../database/seeds/seedToday'
+import { getCoachReport } from '../../coach/data/coachRepository'
 import {
   addHydration,
   getDashboardData,
@@ -23,7 +24,7 @@ export function useDashboard() {
   }, [])
 
   const data = useLiveQuery(
-    () => (isReady ? getDashboardData() : null),
+    async () => { if (!isReady) return null; const [dashboard, coach] = await Promise.all([getDashboardData(), getCoachReport()]); return dashboard ? { ...dashboard, coach } : null },
     [isReady],
     null,
   )

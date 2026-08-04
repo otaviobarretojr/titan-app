@@ -15,7 +15,7 @@ export type DailyCoachSnapshot = {
   protein?: number; calories?: number; hydration?: number; sleep?: number
   weight?: number; waist?: number; training?: number; cardio?: number; score?: number
   proteinTarget?: number; calorieTarget?: number; hydrationTarget?: number; sleepTarget?: number
-  adherence?: number; strength?: number
+  adherence?: number; strength?: number; trainingVolume?: number; trainingPlanned?: number
 }
 
 const ratio = (value: number, target: number) => target > 0 ? Math.min(1, Math.max(0, value / target)) : 0
@@ -47,12 +47,13 @@ const metricConfig: Record<TrendMetric, { label: string; unit: string }> = {
   protein: { label: 'Proteína', unit: 'g' }, calories: { label: 'Calorias', unit: 'kcal' },
   hydration: { label: 'Hidratação', unit: 'ml' }, sleep: { label: 'Sono', unit: 'min' },
   weight: { label: 'Peso', unit: 'kg' }, waist: { label: 'Cintura', unit: 'cm' },
-  training: { label: 'Treino', unit: 'sessões' }, cardio: { label: 'Cardio', unit: 'sessões' },
+  training: { label: 'Treino', unit: 'sessões' }, trainingVolume: { label: 'Volume semanal', unit: 'kg' },
+  strength: { label: 'Força', unit: 'kg' }, cardio: { label: 'Cardio', unit: 'sessões' },
   score: { label: 'Score TITAN', unit: 'pontos' },
 }
 const average = (values: number[]) => values.reduce((sum, value) => sum + value, 0) / values.length
 export function calculateTrends(snapshots: DailyCoachSnapshot[], period: TrendPeriod): CoachTrend[] {
-  const days = period === 'weekly' ? 7 : 30
+  const days = period === 'weekly' ? 7 : period === 'monthly' ? 30 : 90
   const datedSnapshots = snapshots
     .map(snapshot => ({ snapshot, timestamp: Date.parse(`${snapshot.date.slice(0, 10)}T00:00:00Z`) }))
     .filter(item => Number.isFinite(item.timestamp))
@@ -74,11 +75,11 @@ export function calculateTrends(snapshots: DailyCoachSnapshot[], period: TrendPe
     const changePercent = previousAverage !== null && previousAverage !== 0 ? ((currentAverage - previousAverage) / Math.abs(previousAverage)) * 100 : null
     const direction = changePercent === null || Math.abs(changePercent) < 5 ? 'stable' : changePercent > 0 ? 'up' : 'down'
     const config = metricConfig[metric]
-    return [{ id: `${period}-${metric}`, metric, period, title: `${config.label} ${period === 'weekly' ? 'semanal' : 'mensal'}`, direction, changePercent, currentAverage, previousAverage, unit: config.unit, sampleSize: currentValues.length, previousSampleSize: previousValues.length, message: previousAverage === null ? `Média de ${currentAverage.toLocaleString('pt-BR', { maximumFractionDigits: 1 })} ${config.unit}; histórico anterior insuficiente para comparação.` : `${changePercent! >= 0 ? '+' : ''}${changePercent!.toLocaleString('pt-BR', { maximumFractionDigits: 1 })}% em relação ao período anterior.` }]
+    return [{ id: `${period}-${metric}`, metric, period, title: `${config.label} ${period === 'weekly' ? 'semanal' : period === 'monthly' ? 'mensal' : 'em 90 dias'}`, direction, changePercent, currentAverage, previousAverage, unit: config.unit, sampleSize: currentValues.length, previousSampleSize: previousValues.length, message: previousAverage === null ? `Média de ${currentAverage.toLocaleString('pt-BR', { maximumFractionDigits: 1 })} ${config.unit}; histórico anterior insuficiente para comparação.` : `${changePercent! >= 0 ? '+' : ''}${changePercent!.toLocaleString('pt-BR', { maximumFractionDigits: 1 })}% em relação ao período anterior.` }]
   })
 }
 
-const createInsight = (id: string, data: Omit<CoachInsight, 'id'>): CoachInsight => ({ id, ...data })
+const createInsight = (id: string, data: Omit<CoachInsight, 'id' | 'generatedAt'>): CoachInsight => ({ id, generatedAt: new Date().toISOString(), ...data })
 export function generateHistoricalInsights(snapshots: DailyCoachSnapshot[]): CoachInsight[] {
   const recent = [...snapshots].sort((a,b) => a.date.localeCompare(b.date)).slice(-14)
   const insights: CoachInsight[] = []
@@ -110,7 +111,7 @@ export function generateHistoricalInsights(snapshots: DailyCoachSnapshot[]): Coa
 // never produce a warning: an actual persisted measurement is required.
 export function generateCoachInsights(input: CoachEngineInput): CoachInsight[] {
   const insights: CoachInsight[] = []
-  const add = (id: string, title: string, priority: CoachInsight['priority'], category: CoachInsight['category'], evidence: string, message: string, actionLabel: string, actionPath: string) => insights.push({ id, title, priority, category, evidence, message, actionLabel, actionPath, period: 'hoje', sampleSize: 1 })
+  const add = (id: string, title: string, priority: CoachInsight['priority'], category: CoachInsight['category'], evidence: string, message: string, actionLabel: string, actionPath: string) => insights.push({ id, title, priority, category, evidence, message, actionLabel, actionPath, period: 'hoje', sampleSize: 1, generatedAt: new Date().toISOString() })
   if (input.pendingMeals > 0) add('pending-meals', `${input.pendingMeals} refeição(ões) pendente(s)`, 'high','nutrition',`${input.pendingMeals} plano(s) sem resolução após o horário.`, 'Resolva as pendências conforme o que realmente ocorreu.','Abrir nutrição','/nutrition')
   if (input.hasHydrationData && input.currentMinutes >= 720 && ratio(input.hydrationConsumedMl,input.hydrationTargetMl)<.35) add('hydration-low','Hidratação abaixo do esperado','high','hydration',`${input.hydrationConsumedMl} ml de ${input.hydrationTargetMl} ml registrados.`,'Aumente o consumo gradualmente nas próximas horas.','Registrar água','/nutrition')
   if (input.hasNutritionData && input.currentMinutes >= 960 && ratio(input.proteinConsumedG,input.proteinTargetG)<.55) add('protein-low','Proteína atrasada','medium','nutrition',`${input.proteinConsumedG} g de ${input.proteinTargetG} g registrados.`,'Distribua o restante entre as refeições previstas.','Revisar refeições','/nutrition')
@@ -127,4 +128,22 @@ export function generateExecutiveSummary(input: { score: TitanScore; insights: C
   if (priority) return `Prioridade atual: ${priority.title.toLowerCase()}. A recomendação usa somente registros persistidos.`
   const down = input.trends.find(item => item.direction === 'down')
   return down ? `O Score atual é ${input.score.value}; acompanhe a tendência de ${down.title.toLowerCase()}.` : `O Score atual é ${input.score.value}; nenhuma queda relevante foi identificada nos dados disponíveis.`
+}
+
+/** Evidence-only alerts. Each rule needs multiple persisted samples and has a stable id. */
+export function generateCoachAlerts(snapshots: DailyCoachSnapshot[]): CoachInsight[] {
+  const ordered = [...snapshots].sort((a, b) => a.date.localeCompare(b.date)).slice(-30)
+  const current = ordered.slice(-7); const previous = ordered.slice(-14, -7); const alerts: CoachInsight[] = []
+  const vals = (rows: DailyCoachSnapshot[], key: keyof DailyCoachSnapshot) => rows.flatMap(row => typeof row[key] === 'number' ? [row[key] as number] : [])
+  const add = (id: string, category: CoachInsight['category'], priority: CoachInsight['priority'], title: string, evidence: string, period: string, sampleSize: number, message: string, actionLabel: string, actionPath: string) => alerts.push(createInsight(id, { category, priority, title, evidence, period, sampleSize, message, actionLabel, actionPath }))
+  const compareDrop = (key: keyof DailyCoachSnapshot, id: string, title: string, category: CoachInsight['category'], actionPath: string) => { const now=vals(current,key), before=vals(previous,key); if(now.length>=2&&before.length>=2&&average(now)<average(before)*.9) add(id,category,'high',title,`Média atual ${average(now).toFixed(1)}; anterior ${average(before).toFixed(1)}.`, '7 dias versus 7 anteriores',now.length+before.length,'Revise os registros do período e ajuste o planejamento com base nessa queda.','Revisar registros',actionPath) }
+  compareDrop('strength','strength-drop','Queda de força','training','/training')
+  compareDrop('training','frequency-drop','Queda de frequência','consistency','/training')
+  compareDrop('score','score-drop','Queda do Score TITAN','evolution','/analytics')
+  const missed=current.filter(x=>(x.trainingPlanned??0)>0&&(x.training??0)===0); if(missed.length>=2)add('missed-workouts','training','high','Treinos perdidos',`${missed.length} treinos planejados não possuem sessão concluída.`,'últimos 7 dias',missed.length,'Reprograme somente as sessões que continuam compatíveis com seu plano.','Abrir treino','/training')
+  const targetAlert=(key:keyof DailyCoachSnapshot,target:keyof DailyCoachSnapshot,id:string,title:string,category:CoachInsight['category'],path:string)=>{const pairs=current.flatMap(x=>typeof x[key]==='number'&&typeof x[target]==='number'?[[x[key] as number,x[target] as number]]:[]);const low=pairs.filter(([v,t])=>v<t*.8);if(pairs.length>=3&&low.length>=3)add(id,category,'high',title,`${low.length} de ${pairs.length} registros ficaram abaixo de 80% da meta.`,'últimos 7 dias',pairs.length,'Priorize a meta registrada e acompanhe os próximos registros.','Abrir registros',path)}
+  targetAlert('protein','proteinTarget','protein-below-target','Proteína abaixo da meta','nutrition','/nutrition'); targetAlert('hydration','hydrationTarget','water-below-target','Água abaixo da meta','hydration','/nutrition'); targetAlert('sleep','sleepTarget','sleep-insufficient','Sono insuficiente','recovery','/health/sleep')
+  const weights=vals(ordered.slice(-21),'weight'); if(weights.length>=4&&Math.abs(weights.at(-1)!-weights[0])<.3)add('weight-plateau','body','medium','Platô de peso',`${weights.length} medições variaram menos de 0,3 kg.`,'últimos 21 dias',weights.length,'Interprete o platô junto ao objetivo e à cintura registrada.','Ver evolução','/evolution')
+  const strength=vals(ordered.slice(-21),'strength'); if(strength.length>=4&&(Math.max(...strength)-Math.min(...strength))/average(strength)<.02)add('strength-plateau','training','medium','Platô de força',`${strength.length} estimativas variaram menos de 2%.`,'últimos 21 dias',strength.length,'Revise volume, recuperação e progressão registrados.','Ver treino','/training')
+  return [...new Map(alerts.map(alert=>[alert.id,alert])).values()].sort((a,b)=>({high:0,medium:1,low:2}[a.priority]-({high:0,medium:1,low:2}[b.priority]))
 }

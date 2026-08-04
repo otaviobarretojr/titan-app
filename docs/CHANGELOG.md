@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+### Sprint 011 — Coach TITAN Intelligence
+
+- Engine local de insights e alertas explicáveis, com priorização e controle de duplicidade.
+- Tendências de 7, 30 e 90 dias, Timeline TITAN e novos cards do dashboard.
+- Estados de dados insuficientes sem inferir registros ausentes.
+
 ### Sprint 010 — TITAN Experience
 
 - Dashboard inteligente em cards reordenáveis com agenda, pendências, peso, água, sono, treino, cardio, Coach e Score TITAN.
