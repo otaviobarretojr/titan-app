@@ -1,6 +1,6 @@
 import { ChevronRight, Dumbbell } from 'lucide-react'
 import { Link } from 'react-router-dom'
-import { Badge, Card } from '../../../shared/ui'
+import { Badge, Card, ProgressBar } from '../../../shared/ui'
 import type { DashboardWorkout } from '../types/dashboard'
 
 type WorkoutCardProps = {
@@ -36,6 +36,7 @@ export function WorkoutCard({ workout }: WorkoutCardProps) {
           </p>
         </div>
       </div>
+      <div className="mt-4"><ProgressBar label="Treino" value={workout.status === 'completed' ? 100 : workout.status === 'started' ? 50 : 0} /></div>
 
       <Link className="mt-5 inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-full bg-white px-5 font-bold text-slate-950 transition hover:bg-slate-200 active:scale-[0.98]" to="/training">
         {workout.status === 'started' ? 'Continuar treino' : workout.status === 'completed' ? 'Ver treino concluído' : 'Iniciar treino'}

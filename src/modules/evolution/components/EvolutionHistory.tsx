@@ -22,7 +22,7 @@ export function EvolutionHistory({
   }
 
   return (
-    <div className="space-y-3">
+    <div className="relative space-y-3 border-l border-blue-500/30 pl-5 before:absolute before:-left-[5px] before:top-1 before:h-2 before:w-2 before:rounded-full before:bg-blue-400">
       {entries.map((entry) => (
         <Card key={entry.id}>
           <div className="flex items-start justify-between gap-4">

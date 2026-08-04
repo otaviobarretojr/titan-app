@@ -11,6 +11,9 @@ import {
   Moon,
   ShieldCheck,
   Stethoscope,
+  Palette,
+  SlidersHorizontal,
+  Trash2,
 } from 'lucide-react'
 import { useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
@@ -19,11 +22,28 @@ import {
   downloadBackup,
   restoreBackup,
 } from '../../../services/backup/backupService'
+import { titanDatabase } from '../../../database/titanDatabase'
 
 export function SettingsPage() {
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [message, setMessage] = useState<string | null>(null)
   const [isBusy, setIsBusy] = useState(false)
+  const [theme, setTheme] = useState(() => localStorage.getItem('titan-theme') ?? 'premium')
+  const [compact, setCompact] = useState(() => localStorage.getItem('titan-compact') === 'true')
+
+  function changeTheme(value: string) {
+    setTheme(value)
+    localStorage.setItem('titan-theme', value)
+    document.documentElement.dataset.theme = value
+  }
+
+  async function resetDatabase() {
+    if (!window.confirm('Apagar todos os dados locais do TITAN? Esta ação não pode ser desfeita.')) return
+    setIsBusy(true)
+    await titanDatabase.delete()
+    localStorage.removeItem('titan-compact')
+    window.location.reload()
+  }
 
   async function exportData() {
     try {
@@ -78,6 +98,18 @@ export function SettingsPage() {
         </p>
       </header>
 
+      <Card elevated>
+        <div className="flex gap-3"><Palette className="text-blue-300"/><div><h2 className="font-bold">Tema Premium</h2><p className="mt-1 text-sm text-slate-400">Visual One UI com alto contraste e superfícies elevadas.</p></div></div>
+        <div className="mt-4 grid grid-cols-2 gap-3">
+          <Button variant={theme === 'premium' ? 'primary' : 'ghost'} onClick={() => changeTheme('premium')}>Premium</Button>
+          <Button variant={theme === 'amoled' ? 'primary' : 'ghost'} onClick={() => changeTheme('amoled')}>AMOLED</Button>
+        </div>
+      </Card>
+
+      <Card>
+        <div className="flex items-center gap-3"><SlidersHorizontal className="text-blue-300"/><div className="flex-1"><h2 className="font-bold">Preferências</h2><p className="text-sm text-slate-400">Exibição compacta de informações.</p></div><button aria-label="Alternar exibição compacta" className={`h-7 w-12 rounded-full p-1 transition-colors duration-200 ${compact ? 'bg-blue-600' : 'bg-white/10'}`} onClick={() => { const next = !compact; setCompact(next); localStorage.setItem('titan-compact', String(next)) }}><span className={`block h-5 w-5 rounded-full bg-white transition-transform duration-200 ${compact ? 'translate-x-5' : ''}`}/></button></div>
+      </Card>
+
       <Card>
         <div className="flex gap-3">
           <Bell
@@ -101,6 +133,11 @@ export function SettingsPage() {
             </Link>
           </div>
         </div>
+      </Card>
+
+      <Card className="border-red-500/20">
+        <div className="flex gap-3"><Trash2 className="text-red-300"/><div><h2 className="font-bold">Reset do banco</h2><p className="mt-1 text-sm text-slate-400">Remove definitivamente registros, planos e histórico deste aparelho.</p></div></div>
+        <Button className="mt-4 bg-red-600 hover:bg-red-500" disabled={isBusy} fullWidth onClick={() => void resetDatabase()}>Apagar dados locais</Button>
       </Card>
 
       <Card elevated>

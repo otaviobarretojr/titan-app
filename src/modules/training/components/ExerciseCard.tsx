@@ -22,6 +22,7 @@ type ExerciseCardProps = {
     exercisePlanId: string,
   ) => Promise<unknown>
   onStartRest: (seconds: number) => void
+  isCurrent: boolean
 }
 
 export function ExerciseCard({
@@ -31,6 +32,7 @@ export function ExerciseCard({
   onAddSet,
   onRemoveLastSet,
   onStartRest,
+  isCurrent,
 }: ExerciseCardProps) {
   const lastSet = sets.at(-1)
   const [loadKg, setLoadKg] = useState(
@@ -54,11 +56,11 @@ export function ExerciseCard({
   }
 
   return (
-    <Card>
+    <Card className={isCurrent ? 'border-violet-400/50 shadow-lg shadow-violet-500/10' : ''}>
       <div className="flex items-start justify-between gap-4">
         <div>
           <p className="text-xs font-bold uppercase tracking-widest text-violet-300">
-            {exercise.muscleGroup}
+            {isCurrent ? 'AGORA · ' : ''}{exercise.muscleGroup}
           </p>
           <h2 className="mt-2 text-lg font-bold">{exercise.name}</h2>
           <p className="mt-1 text-sm text-slate-400">
@@ -93,7 +95,7 @@ export function ExerciseCard({
         <div className="mt-4 overflow-hidden rounded-2xl border border-white/10">
           {sets.map((set) => (
             <div
-              className="grid grid-cols-4 gap-2 border-b border-white/5 px-3 py-2 text-center text-xs last:border-b-0"
+              className="set-complete grid grid-cols-4 gap-2 border-b border-white/5 px-3 py-2 text-center text-xs last:border-b-0"
               key={set.id}
             >
               <span className="font-bold text-slate-500">

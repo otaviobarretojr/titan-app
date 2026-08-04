@@ -21,7 +21,7 @@ export function NutritionMealCard({
   onReset,
 }: NutritionMealCardProps) {
   return (
-    <Card>
+    <Card className={meal.status === 'completed' ? 'set-complete border-emerald-500/25 bg-emerald-500/5' : meal.status === 'planned' ? 'border-l-4 border-l-amber-400' : ''}>
       <div className="flex gap-4">
         <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-amber-500/10 text-amber-300">
           <Utensils size={22} aria-hidden="true" />

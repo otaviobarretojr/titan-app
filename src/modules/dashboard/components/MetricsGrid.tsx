@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react'
 import { Check, Droplets, Dumbbell, Flame, Moon, Plus } from 'lucide-react'
 import { useState } from 'react'
-import { Button, Card } from '../../../shared/ui'
+import { Button, Card, ProgressBar } from '../../../shared/ui'
 import type { DashboardSummary } from '../types/dashboard'
 
 type MetricsGridProps = {
@@ -42,24 +42,28 @@ export function MetricsGrid({
       label: 'Calorias',
       value: summary.caloriesConsumedKcal.toLocaleString('pt-BR'),
       target: `Meta ${summary.calorieTargetKcal.toLocaleString('pt-BR')} kcal`,
+      progress: Math.round(summary.caloriesConsumedKcal / summary.calorieTargetKcal * 100),
     },
     {
       icon: <Dumbbell size={19} aria-hidden="true" />,
       label: 'Proteína',
       value: `${summary.proteinConsumedG} g`,
       target: `Meta ${summary.proteinTargetG} g`,
+      progress: Math.round(summary.proteinConsumedG / summary.proteinTargetG * 100),
     },
     {
       icon: <Droplets size={19} aria-hidden="true" />,
       label: 'Água',
       value: formatLiters(summary.hydrationConsumedMl),
       target: `Meta ${formatLiters(summary.hydrationTargetMl)}`,
+      progress: Math.round(summary.hydrationConsumedMl / summary.hydrationTargetMl * 100),
     },
     {
       icon: <Moon size={19} aria-hidden="true" />,
       label: 'Sono',
       value: formatSleep(summary.sleepMinutes),
       target: `Meta ${formatSleep(summary.sleepTargetMinutes)}`,
+      progress: Math.round((summary.sleepMinutes ?? 0) / summary.sleepTargetMinutes * 100),
     },
   ]
 
@@ -90,6 +94,7 @@ type MetricCardProps = {
   label: string
   value: string
   target: string
+  progress: number
 }
 
 function MetricCard({
@@ -97,6 +102,7 @@ function MetricCard({
   label,
   value,
   target,
+  progress,
 }: MetricCardProps) {
   return (
     <Card className="p-4 shadow-[0_8px_30px_rgb(0_0_0/0.12)]">
@@ -107,6 +113,7 @@ function MetricCard({
 
       <p className="mt-4 text-2xl font-black">{value}</p>
       <p className="mt-1 text-xs text-slate-500">{target}</p>
+      <div className="mt-3"><ProgressBar label={`Progresso de ${label.toLowerCase()}`} value={progress} /></div>
     </Card>
   )
 }
