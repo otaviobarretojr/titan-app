@@ -25,7 +25,7 @@ export function Button({
   return (
     <button
       className={[
-        'inline-flex min-h-12 items-center justify-center gap-2 rounded-2xl border-0 px-5 font-bold transition disabled:cursor-not-allowed disabled:opacity-50',
+        'ripple relative inline-flex min-h-12 items-center justify-center gap-2 overflow-hidden rounded-2xl border-0 px-5 font-bold transition-[transform,background-color,box-shadow] duration-200 active:scale-[.98] disabled:cursor-not-allowed disabled:opacity-50',
         variantClasses[variant],
         fullWidth ? 'w-full' : '',
         className,

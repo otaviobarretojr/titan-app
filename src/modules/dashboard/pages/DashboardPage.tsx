@@ -47,16 +47,17 @@ export function DashboardPage() {
 
   if (isLoading || !data) {
     return (
-      <div className="flex min-h-[70dvh] items-center justify-center">
-        <p className="text-sm font-semibold text-slate-400">
-          Preparando seu plano de hoje...
-        </p>
+      <div aria-label="Carregando dashboard" className="space-y-5" role="status">
+        <div className="skeleton h-28 rounded-[28px]" />
+        <div className="skeleton h-44 rounded-[28px]" />
+        <div className="grid grid-cols-2 gap-3"><div className="skeleton h-32 rounded-[24px]"/><div className="skeleton h-32 rounded-[24px]"/></div>
+        <span className="sr-only">Preparando seu plano de hoje...</span>
       </div>
     )
   }
 
   return (
-    <div className="space-y-8 pb-3">
+    <div className="stagger-in space-y-8 pb-3">
       <header className="flex items-start justify-between gap-4 pt-2">
         <div>
           <p className="text-sm font-medium text-slate-400">

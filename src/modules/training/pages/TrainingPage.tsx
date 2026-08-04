@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react'
+import { useEffect, useState } from 'react'
 import { Check, Dumbbell, Gauge, Play } from 'lucide-react'
 import { Button, Card, ProgressBar } from '../../../shared/ui'
 import { ExerciseCard } from '../components/ExerciseCard'
@@ -18,6 +19,11 @@ export function TrainingPage() {
   } = useTrainingWorkout()
 
   const restTimer = useRestTimer()
+  const [now, setNow] = useState(0)
+  useEffect(() => {
+    const id = window.setInterval(() => setNow(Date.now()), 1000)
+    return () => window.clearInterval(id)
+  }, [])
 
   if (error) {
     return (
@@ -48,6 +54,10 @@ export function TrainingPage() {
   )
   const progress =
     targetSets > 0 ? Math.round((completedSets / targetSets) * 100) : 0
+  const elapsedMinutes = workout.startedAt
+    ? Math.max(0, Math.floor(((workout.completedAt ? new Date(workout.completedAt).getTime() : now) - new Date(workout.startedAt).getTime()) / 60000))
+    : 0
+  const currentExerciseId = workout.exercises.find((exercise) => exercise.completedSets < exercise.targetSets)?.id
 
   return (
     <div className="space-y-6">
@@ -82,6 +92,7 @@ export function TrainingPage() {
             label="Volume"
             value={`${workout.totalVolumeKg.toLocaleString('pt-BR')} kg`}
           />
+          <Metric icon={<Gauge size={18} aria-hidden="true" />} label="Tempo total" value={`${elapsedMinutes} min`} />
           <Metric
             icon={<Dumbbell size={18} aria-hidden="true" />}
             label="Exercícios"
@@ -129,6 +140,7 @@ export function TrainingPage() {
             <ExerciseCard
               key={exercise.id}
               exercise={exercise}
+              isCurrent={exercise.id === currentExerciseId}
               sessionId={workout.sessionId!}
               sets={workout.sets.filter(
                 (set) => set.exercisePlanId === exercise.id,

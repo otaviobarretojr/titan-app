@@ -1,6 +1,6 @@
 import { HeartPulse } from 'lucide-react'
 import { Link } from 'react-router-dom'
-import { Badge, Card } from '../../../shared/ui'
+import { Badge, Card, ProgressBar } from '../../../shared/ui'
 import type { DashboardCardio } from '../types/dashboard'
 
 type CardioCardProps = {
@@ -40,6 +40,7 @@ export function CardioCard({ cardio }: CardioCardProps) {
           </p>
         </div>
       </div>
+      <div className="mt-4"><ProgressBar label="Cardio" value={cardio.status === 'completed' ? 100 : cardio.status === 'started' ? 50 : 0} /></div>
 
       <Link
         className="mt-5 inline-flex min-h-12 w-full items-center justify-center rounded-2xl bg-white/10 px-5 font-bold text-white transition hover:bg-white/15"

@@ -32,6 +32,13 @@ export function CardioPage() {
   } = useCardioDay()
 
   const { history } = useCardioHistory()
+  const recent = history.slice(0, 7)
+  const previous = history.slice(7, 14)
+  const recentMinutes = recent.reduce((total, item) => total + item.durationMinutes, 0)
+  const previousMinutes = previous.reduce((total, item) => total + item.durationMinutes, 0)
+  const weeklyChange = previousMinutes ? Math.round((recentMinutes - previousMinutes) / previousMinutes * 100) : recentMinutes ? 100 : 0
+  const avgPace = recent.find((item) => item.paceMinutesPerKm !== null)?.paceMinutesPerKm ?? null
+  const weeklyDistance = recent.reduce((total, item) => total + (item.distanceKm ?? 0), 0)
 
   if (error) {
     return (
@@ -69,6 +76,10 @@ export function CardioPage() {
       </header>
 
       <Card elevated>
+        <div className="mb-5 rounded-2xl bg-gradient-to-r from-cyan-500/15 to-blue-500/5 p-4">
+          <div className="flex items-center justify-between"><span className="text-xs font-bold uppercase tracking-widest text-cyan-300">Zona cardíaca</span><span className="rounded-full bg-cyan-400/15 px-3 py-1 text-xs font-black text-cyan-200">{cardio.type === 'zone2' ? 'ZONA 2 · AERÓBICA' : cardioLabels[cardio.type].toUpperCase()}</span></div>
+          <div className="mt-3 h-2 overflow-hidden rounded-full bg-gradient-to-r from-blue-500 via-emerald-400 via-amber-400 to-red-500"><div className="ml-[28%] h-full w-1 rounded-full bg-white shadow"/></div>
+        </div>
         <div className="grid grid-cols-2 gap-3">
           <Metric
             icon={<Timer size={19} aria-hidden="true" />}
@@ -137,6 +148,12 @@ export function CardioPage() {
             ) : null}
           </div>
         ) : null}
+      </Card>
+
+      <Card>
+        <h2 className="font-bold">Evolução semanal</h2>
+        <div className="mt-4 grid grid-cols-3 gap-2"><Metric icon={<Timer size={18}/>} label="7 dias" value={`${recentMinutes} min`} /><Metric icon={<Footprints size={18}/>} label="Distância" value={`${weeklyDistance.toLocaleString('pt-BR', { maximumFractionDigits: 1 })} km`} /><Metric icon={<HeartPulse size={18}/>} label="Ritmo médio" value={formatPace(avgPace)} /></div>
+        <p className={`mt-4 text-sm font-bold ${weeklyChange >= 0 ? 'text-emerald-300' : 'text-amber-300'}`}>{weeklyChange >= 0 ? '+' : ''}{weeklyChange}% versus semana anterior</p>
       </Card>
 
       {cardio.status === 'started' ? (
