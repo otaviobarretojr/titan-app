@@ -26,6 +26,12 @@ Regra principal: componentes de tela não concentram regras de negócio.
 - O schema Dexie 10 adiciona `bioimpedance` e campos opcionais a medições/fotos. A evolução usa leitura adaptativa dos schemas anteriores e recordes de força derivados das séries existentes.
 - O Workbox usa precache, `NetworkFirst` para navegação e `CacheFirst` limitado para imagens, respeitando a base `/titan-app/` do GitHub Pages.
 
+## Sprint 013.1 — Estabilização
+
+- `layouts/AppShell` mantém a navegação mobile e delega ações rápidas a uma composição isolada, com callbacks estáveis e navegação memoizada para reduzir renders não essenciais.
+- A integridade local é validada por testes do contrato Dexie: versão 10, tabelas críticas e índices compostos usados por consultas offline.
+- O ciclo PWA permanece explícito: registro em modo `prompt`, limpeza de caches obsoletos, navegação `NetworkFirst` e cache de imagens `CacheFirst` com expiração.
+
 ## Coach TITAN Intelligence
 
 - `modules/coach/engine` contém regras puras e determinísticas de insights, alertas, priorização, tendências e timeline.

@@ -14,4 +14,5 @@
 - [x] Sprint 010 — TITAN Experience (UX Premium)
 - [x] Sprint 011 — Coach TITAN Intelligence
 - [x] Sprint 012 — Dashboard Inteligente
+- [x] Sprint 013.1 — Estabilização da Plataforma
 - [ ] v1.0 — Primeira versão estável
