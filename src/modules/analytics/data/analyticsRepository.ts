@@ -1,268 +1,28 @@
 import type { Table } from 'dexie'
 import { titanDatabase } from '../../../database/titanDatabase'
 import { TITAN_USER_ID } from '../../../database/seeds/seedToday'
-import type {
-  AnalyticsPoint,
-  AnalyticsSummary,
-} from '../types/analytics'
-import {
-  average,
-  percentage,
-} from '../utils/analyticsMath'
+import type { AnalyticsPoint, AnalyticsSummary } from '../types/analytics'
+import { average, percentage } from '../utils/analyticsMath'
+import { aggregateTrends, calculateStreaks, calculateTitanScore, compareScores, coverage, metricEvolution } from '../utils/analyticsEngine'
 
 type DatedRecord = { localDate: string }
-
-function groupByDate<T extends DatedRecord>(records: T[]) {
-  const groups = new Map<string, T[]>()
-
-  for (const record of records) {
-    const group = groups.get(record.localDate)
-    if (group) group.push(record)
-    else groups.set(record.localDate, [record])
-  }
-
-  return groups
-}
+const groupByDate = <T extends DatedRecord>(records: T[]) => records.reduce((map, record) => map.set(record.localDate, [...(map.get(record.localDate) ?? []), record]), new Map<string, T[]>())
 
 function getLastDates(count: number) {
-  const formatter = new Intl.DateTimeFormat('en-CA', {
-    timeZone: 'America/Manaus',
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-  })
-
-  const dates: string[] = []
-
-  for (let index = count - 1; index >= 0; index -= 1) {
-    const date = new Date()
-    date.setDate(date.getDate() - index)
-    dates.push(formatter.format(date))
-  }
-
+  const dates: string[] = []; const today = new Date()
+  for (let index = count - 1; index >= 0; index -= 1) { const date = new Date(today); date.setUTCDate(today.getUTCDate() - index); dates.push(date.toISOString().slice(0, 10)) }
   return dates
 }
 
-export async function getAnalyticsSummary(
-  daysCount = 30,
-): Promise<AnalyticsSummary> {
-  const dates = getLastDates(daysCount)
-
-  if (dates.length === 0) {
-    throw new Error('O período do Analytics deve ter ao menos um dia.')
-  }
-
-  const dateRange = {
-    lower: [TITAN_USER_ID, dates[0]] as [string, string],
-    upper: [TITAN_USER_ID, dates[dates.length - 1]] as [string, string],
-  }
-
-  const inPeriod = <T extends DatedRecord>(table: Table<T, string>) =>
-    table
-      .where('[userId+localDate]')
-      .between(dateRange.lower, dateRange.upper, true, true)
-      .toArray()
-
-  const [
-    dailyPlans,
-    mealEntries,
-    hydrationEntries,
-    sleepEntries,
-    workoutSessions,
-    cardioSessions,
-    bodyMetrics,
-    personalRecords,
-  ] = await titanDatabase.transaction(
-    'r',
-    [
-      titanDatabase.dailyPlans,
-      titanDatabase.mealEntries,
-      titanDatabase.hydrationEntries,
-      titanDatabase.sleepEntries,
-      titanDatabase.workoutSessions,
-      titanDatabase.cardioSessions,
-      titanDatabase.bodyMetrics,
-      titanDatabase.exercisePersonalRecords,
-    ],
-    () =>
-      Promise.all([
-        inPeriod(titanDatabase.dailyPlans),
-        inPeriod(titanDatabase.mealEntries),
-        inPeriod(titanDatabase.hydrationEntries),
-        inPeriod(titanDatabase.sleepEntries),
-        inPeriod(titanDatabase.workoutSessions),
-        inPeriod(titanDatabase.cardioSessions),
-        inPeriod(titanDatabase.bodyMetrics),
-        titanDatabase.exercisePersonalRecords
-          .where('userId')
-          .equals(TITAN_USER_ID)
-          .toArray(),
-      ]),
-  )
-
-  const plansByDate = new Map(
-    dailyPlans.map((item) => [item.localDate, item]),
-  )
-
-  const mealsByDate = groupByDate(mealEntries)
-  const hydrationByDate = groupByDate(hydrationEntries)
-  const sleepByDate = new Map(
-    sleepEntries.map((item) => [item.localDate, item]),
-  )
-  const metricsByDate = new Map(
-    bodyMetrics.map((item) => [item.localDate, item]),
-  )
-  const completedWorkoutDates = new Set(
-    workoutSessions
-      .filter((item) => item.status === 'completed')
-      .map((item) => item.localDate),
-  )
-  const completedCardioDates = new Set(
-    cardioSessions
-      .filter((item) => item.status === 'completed')
-      .map((item) => item.localDate),
-  )
-
-  const points: AnalyticsPoint[] = dates.map((localDate) => {
-    const dayMeals = mealsByDate.get(localDate) ?? []
-    const dayHydration = hydrationByDate.get(localDate) ?? []
-    const daySleep = sleepByDate.get(localDate)
-    const dayMetric = metricsByDate.get(localDate)
-
-    return {
-      localDate,
-      caloriesKcal: dayMeals.reduce(
-        (sum, item) => sum + item.caloriesKcal,
-        0,
-      ),
-      proteinG: dayMeals.reduce(
-        (sum, item) => sum + item.proteinG,
-        0,
-      ),
-      hydrationMl: dayHydration.reduce(
-        (sum, item) => sum + item.amountMl,
-        0,
-      ),
-      sleepMinutes: daySleep?.durationMinutes ?? null,
-      workoutCompleted: completedWorkoutDates.has(localDate),
-      cardioCompleted: completedCardioDates.has(localDate),
-      weightKg: dayMetric?.weightKg ?? null,
-      waistCm: dayMetric?.waistCm ?? null,
-    }
-  })
-
-  const latestPlan =
-    dailyPlans.sort((a, b) =>
-      b.localDate.localeCompare(a.localDate),
-    )[0] ?? null
-
-  const workoutCount = points.filter(
-    (item) => item.workoutCompleted,
-  ).length
-
-  const cardioCompleted = cardioSessions.filter(
-    (item) => item.status === 'completed',
-  )
-
-  const nutritionAdherenceValues = points.map((point) => {
-    const plan = plansByDate.get(point.localDate)
-    if (!plan) return 0
-    return percentage(point.proteinG, plan.proteinTargetG)
-  })
-
-  const hydrationAdherenceValues = points.map((point) => {
-    const plan = plansByDate.get(point.localDate)
-    if (!plan) return 0
-    return percentage(point.hydrationMl, plan.hydrationTargetMl)
-  })
-
-  const sleepAdherenceValues = points
-    .map((point) => {
-      const plan = plansByDate.get(point.localDate)
-      if (!plan || point.sleepMinutes === null) return null
-      return percentage(point.sleepMinutes, plan.sleepTargetMinutes)
-    })
-    .filter((value): value is number => value !== null)
-
-  const bestByExercise = new Map<
-    string,
-    (typeof personalRecords)[number]
-  >()
-
-  for (const record of personalRecords) {
-    const current = bestByExercise.get(record.exerciseName)
-
-    if (
-      !current ||
-      record.estimatedOneRepMaxKg >
-        current.estimatedOneRepMaxKg
-    ) {
-      bestByExercise.set(record.exerciseName, record)
-    }
-  }
-
-  return {
-    days: points,
-    averages: {
-      caloriesKcal:
-        Math.round(
-          average(points.map((item) => item.caloriesKcal)) ?? 0,
-        ),
-      proteinG:
-        Math.round(
-          average(points.map((item) => item.proteinG)) ?? 0,
-        ),
-      hydrationMl:
-        Math.round(
-          average(points.map((item) => item.hydrationMl)) ?? 0,
-        ),
-      sleepMinutes: average(
-        points
-          .map((item) => item.sleepMinutes)
-          .filter((value): value is number => value !== null),
-      ),
-      weightKg: average(
-        points
-          .map((item) => item.weightKg)
-          .filter((value): value is number => value !== null),
-      ),
-    },
-    totals: {
-      workouts: workoutCount,
-      cardios: cardioCompleted.length,
-      cardioMinutes: cardioCompleted.reduce(
-        (sum, item) => sum + item.durationMinutes,
-        0,
-      ),
-      cardioDistanceKm: cardioCompleted.reduce(
-        (sum, item) => sum + (item.distanceKm ?? 0),
-        0,
-      ),
-    },
-    adherence: {
-      nutrition:
-        Math.round(average(nutritionAdherenceValues) ?? 0),
-      hydration:
-        Math.round(average(hydrationAdherenceValues) ?? 0),
-      sleep:
-        Math.round(average(sleepAdherenceValues) ?? 0),
-      training:
-        latestPlan
-          ? Math.round((workoutCount / daysCount) * 100)
-          : 0,
-    },
-    personalRecords: [...bestByExercise.values()]
-      .sort(
-        (a, b) =>
-          b.estimatedOneRepMaxKg -
-          a.estimatedOneRepMaxKg,
-      )
-      .slice(0, 10)
-      .map((record) => ({
-        exerciseName: record.exerciseName,
-        estimatedOneRepMaxKg:
-          record.estimatedOneRepMaxKg,
-        localDate: record.localDate,
-      })),
-  }
+export async function getAnalyticsSummary(daysCount = 90): Promise<AnalyticsSummary> {
+  if (daysCount < 1) throw new Error('O período do Analytics deve ter ao menos um dia.')
+  const dates = getLastDates(daysCount); const lower: [string, string] = [TITAN_USER_ID, dates[0]]; const upper: [string, string] = [TITAN_USER_ID, dates.at(-1)!]
+  const inPeriod = <T extends DatedRecord>(table: Table<T, string>) => table.where('[userId+localDate]').between(lower, upper, true, true).toArray()
+  const [plans, meals, hydration, sleep, workouts, cardios, metrics, records] = await titanDatabase.transaction('r', [titanDatabase.dailyPlans, titanDatabase.mealEntries, titanDatabase.hydrationEntries, titanDatabase.sleepEntries, titanDatabase.workoutSessions, titanDatabase.cardioSessions, titanDatabase.bodyMetrics, titanDatabase.exercisePersonalRecords], () => Promise.all([inPeriod(titanDatabase.dailyPlans), inPeriod(titanDatabase.mealEntries), inPeriod(titanDatabase.hydrationEntries), inPeriod(titanDatabase.sleepEntries), inPeriod(titanDatabase.workoutSessions), inPeriod(titanDatabase.cardioSessions), inPeriod(titanDatabase.bodyMetrics), titanDatabase.exercisePersonalRecords.where('userId').equals(TITAN_USER_ID).toArray()]))
+  const planMap = new Map(plans.map((x) => [x.localDate, x])); const mealMap = groupByDate(meals); const waterMap = groupByDate(hydration); const sleepMap = new Map(sleep.map((x) => [x.localDate, x])); const metricMap = new Map(metrics.map((x) => [x.localDate, x])); const workoutDates = new Set(workouts.filter((x) => x.status === 'completed').map((x) => x.localDate)); const cardioDone = cardios.filter((x) => x.status === 'completed'); const cardioDates = new Set(cardioDone.map((x) => x.localDate))
+  const days = dates.map((localDate): AnalyticsPoint => { const plan = planMap.get(localDate); const food = mealMap.get(localDate) ?? []; const body = metricMap.get(localDate); const point: AnalyticsPoint = { localDate, caloriesKcal: food.reduce((s, x) => s + x.caloriesKcal, 0), proteinG: food.reduce((s, x) => s + x.proteinG, 0), hydrationMl: (waterMap.get(localDate) ?? []).reduce((s, x) => s + x.amountMl, 0), sleepMinutes: sleepMap.get(localDate)?.durationMinutes ?? null, workoutCompleted: workoutDates.has(localDate), cardioCompleted: cardioDates.has(localDate), weightKg: body?.weightKg ?? null, waistCm: body?.waistCm ?? null, calorieTargetKcal: plan?.calorieTargetKcal ?? null, proteinTargetG: plan?.proteinTargetG ?? null, hydrationTargetMl: plan?.hydrationTargetMl ?? null, sleepTargetMinutes: plan?.sleepTargetMinutes ?? null, titanScore: null }; point.titanScore = calculateTitanScore(point); return point })
+  const values = <T extends number>(items: (T | null)[]) => items.filter((x): x is T => x !== null); const adherence = (selector: (p: AnalyticsPoint) => number, target: (p: AnalyticsPoint) => number | null) => Math.round(average(days.map((p) => target(p) ? percentage(selector(p), target(p)!) : null).filter((x): x is number => x !== null)) ?? 0)
+  const best = new Map<string, typeof records[number]>(); records.forEach((x) => { if (!best.has(x.exerciseName) || best.get(x.exerciseName)!.estimatedOneRepMaxKg < x.estimatedOneRepMaxKg) best.set(x.exerciseName, x) })
+  const scores = values(days.map((x) => x.titanScore)); const dataCoverage = coverage(days)
+  return { days, weeklyTrends: aggregateTrends(days, 'week'), monthlyTrends: aggregateTrends(days, 'month'), averages: { caloriesKcal: Math.round(average(days.map((x) => x.caloriesKcal)) ?? 0), proteinG: Math.round(average(days.map((x) => x.proteinG)) ?? 0), hydrationMl: Math.round(average(days.map((x) => x.hydrationMl)) ?? 0), sleepMinutes: average(values(days.map((x) => x.sleepMinutes))), weightKg: average(values(days.map((x) => x.weightKg))) }, totals: { workouts: workoutDates.size, cardios: cardioDone.length, cardioMinutes: cardioDone.reduce((s, x) => s + x.durationMinutes, 0), cardioDistanceKm: cardioDone.reduce((s, x) => s + (x.distanceKm ?? 0), 0) }, adherence: { nutrition: adherence((x) => x.proteinG, (x) => x.proteinTargetG), hydration: adherence((x) => x.hydrationMl, (x) => x.hydrationTargetMl), sleep: adherence((x) => x.sleepMinutes ?? 0, (x) => x.sleepMinutes === null ? null : x.sleepTargetMinutes), training: Math.round(workoutDates.size / daysCount * 100) }, evolution: { weightKg: metricEvolution(days, (x) => x.weightKg), waistCm: metricEvolution(days, (x) => x.waistCm), titanScore: scores.length > 1 ? scores.at(-1)! - scores[0] : null }, streaks: calculateStreaks(days), consistency: scores.length ? Math.round(average(scores)!) : 0, coverage: dataCoverage, comparisons: { weekly: compareScores(days, 7), monthly: compareScores(days, 30) }, personalRecords: [...best.values()].sort((a, b) => b.estimatedOneRepMaxKg - a.estimatedOneRepMaxKg).slice(0, 10).map(({ exerciseName, estimatedOneRepMaxKg, localDate }) => ({ exerciseName, estimatedOneRepMaxKg, localDate })) }
 }

@@ -52,6 +52,14 @@
 - Registro de duração, distância, FC média e esforço percebido.
 - Schema 3 do IndexedDB.
 
+## Sprint 007 — Analytics Executivo
+
+### Added
+
+- Dashboard executivo local com tendências semanais e mensais.
+- Score TITAN histórico, streaks, consistência, cobertura e comparativos.
+- Nove gráficos de performance e testes unitários da engine de Analytics.
+
 ## Sprint 007
 
 ### Added

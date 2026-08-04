@@ -3,7 +3,7 @@ import { useState } from 'react'
 import { getAnalyticsSummary } from '../data/analyticsRepository'
 
 export function useAnalytics() {
-  const [period, setPeriod] = useState(30)
+  const [period, setPeriod] = useState(90)
 
   const summary = useLiveQuery(
     () => getAnalyticsSummary(period),
