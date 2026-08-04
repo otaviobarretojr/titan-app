@@ -52,3 +52,7 @@ O Coach analisa somente evidências armazenadas no IndexedDB, compara janelas de
 ## Dashboard Inteligente
 
 A Home segue uma experiência mobile-first inspirada no Samsung One UI: Score TITAN destacado, uma recomendação prioritária do Coach, estados claros de refeição e treino, pendências, resumo diário e cards totalmente acionáveis. A navegação inferior permanece fixa e o FAB permite registrar água ou acessar rapidamente os módulos. Consulte `docs/releases/SPRINT_012_DASHBOARD_INTELIGENTE.md`.
+
+## Analytics e Relatórios — Sprint 013
+
+A rota `/analytics` oferece filtros de 7, 30, 90 dias e 1 ano, gráficos de Score TITAN, composição corporal, força, nutrição, hidratação e sono, além da Timeline do Coach. Relatórios semanais e mensais e exportações JSON, CSV e PDF são gerados localmente a partir do IndexedDB. Consulte `docs/releases/SPRINT_013_ANALYTICS_RELATORIOS.md`.

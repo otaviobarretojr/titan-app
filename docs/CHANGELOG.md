@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+### Sprint 013 — Analytics e Relatórios
+
+- Analytics mobile-first com filtros de 7, 30, 90 dias e 1 ano.
+- Gráficos de Score TITAN, peso, medidas, força, proteína, água, calorias e sono.
+- Timeline do Coach alimentada pelas recomendações persistidas no IndexedDB.
+- Relatórios semanais e mensais em PDF e exportação local em JSON, CSV e PDF.
+
 ### Sprint 012 — Dashboard Inteligente
 
 - Home redesenhada em padrão mobile-first inspirado no Samsung One UI, com hierarquia de leitura mais clara.
