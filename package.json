@@ -9,7 +9,7 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "typecheck": "tsc --noEmit",
-    "validate": "npm run lint && npm run typecheck && npm run build && npm run validate:release",
+    "validate": "npm run lint && npm run typecheck && npm run test && npm run build && npm run validate:release",
     "validate:release": "node scripts/validate-release.mjs",
     "test": "vitest run"
   },

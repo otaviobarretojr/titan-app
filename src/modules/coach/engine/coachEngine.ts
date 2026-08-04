@@ -53,8 +53,19 @@ const metricConfig: Record<TrendMetric, { label: string; unit: string }> = {
 const average = (values: number[]) => values.reduce((sum, value) => sum + value, 0) / values.length
 export function calculateTrends(snapshots: DailyCoachSnapshot[], period: TrendPeriod): CoachTrend[] {
   const days = period === 'weekly' ? 7 : 30
-  const sorted = [...snapshots].sort((a, b) => a.date.localeCompare(b.date)).slice(-days * 2)
-  const current = sorted.slice(-days); const previous = sorted.slice(-(days * 2), -days)
+  const datedSnapshots = snapshots
+    .map(snapshot => ({ snapshot, timestamp: Date.parse(`${snapshot.date.slice(0, 10)}T00:00:00Z`) }))
+    .filter(item => Number.isFinite(item.timestamp))
+  const latestTimestamp = datedSnapshots.reduce((latest, item) => Math.max(latest, item.timestamp), -Infinity)
+  const dayInMilliseconds = 24 * 60 * 60 * 1000
+  const currentStart = latestTimestamp - (days - 1) * dayInMilliseconds
+  const previousStart = latestTimestamp - (days * 2 - 1) * dayInMilliseconds
+  const current = datedSnapshots
+    .filter(item => item.timestamp >= currentStart && item.timestamp <= latestTimestamp)
+    .map(item => item.snapshot)
+  const previous = datedSnapshots
+    .filter(item => item.timestamp >= previousStart && item.timestamp < currentStart)
+    .map(item => item.snapshot)
   return (Object.keys(metricConfig) as TrendMetric[]).flatMap(metric => {
     const currentValues = current.flatMap(day => typeof day[metric] === 'number' ? [day[metric] as number] : [])
     if (currentValues.length < 2) return []
