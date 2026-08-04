@@ -145,5 +145,19 @@ export function generateCoachAlerts(snapshots: DailyCoachSnapshot[]): CoachInsig
   targetAlert('protein','proteinTarget','protein-below-target','Proteína abaixo da meta','nutrition','/nutrition'); targetAlert('hydration','hydrationTarget','water-below-target','Água abaixo da meta','hydration','/nutrition'); targetAlert('sleep','sleepTarget','sleep-insufficient','Sono insuficiente','recovery','/health/sleep')
   const weights=vals(ordered.slice(-21),'weight'); if(weights.length>=4&&Math.abs(weights.at(-1)!-weights[0])<.3)add('weight-plateau','body','medium','Platô de peso',`${weights.length} medições variaram menos de 0,3 kg.`,'últimos 21 dias',weights.length,'Interprete o platô junto ao objetivo e à cintura registrada.','Ver evolução','/evolution')
   const strength=vals(ordered.slice(-21),'strength'); if(strength.length>=4&&(Math.max(...strength)-Math.min(...strength))/average(strength)<.02)add('strength-plateau','training','medium','Platô de força',`${strength.length} estimativas variaram menos de 2%.`,'últimos 21 dias',strength.length,'Revise volume, recuperação e progressão registrados.','Ver treino','/training')
-  return [...new Map(alerts.map(alert=>[alert.id,alert])).values()].sort((a,b)=>({high:0,medium:1,low:2}[a.priority]-({high:0,medium:1,low:2}[b.priority]))
+  const priorityOrder = {
+    high: 0,
+    medium: 1,
+    low: 2,
+  }
+
+  return [
+    ...new Map(
+      alerts.map((alert) => [alert.id, alert]),
+    ).values(),
+  ].sort(
+    (first, second) =>
+      priorityOrder[first.priority] -
+      priorityOrder[second.priority],
+  )
 }
