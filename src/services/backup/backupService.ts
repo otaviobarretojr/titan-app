@@ -11,6 +11,30 @@ const backupSchema = z.object({
 })
 
 export type TitanBackup = z.infer<typeof backupSchema>
+export type BackupSummary = {
+  exportedAt: string
+  databaseVersion: number
+  records: number
+  tables: number
+}
+
+export async function readBackup(file: File): Promise<{ backup: TitanBackup; summary: BackupSummary }> {
+  const parsed: unknown = JSON.parse(await file.text())
+  const backup = backupSchema.parse(parsed)
+  const existingTables = new Set(titanDatabase.tables.map((table) => table.name))
+  for (const tableName of Object.keys(backup.tables)) {
+    if (!existingTables.has(tableName)) throw new Error(`Tabela incompatível no backup: ${tableName}`)
+  }
+  return {
+    backup,
+    summary: {
+      exportedAt: backup.exportedAt,
+      databaseVersion: backup.databaseVersion,
+      records: Object.values(backup.tables).reduce((total, records) => total + records.length, 0),
+      tables: Object.keys(backup.tables).length,
+    },
+  }
+}
 
 function exportTitanLocalStorage() {
   const values: Record<string, string> = {}
@@ -65,21 +89,7 @@ export async function downloadBackup() {
 }
 
 export async function restoreBackup(file: File) {
-  const raw = await file.text()
-  const parsed: unknown = JSON.parse(raw)
-  const backup = backupSchema.parse(parsed)
-
-  const existingTables = new Set(
-    titanDatabase.tables.map((table) => table.name),
-  )
-
-  for (const tableName of Object.keys(backup.tables)) {
-    if (!existingTables.has(tableName)) {
-      throw new Error(
-        `Tabela incompatível no backup: ${tableName}`,
-      )
-    }
-  }
+  const { backup } = await readBackup(file)
 
   await titanDatabase.transaction(
     'rw',

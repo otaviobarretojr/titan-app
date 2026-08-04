@@ -8,4 +8,5 @@
 - [ ] v0.7 — Coach
 - [ ] v0.8 — Relatórios
 - [ ] v0.9 — Polimento
+- [x] Sprint 008 — Plataforma PWA e Confiabilidade
 - [ ] v1.0 — Primeira versão estável

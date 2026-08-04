@@ -45,6 +45,12 @@ export function NotificationsPage() {
   ] = useState<string | null>(null)
 
   async function enableNotifications() {
+    if (masterEnabled) {
+      setNotificationsEnabled(false)
+      setMasterEnabled(false)
+      setMessage('Notificações desativadas. Suas preferências foram mantidas.')
+      return
+    }
     try {
       const result =
         await requestNotificationPermission()
@@ -159,7 +165,7 @@ export function NotificationsPage() {
           />
 
           {masterEnabled
-            ? 'Notificações ativadas'
+            ? 'Desativar notificações'
             : 'Ativar notificações'}
         </Button>
 
@@ -172,6 +178,13 @@ export function NotificationsPage() {
         >
           Testar notificação
         </Button>
+      </Card>
+
+      <Card>
+        <p className="text-sm leading-6 text-slate-400">
+          Lembretes dependem do navegador e do sistema. iOS exige instalação na tela inicial;
+          navegadores podem suspender o app e não garantem agendamento em segundo plano sem um serviço de push.
+        </p>
       </Card>
 
       <div className="space-y-3">
