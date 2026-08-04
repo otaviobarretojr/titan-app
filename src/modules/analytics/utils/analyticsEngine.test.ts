@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest'
 import type { AnalyticsPoint } from '../types/analytics'
 import { aggregateTrends, calculateStreaks, calculateTitanScore, compareScores, coverage } from './analyticsEngine'
 
-const day = (localDate: string, data = true): AnalyticsPoint => ({ localDate, caloriesKcal: data ? 2000 : 0, proteinG: data ? 150 : 0, hydrationMl: data ? 3000 : 0, sleepMinutes: data ? 480 : null, workoutCompleted: data, cardioCompleted: false, weightKg: data ? 90 : null, waistCm: null, calorieTargetKcal: 2000, proteinTargetG: 150, hydrationTargetMl: 3000, sleepTargetMinutes: 480, titanScore: data ? 83 : null })
+const day = (localDate: string, data = true): AnalyticsPoint => ({ localDate, caloriesKcal: data ? 2000 : 0, proteinG: data ? 150 : 0, hydrationMl: data ? 3000 : 0, sleepMinutes: data ? 480 : null, workoutCompleted: data, cardioCompleted: false, weightKg: data ? 90 : null, waistCm: null, strengthKg: null, calorieTargetKcal: 2000, proteinTargetG: 150, hydrationTargetMl: 3000, sleepTargetMinutes: 480, titanScore: data ? 83 : null })
 
 describe('analytics engine', () => {
   it('calcula score somente quando existem plano e dados', () => { expect(calculateTitanScore(day('2026-08-01'))).toBe(83); expect(calculateTitanScore(day('2026-08-02', false))).toBeNull() })

@@ -8,6 +8,7 @@ export type AnalyticsPoint = {
   cardioCompleted: boolean
   weightKg: number | null
   waistCm: number | null
+  strengthKg: number | null
   calorieTargetKcal: number | null
   proteinTargetG: number | null
   hydrationTargetMl: number | null
@@ -45,4 +46,5 @@ export type AnalyticsSummary = {
   coverage: { percentage: number; daysWithData: number; totalDays: number; byMetric: Record<string, number> }
   comparisons: { weekly: Comparison; monthly: Comparison }
   personalRecords: Array<{ exerciseName: string; estimatedOneRepMaxKg: number; localDate: string }>
+  coachTimeline: Array<{ id: string; localDate: string; title: string; message: string; priority: 'low' | 'medium' | 'high'; occurredAt: string }>
 }

@@ -6,8 +6,9 @@
 - [ ] v0.5 — Cardio
 - [x] v0.6 — Saúde e evolução
 - [x] v0.7 — Coach
-- [ ] v0.8 — Relatórios
+- [x] v0.8 — Relatórios
 - [ ] v0.9 — Polimento
+- [x] Sprint 013 — Analytics e Relatórios
 - [x] Sprint 008 — Plataforma PWA e Confiabilidade
 - [x] Sprint 009 — Evolução Corporal Avançada
 - [x] Sprint 010 — TITAN Experience (UX Premium)
