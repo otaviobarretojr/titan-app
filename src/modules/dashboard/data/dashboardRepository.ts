@@ -1,3 +1,4 @@
+import Dexie from 'dexie'
 import {
   getTitanCurrentMinutes,
   getTitanLocalDate,
@@ -28,54 +29,64 @@ export async function getDashboardData(): Promise<DashboardData | null> {
     cardioSession,
     hydrationEntries,
     sleepEntry,
-  ] = await Promise.all([
-    titanDatabase.users.get(TITAN_USER_ID),
-
-    titanDatabase.dailyPlans
-      .where('[userId+localDate]')
-      .equals([TITAN_USER_ID, localDate])
-      .first(),
-
-    titanDatabase.mealPlans
-      .where('[userId+localDate]')
-      .equals([TITAN_USER_ID, localDate])
-      .sortBy('sequence'),
-
-    titanDatabase.mealEntries
-      .where('[userId+localDate]')
-      .equals([TITAN_USER_ID, localDate])
-      .toArray(),
-
-    titanDatabase.workoutPlans
-      .where('[userId+localDate]')
-      .equals([TITAN_USER_ID, localDate])
-      .first(),
-
-    titanDatabase.workoutSessions
-      .where('[userId+localDate]')
-      .equals([TITAN_USER_ID, localDate])
-      .first(),
-
-    titanDatabase.cardioPlans
-      .where('[userId+localDate]')
-      .equals([TITAN_USER_ID, localDate])
-      .first(),
-
-    titanDatabase.cardioSessions
-      .where('[userId+localDate]')
-      .equals([TITAN_USER_ID, localDate])
-      .first(),
-
-    titanDatabase.hydrationEntries
-      .where('[userId+localDate]')
-      .equals([TITAN_USER_ID, localDate])
-      .toArray(),
-
-    titanDatabase.sleepEntries
-      .where('[userId+localDate]')
-      .equals([TITAN_USER_ID, localDate])
-      .first(),
-  ])
+  ] = await titanDatabase.transaction(
+    'r',
+    [
+      titanDatabase.users,
+      titanDatabase.dailyPlans,
+      titanDatabase.mealPlans,
+      titanDatabase.mealEntries,
+      titanDatabase.workoutPlans,
+      titanDatabase.workoutSessions,
+      titanDatabase.cardioPlans,
+      titanDatabase.cardioSessions,
+      titanDatabase.hydrationEntries,
+      titanDatabase.sleepEntries,
+    ],
+    () =>
+      Promise.all([
+        titanDatabase.users.get(TITAN_USER_ID),
+        titanDatabase.dailyPlans
+          .where('[userId+localDate]')
+          .equals([TITAN_USER_ID, localDate])
+          .first(),
+        titanDatabase.mealPlans
+          .where('[userId+localDate+sequence]')
+          .between(
+            [TITAN_USER_ID, localDate, Dexie.minKey],
+            [TITAN_USER_ID, localDate, Dexie.maxKey],
+          )
+          .toArray(),
+        titanDatabase.mealEntries
+          .where('[userId+localDate]')
+          .equals([TITAN_USER_ID, localDate])
+          .toArray(),
+        titanDatabase.workoutPlans
+          .where('[userId+localDate]')
+          .equals([TITAN_USER_ID, localDate])
+          .first(),
+        titanDatabase.workoutSessions
+          .where('[userId+localDate]')
+          .equals([TITAN_USER_ID, localDate])
+          .first(),
+        titanDatabase.cardioPlans
+          .where('[userId+localDate]')
+          .equals([TITAN_USER_ID, localDate])
+          .first(),
+        titanDatabase.cardioSessions
+          .where('[userId+localDate]')
+          .equals([TITAN_USER_ID, localDate])
+          .first(),
+        titanDatabase.hydrationEntries
+          .where('[userId+localDate]')
+          .equals([TITAN_USER_ID, localDate])
+          .toArray(),
+        titanDatabase.sleepEntries
+          .where('[userId+localDate]')
+          .equals([TITAN_USER_ID, localDate])
+          .first(),
+      ]),
+  )
 
   if (!user || !dailyPlan) {
     return null

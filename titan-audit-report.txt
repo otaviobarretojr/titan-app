@@ -1,30 +1,39 @@
 TITAN AUDIT REPORT
-Generated: 2026-08-03T21:22:10+00:00
+Generated: 2026-08-04T00:01:03+00:00
 
 === GIT ===
-main
-?? titan-audit-report.txt
-?? titan-audit.sh
-a476ff1 feat: add weekly performance reports
-b10b893 fix: correct sleep page state handling
-d98ed4a feat: integrate dashboard and coach engine
-8e47b01 feat: sprint 009 pwa backup
-f8434c9 feat: implement coach engine foundation
+work
+ M TITAN_AUDIT_RC1.md
+ M src/database/titanDatabase.ts
+ M src/modules/analytics/data/analyticsRepository.ts
+ M src/modules/dashboard/data/dashboardRepository.ts
+ M titan-audit-report.txt
+ M titan-audit.sh
+43013b7 release: apply TITAN RC1
+edd7c1f feat: deliver analytics premium
+7846e6a feat: analytics premium dashboard
+3e17049 fix: integrate consistency into dashboard coach
+52f200d feat: deliver notifications offline and backup premium
 
 === NODE ===
-v24.14.0
-11.9.0
+v24.15.0
+npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm.
+11.4.2
 
 === PACKAGE SCRIPTS ===
 {
   dev: 'vite',
   build: 'tsc -b && vite build',
   lint: 'eslint .',
-  preview: 'vite preview'
+  preview: 'vite preview',
+  typecheck: 'tsc --noEmit',
+  validate: 'npm run lint && npm run typecheck && npm run build && npm run validate:release',
+  'validate:release': 'node scripts/validate-release.mjs'
 }
 
 === DEPENDENCIES ===
-titan-app@0.0.0 /workspaces/titan-app
+npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm.
+titan-app@0.9.0-rc.1 /workspace/titan-app
 ├── @eslint/js@10.0.1
 ├── @tailwindcss/vite@4.3.3
 ├── @types/node@24.13.3
@@ -61,17 +70,36 @@ src/database/seeds/seedToday.ts
 src/database/titanDatabase.ts
 src/layouts/AppShell.tsx
 src/main.tsx
+src/modules/analytics/components/AnalyticsBarChart.tsx
+src/modules/analytics/components/AnalyticsMetricCard.tsx
+src/modules/analytics/data/analyticsRepository.ts
+src/modules/analytics/hooks/useAnalytics.ts
+src/modules/analytics/pages/AnalyticsPage.tsx
+src/modules/analytics/types/analytics.ts
+src/modules/analytics/utils/analyticsMath.ts
+src/modules/analytics/utils/exportAnalytics.ts
 src/modules/cardio/components/CardioForm.tsx
+src/modules/cardio/components/CardioHistory.tsx
 src/modules/cardio/data/cardioRepository.ts
 src/modules/cardio/hooks/useCardioDay.ts
+src/modules/cardio/hooks/useCardioHistory.ts
 src/modules/cardio/pages/CardioPage.tsx
 src/modules/cardio/types/cardio.ts
+src/modules/cardio/utils/cardioMath.ts
+src/modules/coach/components/CoachInsightCard.tsx
+src/modules/coach/components/CoachTrendCard.tsx
+src/modules/coach/data/coachRepository.ts
 src/modules/coach/engine/coachEngine.ts
+src/modules/coach/hooks/useCoachReport.ts
+src/modules/coach/pages/CoachPage.tsx
 src/modules/coach/types/coach.ts
 src/modules/dashboard/components/CardioCard.tsx
 src/modules/dashboard/components/CoachCard.tsx
+src/modules/dashboard/components/CoachInsightsList.tsx
+src/modules/dashboard/components/DailyMetricsGrid.tsx
 src/modules/dashboard/components/MealCard.tsx
 src/modules/dashboard/components/MetricsGrid.tsx
+src/modules/dashboard/components/ScoreBreakdown.tsx
 src/modules/dashboard/components/ScoreCard.tsx
 src/modules/dashboard/components/WorkoutCard.tsx
 src/modules/dashboard/data/dashboardRepository.ts
@@ -79,14 +107,26 @@ src/modules/dashboard/hooks/useDashboard.ts
 src/modules/dashboard/pages/DashboardPage.tsx
 src/modules/dashboard/types/dashboard.ts
 src/modules/evolution/components/BodyMetricForm.tsx
+src/modules/evolution/components/EvolutionChart.tsx
 src/modules/evolution/components/EvolutionHistory.tsx
+src/modules/evolution/components/ProgressPhotos.tsx
 src/modules/evolution/data/evolutionRepository.ts
 src/modules/evolution/hooks/useEvolution.ts
 src/modules/evolution/pages/EvolutionPage.tsx
 src/modules/evolution/types/evolution.ts
+src/modules/evolution/utils/evolutionMath.ts
+src/modules/health/components/HealthExamForm.tsx
+src/modules/health/components/HealthHistory.tsx
+src/modules/health/components/HealthMetricForm.tsx
+src/modules/health/data/healthRepository.ts
 src/modules/health/data/sleepRepository.ts
+src/modules/health/hooks/useHealth.ts
 src/modules/health/hooks/useSleep.ts
+src/modules/health/pages/HealthPage.tsx
 src/modules/health/pages/SleepPage.tsx
+src/modules/health/types/health.ts
+src/modules/notifications/pages/NotificationsPage.tsx
+src/modules/notifications/types/notifications.ts
 src/modules/nutrition/components/MealStatusBadge.tsx
 src/modules/nutrition/components/NutritionMealCard.tsx
 src/modules/nutrition/components/NutritionSummary.tsx
@@ -95,16 +135,20 @@ src/modules/nutrition/hooks/useNutritionDay.ts
 src/modules/nutrition/pages/MealDetailPage.tsx
 src/modules/nutrition/pages/NutritionPage.tsx
 src/modules/nutrition/types/nutrition.ts
+src/modules/nutrition/utils/nutritionMath.ts
 src/modules/reports/data/reportsRepository.ts
 src/modules/reports/hooks/useWeeklyReport.ts
 src/modules/reports/pages/ReportsPage.tsx
 src/modules/reports/types/reports.ts
 src/modules/settings/pages/SettingsPage.tsx
 src/modules/training/components/ExerciseCard.tsx
+src/modules/training/components/RestTimer.tsx
 src/modules/training/data/trainingRepository.ts
+src/modules/training/hooks/useRestTimer.ts
 src/modules/training/hooks/useTrainingWorkout.ts
 src/modules/training/pages/TrainingPage.tsx
 src/modules/training/types/training.ts
+src/modules/training/utils/trainingMath.ts
 src/services/backup/backupService.ts
 src/services/notifications/notificationService.ts
 src/shared/ui/Badge.tsx
@@ -121,6 +165,18 @@ docs/ARCHITECTURE.md
 docs/CHANGELOG.md
 docs/DESIGN_SYSTEM.md
 docs/ROADMAP.md
+docs/features/ANALYTICS_PREMIUM.md
+docs/features/CARDIO_PREMIUM.md
+docs/features/COACH_INTELIGENTE_PREMIUM.md
+docs/features/DASHBOARD_COACH_PREMIUM.md
+docs/features/EVOLUTION_PREMIUM.md
+docs/features/HEALTH_RECOVERY_PREMIUM.md
+docs/features/NOTIFICATIONS_OFFLINE_BACKUP_PREMIUM.md
+docs/features/NUTRITION_PREMIUM.md
+docs/features/TRAINING_PREMIUM.md
+docs/releases/v0.9.0-beta.1.md
+docs/releases/v0.9.0-beta.2.md
+docs/releases/v0.9.0-rc.1.md
 docs/sprints/SPRINT-002.md
 docs/sprints/SPRINT-003.md
 docs/sprints/SPRINT-004.md
@@ -134,23 +190,105 @@ docs/sprints/SPRINT-011.md
 docs/sprints/SPRINT-012.md
 
 === BUILD ===
+npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm.
 
-> titan-app@0.0.0 build
+> titan-app@0.9.0-rc.1 build
 > tsc -b && vite build
 
 vite v8.2.0 building client environment for production...
-[2Ktransforming...✓ 1925 modules transformed.
-rendering chunks...
-computing gzip size...
-dist/manifest.webmanifest                          0.46 kB
-dist/index.html                                    0.63 kB │ gzip:   0.36 kB
-dist/assets/index-Cv0b32Dn.css                    26.59 kB │ gzip:   5.75 kB
-dist/assets/workbox-window.prod.es5-Bd17z0YL.js    5.65 kB │ gzip:   2.20 kB
-dist/assets/index-DCwOqZGO.js                    480.86 kB │ gzip: 145.25 kB
+[2Ktransforming...✓ 1956 modules transformed.
+dist/index.html                                    0.75 kB │ gzip:  0.40 kB
+dist/assets/index-B0M9RMMT.css                    29.20 kB │ gzip:  6.21 kB
+dist/assets/minus-D8pxVaRH.js                      0.10 kB │ gzip:  0.12 kB
+dist/assets/check-DOSKn1xG.js                      0.11 kB │ gzip:  0.13 kB
+dist/assets/chevron-right-BK8rPYAb.js              0.11 kB │ gzip:  0.13 kB
+dist/assets/plus-BtxPZ-jj.js                       0.14 kB │ gzip:  0.14 kB
+dist/assets/flame-BqMSwYTy.js                      0.18 kB │ gzip:  0.17 kB
+dist/assets/rotate-ccw-ClUC4m6H.js                 0.18 kB │ gzip:  0.17 kB
+dist/assets/moon-ChX3FRqY.js                       0.20 kB │ gzip:  0.18 kB
+dist/assets/activity-DjSQ6QTi.js                   0.22 kB │ gzip:  0.19 kB
+dist/assets/arrow-up-ChnDDaPr.js                   0.26 kB │ gzip:  0.19 kB
+dist/assets/bell-B8vIefow.js                       0.27 kB │ gzip:  0.22 kB
+dist/assets/save-BPt_NF_Y.js                       0.31 kB │ gzip:  0.21 kB
+dist/assets/trash-2-CggWsa-4.js                    0.31 kB │ gzip:  0.20 kB
+dist/assets/droplets-BwNcDgHS.js                   0.36 kB │ gzip:  0.27 kB
+dist/assets/timer-B5hGTK1b.js                      0.36 kB │ gzip:  0.26 kB
+dist/assets/download-BsnChmWa.js                   0.41 kB │ gzip:  0.26 kB
+dist/assets/brain-CItNVp2C.js                      0.56 kB │ gzip:  0.30 kB
+dist/assets/rolldown-runtime-CbXtAM7H.js           0.58 kB │ gzip:  0.36 kB
+dist/assets/SleepPage-Iw6P8qWe.js                  3.44 kB │ gzip:  1.52 kB
+dist/assets/useNutritionDay-CKrGp9Hx.js            3.85 kB │ gzip:  1.59 kB
+dist/assets/MealDetailPage-s-wZeBN1.js             3.85 kB │ gzip:  1.50 kB
+dist/assets/NotificationsPage-XD2WAzAf.js          4.96 kB │ gzip:  2.02 kB
+dist/assets/ReportsPage-e4fcJ1D2.js                5.46 kB │ gzip:  1.92 kB
+dist/assets/workbox-window.prod.es5-Bd17z0YL.js    5.65 kB │ gzip:  2.20 kB
+dist/assets/NutritionPage-DsjVG2HW.js              6.03 kB │ gzip:  2.10 kB
+dist/assets/seedToday-DhjM6Ag7.js                  6.31 kB │ gzip:  2.05 kB
+dist/assets/CoachPage-BkSdhUBg.js                  6.56 kB │ gzip:  2.25 kB
+dist/assets/coachEngine-OtciS0PQ.js                7.53 kB │ gzip:  2.74 kB
+dist/assets/AnalyticsPage-DGd09RTB.js             10.06 kB │ gzip:  3.59 kB
+dist/assets/CardioPage-DxjRnleJ.js                11.44 kB │ gzip:  3.75 kB
+dist/assets/HealthPage-DmC2Ptb7.js                12.66 kB │ gzip:  3.53 kB
+dist/assets/DashboardPage-CDnfK01h.js             13.80 kB │ gzip:  3.95 kB
+dist/assets/TrainingPage-BS90XCND.js              14.01 kB │ gzip:  4.55 kB
+dist/assets/EvolutionPage-BVJhkKuS.js             14.33 kB │ gzip:  4.41 kB
+dist/assets/SettingsPage-iP9Yod2s.js              75.85 kB │ gzip: 20.93 kB
+dist/assets/titanDatabase-1xjX-BFg.js            103.90 kB │ gzip: 31.89 kB
+dist/assets/index-Dvy1ZxjF.js                    243.26 kB │ gzip: 78.43 kB
+✓ built in 1.16s
+precache  45 entries (588.68 KiB)
+  dist/workbox-dcde9eb3.js
+npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm.
+> titan-app@0.9.0-rc.1 lint
 
-✓ built in 778ms
+npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm.
+=== RELEASE VALIDATION ===
+npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm.
 
-PWA v1.3.0
+> titan-app@0.9.0-rc.1 validate:release
+> node scripts/validate-release.mjs
+
+✅ Release validada.
+RELEASE_EXIT=0
+
+dist/assets/AnalyticsPage-DGd09RTB.js
+dist/assets/CardioPage-DxjRnleJ.js
+dist/assets/CoachPage-BkSdhUBg.js
+dist/assets/DashboardPage-CDnfK01h.js
+dist/assets/EvolutionPage-BVJhkKuS.js
+dist/assets/HealthPage-DmC2Ptb7.js
+dist/assets/MealDetailPage-s-wZeBN1.js
+dist/assets/NotificationsPage-XD2WAzAf.js
+dist/assets/NutritionPage-DsjVG2HW.js
+dist/assets/ReportsPage-e4fcJ1D2.js
+dist/assets/SettingsPage-iP9Yod2s.js
+dist/assets/SleepPage-Iw6P8qWe.js
+dist/assets/TrainingPage-BS90XCND.js
+dist/assets/activity-DjSQ6QTi.js
+dist/assets/arrow-up-ChnDDaPr.js
+dist/assets/bell-B8vIefow.js
+dist/assets/brain-CItNVp2C.js
+dist/assets/check-DOSKn1xG.js
+dist/assets/chevron-right-BK8rPYAb.js
+dist/assets/coachEngine-OtciS0PQ.js
+dist/assets/download-BsnChmWa.js
+dist/assets/droplets-BwNcDgHS.js
+dist/assets/flame-BqMSwYTy.js
+dist/assets/index-B0M9RMMT.css
+dist/assets/index-Dvy1ZxjF.js
+dist/assets/minus-D8pxVaRH.js
+dist/assets/moon-ChX3FRqY.js
+dist/assets/plus-BtxPZ-jj.js
+dist/assets/rolldown-runtime-CbXtAM7H.js
+dist/assets/rotate-ccw-ClUC4m6H.js
+dist/assets/save-BPt_NF_Y.js
+dist/assets/seedToday-DhjM6Ag7.js
+dist/assets/timer-B5hGTK1b.js
+dist/assets/titanDatabase-1xjX-BFg.js
+dist/assets/trash-2-CggWsa-4.js
+dist/assets/useNutritionDay-CKrGp9Hx.js
+dist/workbox-dcde9eb3.js
+RELEASE_EXIT=0
 mode      generateSW
 precache  11 entries (516.40 KiB)
 files generated

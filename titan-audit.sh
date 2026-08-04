@@ -43,6 +43,11 @@ REPORT="titan-audit-report.txt"
   TSC_EXIT=$?
   echo "TSC_EXIT=$TSC_EXIT"
   echo
+  echo "=== RELEASE VALIDATION ==="
+  npm run validate:release 2>&1
+  RELEASE_EXIT=$?
+  echo "RELEASE_EXIT=$RELEASE_EXIT"
+  echo
   echo "=== PWA OUTPUT ==="
   find dist -maxdepth 2 -type f 2>/dev/null | sort
   echo
@@ -50,6 +55,7 @@ REPORT="titan-audit-report.txt"
   echo "BUILD_EXIT=$BUILD_EXIT"
   echo "LINT_EXIT=$LINT_EXIT"
   echo "TSC_EXIT=$TSC_EXIT"
+  echo "RELEASE_EXIT=$RELEASE_EXIT"
 } | tee "$REPORT"
 
 echo
