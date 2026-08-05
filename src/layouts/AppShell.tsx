@@ -32,7 +32,7 @@ const navigationItems: NavigationItem[] = [
   { label: 'Cardio', to: '/cardio', icon: HeartPulse },
   { label: 'Evolução', to: '/evolution', icon: ChartNoAxesCombined },
   { label: 'Conta', to: '/account', icon: Cloud },
-  { label: 'Mais', to: '/more', icon: MoreHorizontal },
+  { label: 'Conta e Configurações', to: '/more', icon: MoreHorizontal },
 ]
 
 const quickActions = [

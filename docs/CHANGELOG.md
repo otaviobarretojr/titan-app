@@ -308,3 +308,11 @@
 - Coordena ativação do Service Worker e reload único.
 - Detecta falhas de chunks versionados e exibe tela de recuperação.
 - Preserva IndexedDB e dados locais.
+
+## v1.0.3 — Perfil, Planos e Configurações
+
+- Adiciona Perfil completo, onboarding persistente e Conta e Configurações real.
+- Introduz contrato TITAN 1.0 com serviço único, Zod, prévia e importação transacional.
+- Adiciona planos independentes e histórico sanitizado de importações.
+- Remove temas Premium/AMOLED do fluxo oficial e usa system/light/dark.
+- Corrige escrita do Coach fora de `getCoachReport` para evitar Dexie ReadOnlyError.

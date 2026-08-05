@@ -32,3 +32,10 @@
 
 ## v1.0.2
 - [x] Atualização segura do PWA e recuperação sem apagar dados locais.
+
+## v1.0.3
+
+- [x] Perfil completo e onboarding persistente.
+- [x] Planos independentes com importação TITAN segura.
+- [x] Conta e Configurações real, tema simplificado e Sobre versionado.
+- [x] Correção do Coach para não escrever dentro de liveQuery.

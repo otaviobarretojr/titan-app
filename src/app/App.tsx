@@ -7,6 +7,7 @@ import {
 } from 'react-router-dom'
 import { AppShell } from '../layouts/AppShell'
 import { GlobalErrorBoundary } from '../components/feedback/GlobalErrorBoundary'
+import { OnboardingGate } from '../modules/onboarding/OnboardingGate'
 
 const DashboardPage = lazy(() =>
   import('../modules/dashboard/pages/DashboardPage').then((module) => ({
@@ -86,6 +87,10 @@ const SettingsPage = lazy(() =>
   })),
 )
 
+const ProfilePage = lazy(() =>
+  import('../modules/profile/pages/ProfilePage').then((module) => ({ default: module.ProfilePage })),
+)
+
 const AccountPage = lazy(() =>
   import('../modules/account/pages/AccountPage').then((module) => ({
     default: module.AccountPage,
@@ -115,7 +120,7 @@ export function App() {
       <GlobalErrorBoundary>
       <Suspense fallback={<RouteLoading />}>
         <Routes>
-          <Route element={<AppShell />}>
+          <Route element={<OnboardingGate><AppShell /></OnboardingGate>}>
             <Route index element={<DashboardPage />} />
             <Route path="/training" element={<TrainingPage />} />
             <Route path="/nutrition" element={<NutritionPage />} />
@@ -136,6 +141,7 @@ export function App() {
             />
             <Route path="/more" element={<SettingsPage />} />
             <Route path="/account" element={<AccountPage />} />
+            <Route path="/profile" element={<ProfilePage />} />
           </Route>
 
           <Route path="*" element={<Navigate to="/" replace />} />

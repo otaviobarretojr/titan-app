@@ -77,3 +77,7 @@ O IndexedDB permanece como fonte operacional principal. Supabase é usado apenas
 
 ## Atualização PWA v1.0.2
 O PWA usa atualização coordenada: prompt explícito, ativação do Service Worker em espera, aguardo de `controllerchange`, reload único por `sessionStorage` e recuperação global para chunks versionados sem limpar IndexedDB.
+
+## Release v1.0.3 — Separação de domínios
+
+A v1.0.3 separa Perfil, Planos, Execução, Histórico e Preferências. A migração Dexie v12 adiciona apenas `userProfile`, `activePlans`, `importHistory` e `appPreferences`; tabelas v1.0.2 não são removidas. Importações passam exclusivamente por `titanFileService.ts`.

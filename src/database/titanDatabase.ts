@@ -249,6 +249,72 @@ export type SleepEntryRecord = {
   updatedAt: string
 }
 
+
+export type ActivePlanType = 'workout' | 'nutrition' | 'cardio' | 'supplements'
+
+export type UserProfileRecord = {
+  id: string
+  name: string
+  displayName: string
+  birthDate?: string | null
+  sex?: 'female' | 'male' | 'other' | 'not_informed' | null
+  heightCm: number
+  weightKg: number
+  goal: string
+  experience: 'beginner' | 'intermediate' | 'advanced'
+  trainingDays: string[]
+  wakeTime: string
+  workStartTime: string
+  workEndTime: string
+  trainingTime: string
+  sleepTime: string
+  timezone: string
+  calorieTargetKcal: number
+  proteinTargetG: number
+  carbohydrateTargetG: number
+  fatTargetG: number
+  waterTargetMl: number
+  sleepTargetMinutes: number
+  preferences: { notes: string; foodPreferences: string[]; restrictions: string[] }
+  createdAt: string
+  updatedAt: string
+}
+
+export type ActivePlanRecord = {
+  id: string
+  type: ActivePlanType
+  title: string
+  author: string
+  sourceFileName: string
+  payload: unknown
+  importedAt: string
+  createdAt: string
+  updatedAt: string
+}
+
+export type ImportHistoryRecord = {
+  id: string
+  importedAt: string
+  type: 'profile' | ActivePlanType | 'project'
+  title: string
+  author: string
+  fileName: string
+  status: 'success' | 'failure'
+  message: string
+}
+
+export type AppPreferencesRecord = {
+  id: string
+  theme: 'system' | 'light' | 'dark'
+  onboardingStatus: 'pending' | 'completed' | 'skipped'
+  reduceAnimations: boolean
+  highContrast: boolean
+  updateChannel: 'stable'
+  lastUpdateCheckAt?: string | null
+  createdAt: string
+  updatedAt: string
+}
+
 export type CoachRecommendationRecord = {
   id: string
   userId: string
@@ -289,6 +355,10 @@ class TitanDatabase extends Dexie {
   coachRecommendations!: EntityTable<CoachRecommendationRecord, 'id'>
   notificationPreferences!: EntityTable<NotificationPreference, 'id'>
   notificationInbox!: EntityTable<NotificationInboxItem, 'id'>
+  userProfile!: EntityTable<UserProfileRecord, 'id'>
+  activePlans!: EntityTable<ActivePlanRecord, 'id'>
+  importHistory!: EntityTable<ImportHistoryRecord, 'id'>
+  appPreferences!: EntityTable<AppPreferencesRecord, 'id'>
 
   constructor() {
     super('titan-database')
@@ -518,6 +588,21 @@ class TitanDatabase extends Dexie {
         'id, userId, category, enabled, nextRunAt, [userId+category]',
       notificationInbox:
         'id, userId, category, priority, createdAt, readAt, dismissedAt, dedupeKey, [userId+createdAt], [userId+dedupeKey]',
+    })
+
+    // Release v1.0.3: additive stores for profile, independent active plans,
+    // sanitized import history and app preferences. Legacy tables remain intact.
+    this.version(12).stores({
+      userProfile: 'id, displayName, updatedAt',
+      activePlans: 'id, type, importedAt, updatedAt',
+      importHistory: 'id, importedAt, type, status',
+      appPreferences: 'id, theme, onboardingStatus, updatedAt',
+    }).upgrade(async (tx) => {
+      const table = tx.table('appPreferences')
+      const now = new Date().toISOString()
+      const legacyTheme = typeof localStorage !== 'undefined' ? localStorage.getItem('titan-theme') : null
+      const theme = legacyTheme === 'premium' || legacyTheme === 'amoled' || legacyTheme === 'dark' ? 'dark' : legacyTheme === 'light' || legacyTheme === 'system' ? legacyTheme : 'system'
+      await table.put({ id: 'app', theme, onboardingStatus: 'pending', reduceAnimations: false, highContrast: false, updateChannel: 'stable', createdAt: now, updatedAt: now })
     })
   }
 }
