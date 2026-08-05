@@ -18,7 +18,7 @@ export default defineConfig({
         name: 'TITAN v1.0',
         short_name: 'TITAN',
         description:
-          'TITAN v1.0.0 — sistema operacional de performance pessoal para treino, nutrição, cardio e evolução.',
+          'TITAN v1.0.1 — sistema operacional de performance pessoal para treino, nutrição, cardio e evolução.',
         theme_color: '#09090b',
         background_color: '#09090b',
         display: 'standalone',

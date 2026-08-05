@@ -12,7 +12,7 @@ const toneByLabel = {
   Bom: 'primary',
   Atenção: 'warning',
   Crítico: 'warning',
-  'Sem dados': 'neutral',
+  'Sem dados suficientes': 'neutral',
 } as const
 
 export function ScoreCard({ score }: ScoreCardProps) {
@@ -41,8 +41,8 @@ export function ScoreCard({ score }: ScoreCardProps) {
 
           <p className="mt-1 text-sm text-slate-400">
             {score.value === null
-              ? 'Registre ações para calcular o score.'
-              : 'Calculado com os dados registrados hoje.'}
+              ? 'Sem dados suficientes: registre suas primeiras atividades reais.'
+              : 'Calculado somente com categorias que possuem dados reais hoje.'}
           </p>
         </div>
 
@@ -66,6 +66,11 @@ export function ScoreCard({ score }: ScoreCardProps) {
           <ProgressBar label="Performance diária" value={score.value} />
         </div>
       ) : null}
+    {score.measuredCategories.length ? (
+        <p className="mt-4 text-xs font-semibold text-slate-400">Categorias válidas: {score.measuredCategories.join(', ')}.</p>
+      ) : (
+        <p className="mt-4 text-xs font-semibold text-slate-400">Nenhuma categoria possui evidência real suficiente.</p>
+      )}
     </Card>
   )
 }

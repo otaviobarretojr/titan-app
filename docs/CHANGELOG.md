@@ -1,3 +1,10 @@
+
+## v1.0.1 — Primeiro Acesso e Integridade do Score
+
+- Corrige a origem do Score inicial 20/100: planos `planned` não contam mais como execução real.
+- Instalações novas não recebem dados demonstrativos automaticamente em produção.
+- O Dashboard exibe “Sem dados suficientes” até haver evidências reais suficientes.
+- A atualização preserva dados locais existentes; para limpar dados locais, faça backup e confirme manualmente a remoção no navegador/sistema.
 # TITAN — Changelog
 
 ## Unreleased

@@ -31,7 +31,7 @@ export type TitanScoreBreakdown = {
 }
 export type TitanScore = {
   value: number | null
-  label: 'Excelente' | 'Bom' | 'Atenção' | 'Crítico' | 'Sem dados'
+  label: 'Excelente' | 'Bom' | 'Atenção' | 'Crítico' | 'Sem dados suficientes'
   breakdown: TitanScoreBreakdown
   measuredCategories: CoachCategory[]
 }

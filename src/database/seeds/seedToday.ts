@@ -7,6 +7,16 @@ function createId(prefix: string) {
   return `${prefix}-${crypto.randomUUID()}`
 }
 
+export function shouldSeedDemoData() {
+  return import.meta.env.DEV || import.meta.env.VITE_ENABLE_DEMO_DATA === 'true'
+}
+
+export async function prepareInitialData() {
+  if (shouldSeedDemoData()) {
+    await seedToday()
+  }
+}
+
 export async function seedToday() {
   const localDate = getTitanLocalDate()
   const now = new Date().toISOString()

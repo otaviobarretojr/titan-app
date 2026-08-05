@@ -34,8 +34,8 @@ if (manifest.name !== 'TITAN v1.0') {
   throw new Error('Manifesto PWA sem nome oficial da release v1.0.')
 }
 
-if (!manifest.description?.includes('v1.0.0')) {
-  throw new Error('Manifesto PWA sem descrição versionada da release v1.0.0.')
+if (!manifest.description?.includes('v1.0.1')) {
+  throw new Error('Manifesto PWA sem descrição versionada da release v1.0.1.')
 }
 
 if (!Array.isArray(manifest.icons) || manifest.icons.length === 0) {

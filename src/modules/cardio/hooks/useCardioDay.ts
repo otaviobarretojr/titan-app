@@ -1,6 +1,6 @@
 import { useLiveQuery } from 'dexie-react-hooks'
 import { useEffect, useState } from 'react'
-import { seedToday } from '../../../database/seeds/seedToday'
+import { prepareInitialData } from '../../../database/seeds/seedToday'
 import {
   completeCardio,
   getCardioDay,
@@ -13,7 +13,7 @@ export function useCardioDay() {
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
-    seedToday()
+    prepareInitialData()
       .then(() => setIsReady(true))
       .catch((reason: unknown) => {
         setError(
