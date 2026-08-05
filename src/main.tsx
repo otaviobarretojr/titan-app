@@ -22,7 +22,7 @@ window.addEventListener('unhandledrejection', (event) => {
 })
 
 try {
-  document.documentElement.dataset.theme = localStorage.getItem('titan-theme') ?? 'premium'
+  { const legacy = localStorage.getItem('titan-theme'); const theme = legacy === 'premium' || legacy === 'amoled' ? 'dark' : legacy === 'light' || legacy === 'dark' || legacy === 'system' ? legacy : 'system'; localStorage.setItem('titan-theme', theme); document.documentElement.dataset.theme = theme }
   const rootElement = document.getElementById('root')
   if (!rootElement) {
     renderBootstrapFallback('Elemento raiz da aplicação não encontrado.')

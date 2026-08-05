@@ -1,7 +1,9 @@
 import { useLiveQuery } from 'dexie-react-hooks'
 import { useEffect, useState } from 'react'
 import { prepareInitialData } from '../../../database/seeds/seedToday'
-import { getCoachReport } from '../../coach/data/coachRepository'
+import { getCoachReport, persistCoachInsights } from '../../coach/data/coachRepository'
+import { getTitanLocalDate } from '../../../database/date'
+import { titanDatabase } from '../../../database/titanDatabase'
 import {
   addHydration,
   getDashboardData,
@@ -28,6 +30,15 @@ export function useDashboard() {
     [isReady],
     null,
   )
+
+  useEffect(() => {
+    if (!data?.coach?.dailyInsights?.length) return
+    let cancelled = false
+    titanDatabase.coachRecommendations.where('userId').equals('local-user').toArray()
+      .then((history) => { if (!cancelled) return persistCoachInsights(data.coach!.dailyInsights, getTitanLocalDate(), history) })
+      .catch((reason) => console.warn('[TITAN] Falha ao persistir insights do Coach.', reason))
+    return () => { cancelled = true }
+  }, [data?.coach])
 
   async function registerWater(amountMl: number) {
     try {

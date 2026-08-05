@@ -3,7 +3,7 @@ import { getDeviceIdentity } from './deviceIdentityService'
 
 export const CLOUD_BACKUP_VERSION = 3
 export const CLOUD_BACKUP_MAX_BYTES = 25 * 1024 * 1024
-const APP_VERSION = import.meta.env.VITE_APP_VERSION ?? '1.0.2'
+const APP_VERSION = import.meta.env.VITE_APP_VERSION ?? '1.0.3'
 const PHOTO_TABLES = new Set(['progressPhotos'])
 
 export type BackupTables = Record<string, unknown[]>
@@ -101,7 +101,7 @@ export async function serializeBackup(options: { includePhotos?: boolean } = {})
     recordCounts,
     estimatedSizeBytes: 0,
     containsPhotos,
-    compatibility: { minDatabaseVersion: 1, maxDatabaseVersion: 11, excludedTables: options.includePhotos ? [] : ['progressPhotos'], photosExcludedByDefault: !options.includePhotos, automaticSync: false as const },
+    compatibility: { minDatabaseVersion: 1, maxDatabaseVersion: 12, excludedTables: options.includePhotos ? [] : ['progressPhotos'], photosExcludedByDefault: !options.includePhotos, automaticSync: false as const },
   }
   const checksum = await sha256(stableStringify({ tables: base.tables, preferences: base.preferences, recordCounts: base.recordCounts, compatibility: base.compatibility }))
   const withChecksum = { ...base, checksum }

@@ -60,3 +60,11 @@
 - [x] Fluxo de atualização com reload único.
 - [x] Recuperação de erro de chunk documentada.
 - [x] IndexedDB preservado.
+
+## v1.0.3 — Candidata oficial
+
+- [x] Migração aditiva v12.
+- [x] Serviço único TITAN com Zod e expectedType.
+- [x] Project preserva módulos ausentes e não é salvo em activePlans.
+- [x] Tema system/light/dark com migração premium/amoled.
+- [x] Documentação da release e do modelo de dados.

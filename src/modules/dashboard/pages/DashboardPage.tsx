@@ -22,7 +22,7 @@ export function DashboardPage() {
   const permission = getNotificationPermission()
   useEffect(() => { void Promise.all([unreadCount(), getNotificationSnapshot()]).then(([count, snapshot]) => { setUnreadNotifications(count); setNextReminder(snapshot.next[0]?.nextRunAt ?? null) }) }, [])
   if (error) return <InfoBanner title="Não foi possível abrir o TITAN" tone="error">{error} Seus registros locais permanecem seguros.</InfoBanner>
-  if (isLoading || !data) return <SkeletonPage label="Carregando dashboard premium" variant="dashboard" />
+  if (isLoading || !data) return <SkeletonPage label="Carregando dashboard TITAN" variant="dashboard" />
 
   const insight = data.insights[0]
   return <div className="stagger-in space-y-6 pb-4">
@@ -37,7 +37,7 @@ export function DashboardPage() {
 
     <Link className="block rounded-[28px]" to="/analytics" aria-label="Abrir detalhes do Score TITAN"><ScoreCard score={data.score} /></Link>
 
-    {data.score.value === null ? <section className="dashboard-card p-5" aria-labelledby="first-access-title"><h2 className="text-lg font-black" id="first-access-title">Bem-vindo ao TITAN.</h2><p className="mt-2 text-sm leading-6 text-slate-300">Registre suas primeiras atividades para começar a gerar Score, tendências e recomendações.</p><div className="mt-4 grid grid-cols-2 gap-3"><Link className="quick-action" to="/settings"><Settings size={18} />Configurar rotina</Link><Link className="quick-action" to="/training"><Dumbbell size={18} />Revisar plano de treino</Link><Link className="quick-action" to="/nutrition"><Utensils size={18} />Revisar refeições</Link><Link className="quick-action" to="/nutrition"><PencilLine size={18} />Registrar primeiro dado</Link></div></section> : null}
+    {data.score.value === null ? <section className="dashboard-card p-5" aria-labelledby="first-access-title"><h2 className="text-lg font-black" id="first-access-title">Bem-vindo ao TITAN.</h2><p className="mt-2 text-sm leading-6 text-slate-300">Registre suas primeiras atividades para começar a gerar Score, tendências e recomendações.</p><div className="mt-4 grid grid-cols-2 gap-3"><Link className="quick-action" to="/more"><Settings size={18} />Configurar rotina</Link><Link className="quick-action" to="/training"><Dumbbell size={18} />Revisar plano de treino</Link><Link className="quick-action" to="/nutrition"><Utensils size={18} />Revisar refeições</Link><Link className="quick-action" to="/nutrition"><PencilLine size={18} />Registrar primeiro dado</Link></div></section> : null}
 
     <section aria-labelledby="coach-title">
       <div className="mb-3 flex items-center gap-2"><Sparkles className="text-blue-300" size={17} /><h2 className="text-sm font-extrabold" id="coach-title">Recomendação do Coach</h2></div>
