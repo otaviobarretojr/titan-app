@@ -3,7 +3,7 @@ import { titanDatabase } from '../src/database/titanDatabase'
 
 describe('IndexedDB schema', () => {
   it('mantém a versão Dexie mais recente e as tabelas críticas registradas', () => {
-    expect(titanDatabase.verno).toBe(12)
+    expect(titanDatabase.verno).toBe(13)
 
     const tableNames = titanDatabase.tables.map(
       (table) => table.name,
@@ -36,6 +36,10 @@ describe('IndexedDB schema', () => {
         'activePlans',
         'importHistory',
         'appPreferences',
+        'foodCategories', 'foodLibrary', 'foodSubstitutions', 'recipes', 'recipeIngredients',
+        'nutritionPlans', 'nutritionPlanDays', 'plannedMeals', 'plannedFoods',
+        'mealExecutions', 'foodExecutions', 'shoppingLists', 'shoppingListItems',
+        'pantryItems', 'foodYieldFactors',
       ]),
     )
   })

@@ -1,5 +1,6 @@
 import Dexie, { type EntityTable } from 'dexie'
 import type { NotificationInboxItem, NotificationPreference } from '../modules/notifications/types/notifications'
+import type { FoodCategoryRecord, FoodLibraryRecord, FoodSubstitutionRecord, RecipeRecord, RecipeIngredientRecord, NutritionPlanRecord, NutritionPlanDayRecord, PlannedMealRecord, PlannedFoodRecord, MealExecutionRecord, FoodExecutionRecord, ShoppingListRecord, ShoppingListItemRecord, PantryItemRecord, FoodYieldFactorRecord } from '../modules/nutrition/types'
 
 export type UserRecord = {
   id: string
@@ -359,6 +360,21 @@ class TitanDatabase extends Dexie {
   activePlans!: EntityTable<ActivePlanRecord, 'id'>
   importHistory!: EntityTable<ImportHistoryRecord, 'id'>
   appPreferences!: EntityTable<AppPreferencesRecord, 'id'>
+  foodCategories!: EntityTable<FoodCategoryRecord, 'id'>
+  foodLibrary!: EntityTable<FoodLibraryRecord, 'id'>
+  foodSubstitutions!: EntityTable<FoodSubstitutionRecord, 'id'>
+  recipes!: EntityTable<RecipeRecord, 'id'>
+  recipeIngredients!: EntityTable<RecipeIngredientRecord, 'id'>
+  nutritionPlans!: EntityTable<NutritionPlanRecord, 'id'>
+  nutritionPlanDays!: EntityTable<NutritionPlanDayRecord, 'id'>
+  plannedMeals!: EntityTable<PlannedMealRecord, 'id'>
+  plannedFoods!: EntityTable<PlannedFoodRecord, 'id'>
+  mealExecutions!: EntityTable<MealExecutionRecord, 'id'>
+  foodExecutions!: EntityTable<FoodExecutionRecord, 'id'>
+  shoppingLists!: EntityTable<ShoppingListRecord, 'id'>
+  shoppingListItems!: EntityTable<ShoppingListItemRecord, 'id'>
+  pantryItems!: EntityTable<PantryItemRecord, 'id'>
+  foodYieldFactors!: EntityTable<FoodYieldFactorRecord, 'id'>
 
   constructor() {
     super('titan-database')
@@ -604,6 +620,27 @@ class TitanDatabase extends Dexie {
       const theme = legacyTheme === 'premium' || legacyTheme === 'amoled' || legacyTheme === 'dark' ? 'dark' : legacyTheme === 'light' || legacyTheme === 'system' ? legacyTheme : 'system'
       await table.put({ id: 'app', theme, onboardingStatus: 'pending', reduceAnimations: false, highContrast: false, updateChannel: 'stable', createdAt: now, updatedAt: now })
     })
+
+    // v1.0.4 nutrition foundation. This migration only creates stores and indexes;
+    // it never clears or rewrites legacy v1.0.3 records.
+    this.version(13).stores({
+      foodCategories: 'id, name, sortOrder, createdAt, updatedAt',
+      foodLibrary: 'id, name, categoryId, preparationState, source, createdAt, updatedAt',
+      foodSubstitutions: 'id, sourceFoodId, targetFoodId, matchingPriority, createdAt, updatedAt',
+      recipes: 'id, name, createdAt, updatedAt',
+      recipeIngredients: 'id, recipeId, foodId, sortOrder, createdAt, updatedAt',
+      nutritionPlans: 'id, userId, status, effectiveFrom, createdAt, updatedAt, [userId+status]',
+      nutritionPlanDays: 'id, planId, dayOfWeek, dayType, createdAt, updatedAt, [planId+dayOfWeek]',
+      plannedMeals: 'id, planId, planDayId, plannedTime, sequence, createdAt, updatedAt, [planDayId+sequence]',
+      plannedFoods: 'id, plannedMealId, foodId, sortOrder, createdAt, updatedAt, [plannedMealId+sortOrder]',
+      mealExecutions: 'id, userId, planId, plannedMealId, localDate, status, createdAt, updatedAt, [userId+localDate], [planId+localDate]',
+      foodExecutions: 'id, mealExecutionId, plannedFoodId, originalFoodId, consumedFoodId, createdAt, updatedAt',
+      shoppingLists: 'id, userId, weekStartDate, status, createdAt, updatedAt, [userId+weekStartDate]',
+      shoppingListItems: 'id, shoppingListId, foodId, categoryId, isPurchased, createdAt, updatedAt',
+      pantryItems: 'id, userId, foodId, expiresAt, createdAt, updatedAt, [userId+foodId]',
+      foodYieldFactors: 'id, foodId, fromState, toState, createdAt, updatedAt, [foodId+fromState+toState]',
+    })
+
   }
 }
 

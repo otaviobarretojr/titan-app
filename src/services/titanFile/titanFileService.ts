@@ -1,4 +1,5 @@
 import { z } from 'zod'
+import { nutritionPayloadV11Schema } from './nutritionContract'
 import { titanDatabase, type ActivePlanType, type AppPreferencesRecord, type ImportHistoryRecord, type UserProfileRecord } from '../../database/titanDatabase'
 
 export type TitanEnvelopeType = 'profile' | ActivePlanType | 'project'
@@ -26,7 +27,7 @@ export const preferencesSchema: z.ZodType<Omit<AppPreferencesRecord, 'id' | 'cre
 export const importHistorySchema: z.ZodType<Omit<ImportHistoryRecord, 'id'>> = z.object({ importedAt: iso, type: z.enum(['profile','workout','nutrition','cardio','supplements','project']), title: z.string().max(160), author: z.string().max(120), fileName: z.string().max(180), status: z.enum(['success','failure']), message: z.string().max(240) })
 
 export const projectPayloadSchema = z.object({ profile: profilePayloadSchema.optional(), workout: workoutPayloadSchema.optional(), nutrition: nutritionPayloadSchema.optional(), cardio: cardioPayloadSchema.optional(), supplements: supplementsPayloadSchema.optional() }).refine(v => Object.keys(v).length > 0, 'Projeto vazio')
-export const envelopeSchema = z.object({ schema: z.literal('TITAN'), schemaVersion: z.literal('1.0'), type: z.enum(['profile','workout','nutrition','cardio','supplements','project']), title: text(160), author: text(120), createdAt: iso, payload: z.unknown() }).strict()
+export const envelopeSchema = z.object({ schema: z.literal('TITAN'), schemaVersion: z.enum(['1.0','1.1']), type: z.enum(['profile','workout','nutrition','cardio','supplements','project']), title: text(160), author: text(120), createdAt: iso, payload: z.unknown() }).strict()
 
 export type TitanPreview = { envelope: z.infer<typeof envelopeSchema>; fileName: string; included: TitanEnvelopeType[]; changed: TitanEnvelopeType[]; preserved: TitanEnvelopeType[]; historyPreserved: boolean; payload: unknown }
 const planSchemas = { workout: workoutPayloadSchema, nutrition: nutritionPayloadSchema, cardio: cardioPayloadSchema, supplements: supplementsPayloadSchema } as const
@@ -48,13 +49,14 @@ export async function readTitanFile(file: File, expectedType: TitanEnvelopeType)
   try { raw = JSON.parse(await file.text()) } catch { throw new TitanFileError('JSON inválido', 'Não foi possível ler o JSON do arquivo.') }
   const envelope = envelopeSchema.parse(raw)
   if (envelope.type !== expectedType) throw new TitanFileError('Arquivo incompatível', `Este arquivo contém um ${typeLabel[envelope.type]}. Vá para ${typeLabel[envelope.type]} → Importar plano.`)
-  const payload = validatePayload(envelope.type, envelope.payload)
+  if (envelope.schemaVersion === '1.1' && envelope.type !== 'nutrition') throw new TitanFileError('Versão incompatível', 'O contrato TITAN 1.1 é aceito somente para nutrição.')
+  const payload = validatePayload(envelope.type, envelope.payload, envelope.schemaVersion)
   const existing = await titanDatabase.activePlans.toArray(); const hasProfile = !!(await titanDatabase.userProfile.get('primary'))
   const included = envelope.type === 'project' ? Object.keys(payload as object) as TitanEnvelopeType[] : [envelope.type]
   return { envelope, fileName: file.name, payload, included, changed: included.filter(t => t === 'profile' ? hasProfile : existing.some(p => p.type === t)), preserved: (['profile','workout','nutrition','cardio','supplements'] as TitanEnvelopeType[]).filter(t => !included.includes(t)), historyPreserved: true }
 }
 
-function validatePayload(type: TitanEnvelopeType, payload: unknown) { if (type === 'profile') return profilePayloadSchema.parse(payload); if (type === 'project') return projectPayloadSchema.parse(payload); return planSchemas[type].parse(payload) }
+function validatePayload(type: TitanEnvelopeType, payload: unknown, version: '1.0'|'1.1') { if (type === 'nutrition' && version === '1.1') return nutritionPayloadV11Schema.parse(payload); if (type === 'profile') return profilePayloadSchema.parse(payload); if (type === 'project') return projectPayloadSchema.parse(payload); return planSchemas[type].parse(payload) }
 async function history(input: Omit<ImportHistoryRecord,'id'|'importedAt'> & { importedAt?: string }) { const row = importHistorySchema.parse({ ...input, importedAt: input.importedAt ?? new Date().toISOString() }); await titanDatabase.importHistory.add({ id: crypto.randomUUID(), ...row }) }
 
 export async function recordTitanImportFailure(fileName: string, expectedType: TitanEnvelopeType, error: unknown) { await history({ type: expectedType, title: '', author: '', fileName, status: 'failure', message: sanitize(error) }) }
