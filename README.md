@@ -84,3 +84,10 @@ A Sprint 016 refina a experiência visual do TITAN com design system tokenizado,
 ## Beta — Sprint 017
 
 A Sprint 017 consolida a auditoria beta pré-v1.0: fluxos funcionais, UX, performance, PWA, acessibilidade, segurança, documentação e riscos conhecidos. A entrega não adiciona funcionalidades nem altera schemas IndexedDB; corrige apenas inconsistências de acessibilidade identificadas na auditoria. Consulte `docs/BETA_CHECKLIST.md` e `docs/releases/SPRINT_017_BETA.md`.
+
+## v1.0.1 — Primeiro Acesso e Integridade do Score
+
+- Corrige a origem do Score inicial 20/100: planos `planned` não contam mais como execução real.
+- Instalações novas não recebem dados demonstrativos automaticamente em produção.
+- O Dashboard exibe “Sem dados suficientes” até haver evidências reais suficientes.
+- A atualização preserva dados locais existentes; para limpar dados locais, faça backup e confirme manualmente a remoção no navegador/sistema.

@@ -24,20 +24,20 @@ export function calculateTitanScore(input: CoachEngineInput): TitanScore {
   const breakdown: TitanScoreBreakdown = {
     nutrition: clampScore((ratio(input.proteinConsumedG, input.proteinTargetG) * .6 + ratio(input.caloriesConsumedKcal, input.calorieTargetKcal) * .4) * 100),
     hydration: clampScore(ratio(input.hydrationConsumedMl, input.hydrationTargetMl) * 100),
-    training: input.workoutStatus === 'completed' ? 100 : input.workoutStatus === 'started' ? 60 : input.workoutStatus === 'planned' ? 20 : 0,
-    cardio: input.cardioStatus === 'completed' ? 100 : input.cardioStatus === 'started' ? 60 : input.cardioStatus === 'planned' ? 20 : 0,
+    training: input.workoutStatus === 'completed' ? 100 : 0,
+    cardio: input.cardioStatus === 'completed' ? 100 : 0,
     recovery: input.sleepMinutes === null ? 0 : clampScore(ratio(input.sleepMinutes, input.sleepTargetMinutes) * 100),
     consistency: clampScore(input.consistency),
   }
   const categories = [
     input.hasNutritionData ? { category: 'nutrition' as const, value: breakdown.nutrition, weight: .25 } : null,
     input.hasHydrationData ? { category: 'hydration' as const, value: breakdown.hydration, weight: .15 } : null,
-    input.workoutStatus !== 'none' ? { category: 'training' as const, value: breakdown.training, weight: .2 } : null,
-    input.cardioStatus !== 'none' ? { category: 'cardio' as const, value: breakdown.cardio, weight: .1 } : null,
+    input.workoutStatus === 'completed' ? { category: 'training' as const, value: breakdown.training, weight: .2 } : null,
+    input.cardioStatus === 'completed' ? { category: 'cardio' as const, value: breakdown.cardio, weight: .1 } : null,
     input.sleepMinutes !== null ? { category: 'recovery' as const, value: breakdown.recovery, weight: .15 } : null,
     input.hasConsistencyData ? { category: 'consistency' as const, value: breakdown.consistency, weight: .15 } : null,
   ].filter((item): item is NonNullable<typeof item> => item !== null)
-  if (!categories.length) return { value: null, label: 'Sem dados', breakdown, measuredCategories: [] }
+  if (categories.length < 2) return { value: null, label: 'Sem dados suficientes', breakdown, measuredCategories: categories.map(item => item.category) }
   const totalWeight = categories.reduce((sum, item) => sum + item.weight, 0)
   const value = clampScore(categories.reduce((sum, item) => sum + item.value * item.weight, 0) / totalWeight)
   return { value, label: value >= 85 ? 'Excelente' : value >= 70 ? 'Bom' : value >= 50 ? 'Atenção' : 'Crítico', breakdown, measuredCategories: categories.map(item => item.category) }

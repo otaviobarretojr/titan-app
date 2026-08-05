@@ -1,4 +1,4 @@
-import { AlertCircle, Bell, ChevronRight, Sparkles } from 'lucide-react'
+import { AlertCircle, Bell, ChevronRight, Dumbbell, PencilLine, Settings, Sparkles, Utensils } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { InfoBanner, SkeletonPage } from '../../../shared/ui'
@@ -11,8 +11,9 @@ import { unreadCount, getNotificationSnapshot } from '../../notifications/data/n
 import { getNotificationPermission } from '../../../services/notifications/notificationService'
 import { useDashboard } from '../hooks/useDashboard'
 
-function dayLabel() { const value = new Intl.DateTimeFormat('pt-BR', { timeZone: 'America/Manaus', weekday: 'long', day: '2-digit', month: 'long' }).format(new Date()); return value.charAt(0).toUpperCase() + value.slice(1) }
-function greeting() { const hour = Number(new Intl.DateTimeFormat('pt-BR', { timeZone: 'America/Manaus', hour: '2-digit', hour12: false }).format(new Date())); return hour < 12 ? 'Bom dia' : hour < 18 ? 'Boa tarde' : 'Boa noite' }
+const userTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone || 'America/Manaus'
+function dayLabel() { const value = new Intl.DateTimeFormat('pt-BR', { timeZone: userTimeZone, weekday: 'long', day: '2-digit', month: 'long' }).format(new Date()); return value.charAt(0).toUpperCase() + value.slice(1) }
+function greeting() { const hour = Number(new Intl.DateTimeFormat('pt-BR', { timeZone: userTimeZone, hour: '2-digit', hour12: false }).format(new Date())); return hour < 12 ? 'Bom dia' : hour < 18 ? 'Boa tarde' : 'Boa noite' }
 
 export function DashboardPage() {
   const { data, error, isLoading } = useDashboard()
@@ -35,6 +36,8 @@ export function DashboardPage() {
     {nextReminder ? <Link className="dashboard-card dashboard-link block p-4 text-sm text-slate-300" to="/notifications">Próximo lembrete: {new Date(nextReminder).toLocaleString('pt-BR')}</Link> : null}
 
     <Link className="block rounded-[28px]" to="/analytics" aria-label="Abrir detalhes do Score TITAN"><ScoreCard score={data.score} /></Link>
+
+    {data.score.value === null ? <section className="dashboard-card p-5" aria-labelledby="first-access-title"><h2 className="text-lg font-black" id="first-access-title">Bem-vindo ao TITAN.</h2><p className="mt-2 text-sm leading-6 text-slate-300">Registre suas primeiras atividades para começar a gerar Score, tendências e recomendações.</p><div className="mt-4 grid grid-cols-2 gap-3"><Link className="quick-action" to="/settings"><Settings size={18} />Configurar rotina</Link><Link className="quick-action" to="/training"><Dumbbell size={18} />Revisar plano de treino</Link><Link className="quick-action" to="/nutrition"><Utensils size={18} />Revisar refeições</Link><Link className="quick-action" to="/nutrition"><PencilLine size={18} />Registrar primeiro dado</Link></div></section> : null}
 
     <section aria-labelledby="coach-title">
       <div className="mb-3 flex items-center gap-2"><Sparkles className="text-blue-300" size={17} /><h2 className="text-sm font-extrabold" id="coach-title">Recomendação do Coach</h2></div>

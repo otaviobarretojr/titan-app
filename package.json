@@ -1,7 +1,7 @@
 {
   "name": "titan-app",
   "private": true,
-  "version": "1.0.0",
+  "version": "1.0.1",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -41,9 +41,9 @@
     "vite": "^8.2.0",
     "vitest": "^4.1.10"
   },
-  "description": "TITAN v1.0.0 — sistema operacional de performance pessoal offline-first.",
+  "description": "TITAN v1.0.1 — primeiro acesso e integridade do Score offline-first.",
   "author": "Otávio Barreto Jr.",
   "license": "Proprietary",
-  "releaseName": "TITAN v1.0.0 — Release Oficial",
-  "releaseTag": "v1.0.0"
+  "releaseName": "TITAN v1.0.1 — Primeiro Acesso e Integridade do Score",
+  "releaseTag": "v1.0.1"
 }

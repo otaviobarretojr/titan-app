@@ -95,7 +95,46 @@ export async function getDashboardData(): Promise<DashboardData | null> {
   )
 
   if (!user || !dailyPlan) {
-    return null
+    const emptyScore = calculateTitanScore({
+      currentMinutes: getTitanCurrentMinutes(),
+      proteinConsumedG: 0,
+      proteinTargetG: 0,
+      caloriesConsumedKcal: 0,
+      calorieTargetKcal: 0,
+      hydrationConsumedMl: 0,
+      hydrationTargetMl: 0,
+      sleepMinutes: null,
+      sleepTargetMinutes: 0,
+      pendingMeals: 0,
+      workoutStatus: 'none',
+      cardioStatus: 'none',
+      plannedWorkoutMinutes: null,
+      consistency: 0,
+      hasNutritionData: false,
+      hasHydrationData: false,
+      hasConsistencyData: false,
+    })
+
+    return {
+      userName: user?.displayName ?? 'Atleta',
+      pendingMeals: 0,
+      weight: { currentKg: null, changeKg: null },
+      nextMeal: null,
+      workout: null,
+      cardio: null,
+      insights: [],
+      score: emptyScore,
+      summary: {
+        caloriesConsumedKcal: 0,
+        proteinConsumedG: 0,
+        hydrationConsumedMl: 0,
+        sleepMinutes: null,
+        calorieTargetKcal: 0,
+        proteinTargetG: 0,
+        hydrationTargetMl: 0,
+        sleepTargetMinutes: 0,
+      },
+    }
   }
 
   const currentMinutes = getTitanCurrentMinutes()
