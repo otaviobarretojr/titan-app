@@ -77,3 +77,6 @@ O IndexedDB permanece como fonte operacional principal. Supabase é usado apenas
 
 ## Atualização PWA v1.0.2
 O PWA usa atualização coordenada: prompt explícito, ativação do Service Worker em espera, aguardo de `controllerchange`, reload único por `sessionStorage` e recuperação global para chunks versionados sem limpar IndexedDB.
+
+## Arquitetura v1.0.3
+A camada de importação TITAN possui serviço único em `src/services/titanFile/titanFileService.ts`. Perfil, planos, histórico e preferências são persistidos em tabelas separadas; execução permanece nas tabelas históricas e não é criada por planos importados.

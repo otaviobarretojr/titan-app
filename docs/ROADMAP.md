@@ -32,3 +32,6 @@
 
 ## v1.0.2
 - [x] Atualização segura do PWA e recuperação sem apagar dados locais.
+
+## v1.0.3 concluída
+- Perfil completo, onboarding persistente, planos ativos reais e importação segura do Projeto TITAN.

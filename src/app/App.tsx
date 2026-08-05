@@ -86,6 +86,12 @@ const SettingsPage = lazy(() =>
   })),
 )
 
+const ProfilePage = lazy(() =>
+  import('../modules/profile/pages/ProfilePage').then((module) => ({
+    default: module.ProfilePage,
+  })),
+)
+
 const AccountPage = lazy(() =>
   import('../modules/account/pages/AccountPage').then((module) => ({
     default: module.AccountPage,
@@ -136,6 +142,7 @@ export function App() {
             />
             <Route path="/more" element={<SettingsPage />} />
             <Route path="/account" element={<AccountPage />} />
+            <Route path="/profile" element={<ProfilePage />} />
           </Route>
 
           <Route path="*" element={<Navigate to="/" replace />} />

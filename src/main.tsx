@@ -22,7 +22,7 @@ window.addEventListener('unhandledrejection', (event) => {
 })
 
 try {
-  document.documentElement.dataset.theme = localStorage.getItem('titan-theme') ?? 'premium'
+  { const saved = localStorage.getItem('titan-theme'); document.documentElement.dataset.theme = saved === 'light' || saved === 'system' ? saved : 'dark' }
   const rootElement = document.getElementById('root')
   if (!rootElement) {
     renderBootstrapFallback('Elemento raiz da aplicação não encontrado.')

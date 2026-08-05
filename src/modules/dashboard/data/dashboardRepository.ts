@@ -30,6 +30,8 @@ export async function getDashboardData(): Promise<DashboardData | null> {
     hydrationEntries,
     sleepEntry,
     bodyMetrics,
+    activePlans,
+    profile,
   ] = await titanDatabase.transaction(
     'r',
     [
@@ -44,6 +46,8 @@ export async function getDashboardData(): Promise<DashboardData | null> {
       titanDatabase.hydrationEntries,
       titanDatabase.sleepEntries,
       titanDatabase.bodyMetrics,
+      titanDatabase.activePlans,
+      titanDatabase.userProfile,
     ],
     () =>
       Promise.all([
@@ -91,9 +95,12 @@ export async function getDashboardData(): Promise<DashboardData | null> {
           .where('userId')
           .equals(TITAN_USER_ID)
           .sortBy('localDate'),
+        titanDatabase.activePlans.toArray(),
+        titanDatabase.userProfile.get('default'),
       ]),
   )
 
+  const activePlanByType = new Map(activePlans.map((plan) => [plan.type, plan]))
   if (!user || !dailyPlan) {
     const emptyScore = calculateTitanScore({
       currentMinutes: getTitanCurrentMinutes(),
@@ -116,12 +123,12 @@ export async function getDashboardData(): Promise<DashboardData | null> {
     })
 
     return {
-      userName: user?.displayName ?? 'Atleta',
+      userName: profile?.displayName ?? user?.displayName ?? 'Atleta',
       pendingMeals: 0,
       weight: { currentKg: null, changeKg: null },
-      nextMeal: null,
-      workout: null,
-      cardio: null,
+      nextMeal: buildPlannedMeal(activePlanByType.get('nutrition')?.payload),
+      workout: buildPlannedWorkout(activePlanByType.get('workout')?.payload),
+      cardio: buildPlannedCardio(activePlanByType.get('cardio')?.payload),
       insights: [],
       score: emptyScore,
       summary: {
@@ -260,7 +267,7 @@ export async function getDashboardData(): Promise<DashboardData | null> {
 
   return {
     userName:
-      user.displayName,
+      profile?.displayName ?? user.displayName,
 
     pendingMeals: pendingMeals.length,
 
@@ -417,4 +424,18 @@ export async function addHydration(
   await titanDatabase
     .hydrationEntries
     .add(entry)
+}
+
+
+function buildPlannedMeal(payload: unknown) {
+  const meal = (payload as { meals?: Array<{ id: string; name: string; plannedTime: string; caloriesKcal: number; proteinG: number }> } | undefined)?.meals?.[0]
+  return meal ? { id: meal.id, name: meal.name, plannedTime: meal.plannedTime, caloriesKcal: meal.caloriesKcal, proteinG: meal.proteinG, status: 'normal' as const } : null
+}
+function buildPlannedWorkout(payload: unknown) {
+  const day = (payload as { days?: Array<{ id: string; title: string; plannedTime: string; estimatedDurationMinutes: number; exercises: unknown[] }> } | undefined)?.days?.[0]
+  return day ? { id: day.id, name: day.title, plannedTime: day.plannedTime, exerciseCount: day.exercises.length, estimatedDurationMinutes: day.estimatedDurationMinutes, status: 'planned' as const } : null
+}
+function buildPlannedCardio(payload: unknown) {
+  const session = (payload as { sessions?: Array<{ id: string; title: string; plannedTime: string; targetDurationMinutes: number }> } | undefined)?.sessions?.[0]
+  return session ? { id: session.id, title: session.title, plannedTime: session.plannedTime, targetDurationMinutes: session.targetDurationMinutes, status: 'planned' as const } : null
 }
