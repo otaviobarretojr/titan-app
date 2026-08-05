@@ -73,3 +73,7 @@ O backup em nuvem é opcional, manual e associado à conta autenticada. Ele arma
 ## Experiência Premium — Sprint 016
 
 A Sprint 016 refina a experiência visual do TITAN com design system tokenizado, dark premium, skeleton loading nas rotas principais, microinterações discretas, navegação com indicador ativo, foco visível e transições que respeitam `prefers-reduced-motion`. Não altera regras de negócio, APIs públicas nem schemas do IndexedDB. Consulte `docs/releases/SPRINT_016_EXPERIENCIA_PREMIUM.md`.
+
+## Beta — Sprint 017
+
+A Sprint 017 consolida a auditoria beta pré-v1.0: fluxos funcionais, UX, performance, PWA, acessibilidade, segurança, documentação e riscos conhecidos. A entrega não adiciona funcionalidades nem altera schemas IndexedDB; corrige apenas inconsistências de acessibilidade identificadas na auditoria. Consulte `docs/BETA_CHECKLIST.md` e `docs/releases/SPRINT_017_BETA.md`.

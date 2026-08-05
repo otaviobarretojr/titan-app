@@ -59,3 +59,10 @@ O IndexedDB permanece como fonte operacional principal. Supabase é usado apenas
 - `layouts/AppShell` mantém navegação e FAB como camada de shell, com indicador ativo, ações rápidas, feedback de hidratação e callbacks estáveis.
 - Rotas continuam em `React.lazy`/`Suspense`, preservando code splitting por módulo e carregamento sob demanda.
 - A Sprint não altera regras de negócio, contratos públicos nem schema IndexedDB; as mudanças ficam restritas à apresentação, performance percebida e acessibilidade.
+
+## Sprint 017 — Auditoria Beta
+
+- A Sprint 017 não altera fronteiras de arquitetura, contratos públicos, regras de negócio nem schema IndexedDB.
+- A auditoria confirma IndexedDB como fonte operacional principal, Supabase como camada opcional/manual de backup e Service Worker como infraestrutura de PWA offline-first.
+- Correções aplicadas permanecem na camada de apresentação/acessibilidade: labels em fotos de evolução, semântica de status e dialog modal de restauração em nuvem.
+- `docs/BETA_CHECKLIST.md` concentra o checklist de publicação, riscos conhecidos e pendências para v1.0.

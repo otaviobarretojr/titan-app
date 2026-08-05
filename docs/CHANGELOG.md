@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+### Sprint 017 — Auditoria Completa e Beta
+
+- Auditoria beta pré-v1.0 cobrindo Dashboard, Treino, Nutrição, Cardio, Evolução, Saúde, Coach, Analytics, Notificações, Conta e backups local/nuvem.
+- Checklist beta criado com publicação, riscos conhecidos, melhorias adiadas e pendências para v1.0.
+- Release notes da Sprint 017 adicionadas.
+- Acessibilidade reforçada em fotos de evolução e confirmação de restauração em nuvem.
+- Sem novas funcionalidades, sem novas tabelas IndexedDB e sem alteração intencional de regras de negócio.
+
 ### Sprint 016 — Experiência Premium (UX/UI)
 
 - Design system premium com tokens CSS reutilizáveis para superfícies, radius, espaçamento, bordas, elevação, foco e movimento.
