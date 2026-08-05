@@ -66,3 +66,10 @@ O IndexedDB permanece como fonte operacional principal. Supabase é usado apenas
 - A auditoria confirma IndexedDB como fonte operacional principal, Supabase como camada opcional/manual de backup e Service Worker como infraestrutura de PWA offline-first.
 - Correções aplicadas permanecem na camada de apresentação/acessibilidade: labels em fotos de evolução, semântica de status e dialog modal de restauração em nuvem.
 - `docs/BETA_CHECKLIST.md` concentra o checklist de publicação, riscos conhecidos e pendências para v1.0.
+
+## Sprint 018 — TITAN v1.0.0
+
+- A Sprint 018 é uma release oficial: não adiciona funcionalidades, não altera contratos públicos e não altera schemas IndexedDB.
+- Metadados oficiais: versão `1.0.0`, data `5 de agosto de 2026`, tag lógica `v1.0.0`, ambiente GitHub Pages/PWA, licença Proprietary e autor Otávio Barreto Jr.
+- A arquitetura validada para v1.0 mantém IndexedDB/Dexie como fonte operacional, Supabase opcional/manual para backup, PWA via Workbox e rotas `React.lazy`/`Suspense` para code splitting.
+- Validação final cobre produção, manifesto, Service Worker, cache, offline, backup/restauração, treino, refeições, notificações, analytics, Coach e exportações.

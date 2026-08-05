@@ -10,6 +10,11 @@ const requiredFiles = [
   'docs/releases/SPRINT_009_EVOLUCAO_AVANCADA.md',
   'docs/releases/SPRINT_010_TITAN_EXPERIENCE.md',
   'docs/releases/SPRINT_013_ANALYTICS_RELATORIOS.md',
+  'docs/releases/V1_0_0.md',
+  'docs/USER_GUIDE.md',
+  'docs/INSTALLATION.md',
+  'docs/PROJECT_HISTORY.md',
+  'docs/V1_CHECKLIST.md',
 ]
 
 for (const file of requiredFiles) {
@@ -23,6 +28,14 @@ const manifest = JSON.parse(
 
 if (!indexHtml.includes('/titan-app/')) {
   throw new Error('Build sem base correta para GitHub Pages.')
+}
+
+if (manifest.name !== 'TITAN v1.0') {
+  throw new Error('Manifesto PWA sem nome oficial da release v1.0.')
+}
+
+if (!manifest.description?.includes('v1.0.0')) {
+  throw new Error('Manifesto PWA sem descrição versionada da release v1.0.0.')
 }
 
 if (!Array.isArray(manifest.icons) || manifest.icons.length === 0) {

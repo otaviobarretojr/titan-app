@@ -2,6 +2,13 @@
 
 Sistema operacional de performance pessoal, mobile-first e instalável como PWA.
 
+
+## Release oficial — v1.0.0
+
+O TITAN v1.0.0 é a primeira versão oficial do app. A release consolida a base local-first/offline-first, PWA instalável, IndexedDB como fonte principal, backup local, backup em nuvem manual/opcional, Analytics, Coach, notificações, exportações e documentação de uso/instalação.
+
+**Metadados:** versão `1.0.0`, data `5 de agosto de 2026`, tag lógica `v1.0.0`, ambiente GitHub Pages/PWA, licença Proprietary, autor Otávio Barreto Jr. Consulte `docs/releases/V1_0_0.md`, `docs/USER_GUIDE.md`, `docs/INSTALLATION.md`, `docs/PROJECT_HISTORY.md` e `docs/V1_CHECKLIST.md`.
+
 ## Desenvolvimento
 
 ```bash
