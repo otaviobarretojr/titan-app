@@ -73,3 +73,7 @@ O IndexedDB permanece como fonte operacional principal. Supabase é usado apenas
 - Metadados oficiais: versão `1.0.0`, data `5 de agosto de 2026`, tag lógica `v1.0.0`, ambiente GitHub Pages/PWA, licença Proprietary e autor Otávio Barreto Jr.
 - A arquitetura validada para v1.0 mantém IndexedDB/Dexie como fonte operacional, Supabase opcional/manual para backup, PWA via Workbox e rotas `React.lazy`/`Suspense` para code splitting.
 - Validação final cobre produção, manifesto, Service Worker, cache, offline, backup/restauração, treino, refeições, notificações, analytics, Coach e exportações.
+
+
+## Atualização PWA v1.0.2
+O PWA usa atualização coordenada: prompt explícito, ativação do Service Worker em espera, aguardo de `controllerchange`, reload único por `sessionStorage` e recuperação global para chunks versionados sem limpar IndexedDB.

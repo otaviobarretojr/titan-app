@@ -3,7 +3,16 @@ import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
 import { VitePWA } from 'vite-plugin-pwa'
 
+const appVersion = process.env.VITE_APP_VERSION ?? '1.0.2'
+const buildDate = process.env.VITE_BUILD_DATE ?? new Date().toISOString()
+const gitCommit = process.env.VITE_GIT_COMMIT ?? process.env.GITHUB_SHA ?? 'local'
+
 export default defineConfig({
+  define: {
+    'import.meta.env.VITE_APP_VERSION': JSON.stringify(appVersion),
+    'import.meta.env.VITE_BUILD_DATE': JSON.stringify(buildDate),
+    'import.meta.env.VITE_GIT_COMMIT': JSON.stringify(gitCommit),
+  },
   base: '/titan-app/',
   plugins: [
     react(),
@@ -15,10 +24,10 @@ export default defineConfig({
         'icons/titan-maskable.svg',
       ],
       manifest: {
-        name: 'TITAN v1.0',
+        name: 'TITAN',
         short_name: 'TITAN',
         description:
-          'TITAN v1.0.1 — sistema operacional de performance pessoal para treino, nutrição, cardio e evolução.',
+          'TITAN v1.0.2 — sistema operacional de performance pessoal para treino, nutrição, cardio e evolução.',
         theme_color: '#09090b',
         background_color: '#09090b',
         display: 'standalone',
@@ -50,13 +59,13 @@ export default defineConfig({
         clientsClaim: true,
         skipWaiting: false,
         globPatterns: [
-          '**/*.{js,css,html,svg,png,webp,json}',
+          '**/*.{js,css,svg,png,webp,json}',
         ],
         runtimeCaching: [
           {
             urlPattern: ({ request }) => request.mode === 'navigate',
             handler: 'NetworkFirst',
-            options: { cacheName: 'titan-pages', networkTimeoutSeconds: 3 },
+            options: { cacheName: 'titan-html-v1', networkTimeoutSeconds: 3 },
           },
           {
             urlPattern: ({ request }) =>

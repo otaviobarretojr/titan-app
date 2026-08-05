@@ -25,6 +25,7 @@ import {
 } from '../../../services/backup/backupService'
 import { titanDatabase } from '../../../database/titanDatabase'
 import { formatBytes, getStorageDiagnostics, type StorageDiagnostics } from '../../../services/storage/storageDiagnostics'
+import { APP_VERSION, BUILD_DATE, GIT_COMMIT, RELEASE_CHANNEL, getDatabaseVersion, getServiceWorkerStatus } from '../../../services/appMetadata'
 
 export function SettingsPage() {
   const fileInputRef = useRef<HTMLInputElement>(null)
@@ -291,11 +292,18 @@ export function SettingsPage() {
           />
 
           <div>
-            <h2 className="font-bold">Sobre</h2>
+            <h2 className="font-bold">Sobre o TITAN</h2>
 
-            <p className="mt-1 text-sm leading-6 text-slate-400">
-              TITAN — sistema operacional de performance pessoal.
-            </p>
+            <dl className="mt-3 grid gap-2 text-sm text-slate-300">
+              <div><dt className="text-slate-500">Nome</dt><dd>TITAN</dd></div>
+              <div><dt className="text-slate-500">Versão</dt><dd>{APP_VERSION}</dd></div>
+              <div><dt className="text-slate-500">Canal</dt><dd>{RELEASE_CHANNEL}</dd></div>
+              <div><dt className="text-slate-500">Banco Dexie</dt><dd>v{getDatabaseVersion()}</dd></div>
+              <div><dt className="text-slate-500">Build</dt><dd>{BUILD_DATE}</dd></div>
+              <div><dt className="text-slate-500">Commit/build id</dt><dd>{GIT_COMMIT}</dd></div>
+              <div><dt className="text-slate-500">Service Worker</dt><dd>{getServiceWorkerStatus(false)}</dd></div>
+              <div><dt className="text-slate-500">Status</dt><dd>Atualizado</dd></div>
+            </dl>
           </div>
         </div>
       </Card>

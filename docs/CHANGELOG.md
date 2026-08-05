@@ -302,3 +302,9 @@
 - Rotas agora usam lazy loading e code splitting.
 - Bundle inicial reduzido.
 - Adicionado fallback acessível durante carregamento dos módulos.
+
+
+## v1.0.2 — Atualização Segura e Recuperação do PWA
+- Coordena ativação do Service Worker e reload único.
+- Detecta falhas de chunks versionados e exibe tela de recuperação.
+- Preserva IndexedDB e dados locais.

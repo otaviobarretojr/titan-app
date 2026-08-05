@@ -54,3 +54,9 @@
 - Instalações novas não recebem dados demonstrativos automaticamente em produção.
 - O Dashboard exibe “Sem dados suficientes” até haver evidências reais suficientes.
 - A atualização preserva dados locais existentes; para limpar dados locais, faça backup e confirme manualmente a remoção no navegador/sistema.
+
+
+## v1.0.2
+- [x] Fluxo de atualização com reload único.
+- [x] Recuperação de erro de chunk documentada.
+- [x] IndexedDB preservado.
