@@ -86,6 +86,12 @@ const SettingsPage = lazy(() =>
   })),
 )
 
+const ProfilePage = lazy(() =>
+  import('../modules/profile/ProfilePage').then((module) => ({
+    default: module.ProfilePage,
+  })),
+)
+
 const AccountPage = lazy(() =>
   import('../modules/account/pages/AccountPage').then((module) => ({
     default: module.AccountPage,
@@ -135,6 +141,7 @@ export function App() {
               element={<NotificationsPage />}
             />
             <Route path="/more" element={<SettingsPage />} />
+            <Route path="/profile" element={<ProfilePage />} />
             <Route path="/account" element={<AccountPage />} />
           </Route>
 

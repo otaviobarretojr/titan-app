@@ -1,7 +1,8 @@
 import { AlertCircle, Bell, ChevronRight, Dumbbell, PencilLine, Settings, Sparkles, Utensils } from 'lucide-react'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
+import { useLiveQuery } from 'dexie-react-hooks'
 import { Link } from 'react-router-dom'
-import { InfoBanner, SkeletonPage } from '../../../shared/ui'
+import { Button, Card, InfoBanner, SkeletonPage } from '../../../shared/ui'
 import { CoachCard } from '../components/CoachCard'
 import { DailyMetricsGrid } from '../components/DailyMetricsGrid'
 import { MealCard } from '../components/MealCard'
@@ -10,17 +11,25 @@ import { WorkoutCard } from '../components/WorkoutCard'
 import { unreadCount, getNotificationSnapshot } from '../../notifications/data/notificationsRepository'
 import { getNotificationPermission } from '../../../services/notifications/notificationService'
 import { useDashboard } from '../hooks/useDashboard'
+import { titanDatabase } from '../../../database/titanDatabase'
+import { TITAN_USER_ID } from '../../../database/seeds/seedToday'
+import { importTitanProject, readTitanFile, previewProject } from '../../profilePlans'
 
 const userTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone || 'America/Manaus'
 function dayLabel() { const value = new Intl.DateTimeFormat('pt-BR', { timeZone: userTimeZone, weekday: 'long', day: '2-digit', month: 'long' }).format(new Date()); return value.charAt(0).toUpperCase() + value.slice(1) }
 function greeting() { const hour = Number(new Intl.DateTimeFormat('pt-BR', { timeZone: userTimeZone, hour: '2-digit', hour12: false }).format(new Date())); return hour < 12 ? 'Bom dia' : hour < 18 ? 'Boa tarde' : 'Boa noite' }
 
 export function DashboardPage() {
+  const projectInputRef = useRef<HTMLInputElement>(null)
+  const profile = useLiveQuery(() => titanDatabase.userProfile.get(TITAN_USER_ID), [])
   const { data, error, isLoading } = useDashboard()
   const [unreadNotifications, setUnreadNotifications] = useState(0)
   const [nextReminder, setNextReminder] = useState<string | null>(null)
   const permission = getNotificationPermission()
   useEffect(() => { void Promise.all([unreadCount(), getNotificationSnapshot()]).then(([count, snapshot]) => { setUnreadNotifications(count); setNextReminder(snapshot.next[0]?.nextRunAt ?? null) }) }, [])
+  async function importProject(file: File) { const titanFile = await readTitanFile(file, 'project'); const preview = previewProject(titanFile); if (window.confirm(`${preview.title} por ${preview.author}. Módulos: ${preview.included.join(', ')}. Histórico preservado. Aplicar?`)) await importTitanProject(titanFile); }
+  if (profile === undefined) return <SkeletonPage label="Carregando configuração inicial" />
+  if (!profile) return <Card elevated><p className="text-sm font-bold uppercase tracking-widest text-blue-300">Bem-vindo ao TITAN</p><h1 className="mt-2 text-3xl font-black">Bem-vindo ao TITAN</h1><p className="mt-3 text-sm leading-6 text-slate-300">Vamos preparar seu perfil e seus planos para que o aplicativo mostre sua rotina diária.</p><div className="mt-5 grid gap-3"><Link className="quick-action" to="/profile">Criar perfil manualmente</Link><Button onClick={() => projectInputRef.current?.click()}>Importar Projeto TITAN</Button><Link className="quick-action" to="/more">Restaurar backup</Link><Link className="text-center text-sm text-slate-400" to="/more">Sair e continuar depois</Link></div><input className="hidden" accept=".titanproject,application/json" ref={projectInputRef} type="file" onChange={(event) => { const file = event.target.files?.[0]; if (file) void importProject(file).catch((reason) => window.alert(String(reason instanceof Error ? reason.message : reason))); event.target.value = '' }} /></Card>
   if (error) return <InfoBanner title="Não foi possível abrir o TITAN" tone="error">{error} Seus registros locais permanecem seguros.</InfoBanner>
   if (isLoading || !data) return <SkeletonPage label="Carregando dashboard premium" variant="dashboard" />
 

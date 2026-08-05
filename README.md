@@ -95,3 +95,11 @@ A Sprint 017 consolida a auditoria beta pré-v1.0: fluxos funcionais, UX, perfor
 
 ## Release v1.0.2
 Atualização segura do PWA com recuperação de chunks, reload único coordenado com o Service Worker e tela global que preserva IndexedDB. Consulte `docs/PWA_UPDATE_AND_RECOVERY.md`.
+
+## v1.0.3 — Perfil, Planos e Configurações
+
+- Configuração inicial com perfil editável e opções de Projeto TITAN/backup.
+- Planos independentes para treino, nutrição, cardio e suplementação, separados de execução e histórico.
+- Formatos TITAN autoidentificáveis e validação segura antes de qualquer alteração.
+- Central “Conta e configurações” com perfil, planos/importações, aparência, atualizações, novidades, dados e Sobre.
+- Migração Dexie aditiva para `userProfile`, `activePlans`, `importHistory` e `appPreferences`.

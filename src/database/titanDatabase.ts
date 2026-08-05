@@ -267,6 +267,13 @@ export type CoachRecommendationRecord = {
   updatedAt: string
 }
 
+
+export type TitanPlanType = 'profile' | 'workout' | 'nutrition' | 'cardio' | 'supplements' | 'project'
+export type UserProfileRecord = { id: string; name: string; displayName: string; birthDate?: string; sex?: string; heightCm: number; referenceWeightKg: number; mainGoal: string; experienceLevel: string; trainingDaysPerWeek: number; wakeTime: string; workStartTime: string; workEndTime: string; preferredWorkoutTime: string; sleepTime: string; timezone: string; goals: { caloriesKcal: number; proteinG: number; carbohydrateG: number; fatG: number; waterMl: number; sleepHours: number }; preferences: string[]; createdAt: string; updatedAt: string }
+export type ActivePlanRecord = { id: string; type: Exclude<TitanPlanType, 'profile' | 'project'>; schemaVersion: string; title: string; author: string; createdAt: string; updatedAt: string; effectiveFrom: string; status: 'draft' | 'active' | 'archived'; payload: unknown }
+export type ImportHistoryRecord = { id: string; importedAt: string; type: TitanPlanType; name: string; author: string; result: 'success' | 'error'; previousVersion: string | null; newVersion: string | null }
+export type AppPreferenceRecord = { id: string; key: string; value: string; updatedAt: string }
+
 class TitanDatabase extends Dexie {
   users!: EntityTable<UserRecord, 'id'>
   dailyPlans!: EntityTable<DailyPlanRecord, 'id'>
@@ -289,6 +296,10 @@ class TitanDatabase extends Dexie {
   coachRecommendations!: EntityTable<CoachRecommendationRecord, 'id'>
   notificationPreferences!: EntityTable<NotificationPreference, 'id'>
   notificationInbox!: EntityTable<NotificationInboxItem, 'id'>
+  userProfile!: EntityTable<UserProfileRecord, 'id'>
+  activePlans!: EntityTable<ActivePlanRecord, 'id'>
+  importHistory!: EntityTable<ImportHistoryRecord, 'id'>
+  appPreferences!: EntityTable<AppPreferenceRecord, 'id'>
 
   constructor() {
     super('titan-database')
@@ -518,6 +529,16 @@ class TitanDatabase extends Dexie {
         'id, userId, category, enabled, nextRunAt, [userId+category]',
       notificationInbox:
         'id, userId, category, priority, createdAt, readAt, dismissedAt, dedupeKey, [userId+createdAt], [userId+dedupeKey]',
+    })
+
+    // v1.0.3: profile, independent active plans, import audit and app preferences.
+    // Additive Dexie migration; no historical execution, score, photo or backup
+    // table is reset or backfilled automatically.
+    this.version(12).stores({
+      userProfile: 'id, displayName, updatedAt',
+      activePlans: 'id, type, status, updatedAt, [type+status]',
+      importHistory: 'id, importedAt, type, result',
+      appPreferences: 'id, key, updatedAt',
     })
   }
 }

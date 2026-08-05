@@ -77,3 +77,11 @@ O IndexedDB permanece como fonte operacional principal. Supabase é usado apenas
 
 ## Atualização PWA v1.0.2
 O PWA usa atualização coordenada: prompt explícito, ativação do Service Worker em espera, aguardo de `controllerchange`, reload único por `sessionStorage` e recuperação global para chunks versionados sem limpar IndexedDB.
+
+## v1.0.3 — Perfil, Planos e Configurações
+
+- Configuração inicial com perfil editável e opções de Projeto TITAN/backup.
+- Planos independentes para treino, nutrição, cardio e suplementação, separados de execução e histórico.
+- Formatos TITAN autoidentificáveis e validação segura antes de qualquer alteração.
+- Central “Conta e configurações” com perfil, planos/importações, aparência, atualizações, novidades, dados e Sobre.
+- Migração Dexie aditiva para `userProfile`, `activePlans`, `importHistory` e `appPreferences`.
