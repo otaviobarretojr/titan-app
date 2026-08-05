@@ -1,7 +1,7 @@
 {
   "name": "titan-app",
   "private": true,
-  "version": "1.0.3",
+  "version": "1.0.4",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -41,9 +41,9 @@
     "vite": "^8.2.0",
     "vitest": "^4.1.10"
   },
-  "description": "TITAN v1.0.3 — Perfil, Planos e Configurações.",
+  "description": "TITAN v1.0.4 — Fundação da Nutrição Inteligente.",
   "author": "Otávio Barreto Jr.",
   "license": "Proprietary",
-  "releaseName": "TITAN v1.0.3 — Perfil, Planos e Configurações",
-  "releaseTag": "v1.0.3"
+  "releaseName": "TITAN v1.0.4 — Fundação da Nutrição Inteligente",
+  "releaseTag": "v1.0.4"
 }

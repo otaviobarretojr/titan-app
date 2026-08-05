@@ -2,6 +2,7 @@ import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import { App } from './app/App'
 import { GlobalErrorBoundary } from './components/feedback/GlobalErrorBoundary'
+import { seedFoodLibrary } from './database/seeds/seedFoodLibrary'
 import { isChunkLoadError, markAppBootSuccessful, recoverFromChunkError } from './services/pwa/updateRecovery'
 import './styles/globals.css'
 
@@ -22,6 +23,7 @@ window.addEventListener('unhandledrejection', (event) => {
 })
 
 try {
+  void seedFoodLibrary().catch((error) => console.error('[TITAN] Falha ao preparar biblioteca alimentar.', error))
   { const legacy = localStorage.getItem('titan-theme'); const theme = legacy === 'premium' || legacy === 'amoled' ? 'dark' : legacy === 'light' || legacy === 'dark' || legacy === 'system' ? legacy : 'system'; localStorage.setItem('titan-theme', theme); document.documentElement.dataset.theme = theme }
   const rootElement = document.getElementById('root')
   if (!rootElement) {

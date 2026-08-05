@@ -1,0 +1,21 @@
+/** Nutrition persistence primitives. Nutrient values are references, not clinical guidance. */
+export const FOOD_UNITS = ['g', 'ml', 'unit', 'slice', 'portion', 'scoop', 'tablespoon', 'teaspoon', 'cup', 'package'] as const
+export type FoodUnit = typeof FOOD_UNITS[number]
+export const PREPARATION_STATES = ['raw', 'cooked', 'grilled', 'baked', 'fried', 'drained', 'ready_to_eat'] as const
+export type PreparationState = typeof PREPARATION_STATES[number]
+export type Timestamped = { createdAt: string; updatedAt: string }
+export type FoodCategoryRecord = Timestamped & { id: string; name: string; sortOrder: number }
+export type FoodLibraryRecord = Timestamped & { id: string; name: string; categoryId: string; preparationState: PreparationState; baseQuantity: number; baseUnit: FoodUnit; caloriesKcal: number; proteinG: number; carbohydrateG: number; fatG: number; fiberG: number; sodiumMg?: number; unitWeightG?: number; edibleYieldPercent?: number; cookingYieldFactor?: number; source: 'titan_seed'|'user_custom'|'imported'|'verified_source'; isCustom: boolean }
+export type FoodSubstitutionRecord = Timestamped & { id: string; sourceFoodId: string; targetFoodId: string; matchingPriority: number; suggestedQuantity: number; suggestedUnit: FoodUnit; calorieDifference: number; proteinDifference: number; carbohydrateDifference: number; fatDifference: number }
+export type RecipeRecord = Timestamped & { id: string; name: string; description: string; preparationInstructions: string; totalYieldG: number; servings: number; caloriesKcal: number; proteinG: number; carbohydrateG: number; fatG: number; fiberG: number }
+export type RecipeIngredientRecord = Timestamped & { id: string; recipeId: string; foodId: string; quantity: number; unit: FoodUnit; sortOrder: number }
+export type NutritionPlanRecord = Timestamped & { id: string; userId: string; title: string; author: string; status: string; effectiveFrom: string; effectiveUntil?: string; calorieTargetKcal: number; proteinTargetG: number; carbohydrateTargetG: number; fatTargetG: number; fiberTargetG?: number; waterTargetMl: number }
+export type NutritionPlanDayRecord = Timestamped & { id: string; planId: string; dayOfWeek: number; dayType: 'training'|'rest' }
+export type PlannedMealRecord = Timestamped & { id: string; planId: string; planDayId: string; name: string; plannedTime: string; sequence: number; plannedCaloriesKcal: number; plannedProteinG: number; plannedCarbohydrateG: number; plannedFatG: number; plannedFiberG?: number }
+export type PlannedFoodRecord = Timestamped & { id: string; plannedMealId: string; foodId: string; quantity: number; unit: FoodUnit; caloriesKcal: number; proteinG: number; carbohydrateG: number; fatG: number; fiberG?: number; sortOrder: number }
+export type MealExecutionRecord = Timestamped & { id: string; userId: string; planId: string; plannedMealId: string; localDate: string; status: 'pending'|'partial'|'completed'|'skipped'|'substituted'; completedAt?: string; skippedAt?: string; notes?: string; consumedCaloriesKcal: number; consumedProteinG: number; consumedCarbohydrateG: number; consumedFatG: number; consumedFiberG?: number }
+export type FoodExecutionRecord = Timestamped & { id: string; mealExecutionId: string; plannedFoodId: string; originalFoodId: string; consumedFoodId: string; plannedQuantity: number; consumedQuantity: number; unit: FoodUnit; wasSubstituted: boolean; consumedCaloriesKcal: number; consumedProteinG: number; consumedCarbohydrateG: number; consumedFatG: number; consumedFiberG?: number }
+export type ShoppingListRecord = Timestamped & { id: string; userId: string; weekStartDate: string; status: 'draft'|'active'|'completed'|'archived' }
+export type ShoppingListItemRecord = Timestamped & { id: string; shoppingListId: string; foodId?: string; customName?: string; categoryId?: string; requiredQuantity: number; availableQuantity: number; purchaseQuantity: number; unit: FoodUnit; isPurchased: boolean }
+export type PantryItemRecord = Timestamped & { id: string; userId: string; foodId?: string; customName?: string; quantity: number; unit: FoodUnit; expiresAt?: string }
+export type FoodYieldFactorRecord = Timestamped & { id: string; foodId: string; fromState: PreparationState; toState: PreparationState; factor: number }
