@@ -15,7 +15,7 @@ import {
   SlidersHorizontal,
   Trash2,
 } from 'lucide-react'
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { Button, Card } from '../../../shared/ui'
 import {
@@ -23,22 +23,29 @@ import {
   restoreBackup,
   readBackup,
 } from '../../../services/backup/backupService'
-import { titanDatabase } from '../../../database/titanDatabase'
+import { titanDatabase, type ImportHistoryRecord } from '../../../database/titanDatabase'
 import { formatBytes, getStorageDiagnostics, type StorageDiagnostics } from '../../../services/storage/storageDiagnostics'
+import { applyThemeMode, loadThemePreference, saveThemePreference, type ThemeMode } from '../../../services/preferences/appPreferences'
+import { importTitanModule, previewTitanImport, readTitanFile, recordFailedTitanImport, type TitanImportKind, type TitanPreview } from '../../../services/import/titanImportService'
 import { APP_VERSION, BUILD_DATE, GIT_COMMIT, RELEASE_CHANNEL, getDatabaseVersion, getServiceWorkerStatus } from '../../../services/appMetadata'
 
 export function SettingsPage() {
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [message, setMessage] = useState<string | null>(null)
   const [isBusy, setIsBusy] = useState(false)
-  const [theme, setTheme] = useState(() => localStorage.getItem('titan-theme') ?? 'premium')
+  const [theme, setTheme] = useState<ThemeMode>('system')
+  const [preview, setPreview] = useState<TitanPreview | null>(null)
+  const [pendingImport, setPendingImport] = useState<{ kind: TitanImportKind; payload: Awaited<ReturnType<typeof readTitanFile>> } | null>(null)
+  const [history, setHistory] = useState<ImportHistoryRecord[]>([])
   const [compact, setCompact] = useState(() => localStorage.getItem('titan-compact') === 'true')
   const [diagnostics, setDiagnostics] = useState<StorageDiagnostics | null>(null)
 
-  function changeTheme(value: string) {
+  useEffect(() => { void loadThemePreference().then((mode) => { setTheme(mode); applyThemeMode(mode) }); const sync = () => applyThemeMode(theme); window.matchMedia?.('(prefers-color-scheme: dark)').addEventListener?.('change', sync); return () => window.matchMedia?.('(prefers-color-scheme: dark)').removeEventListener?.('change', sync) }, [theme])
+  useEffect(() => { void titanDatabase.importHistory.orderBy('importedAt').reverse().toArray().then(setHistory) }, [message])
+
+  function changeTheme(value: ThemeMode) {
     setTheme(value)
-    localStorage.setItem('titan-theme', value)
-    document.documentElement.dataset.theme = value
+    void saveThemePreference(value)
   }
 
   async function resetDatabase() {
@@ -93,6 +100,31 @@ export function SettingsPage() {
     }
   }
 
+  async function prepareTitanImport(file: File, kind: TitanImportKind) {
+    try {
+      setMessage(null)
+      const payload = await readTitanFile(file, kind)
+      setPendingImport({ kind, payload })
+      setPreview(previewTitanImport(payload))
+    } catch (reason) {
+      await recordFailedTitanImport(kind)
+      setMessage(reason instanceof Error ? `${reason.name === 'Error' ? 'Arquivo incompatível' : 'Arquivo incompatível'} — ${reason.message}` : 'Arquivo incompatível — O arquivo não contém um JSON TITAN válido.')
+    }
+  }
+
+  async function confirmTitanImport() {
+    if (!pendingImport) return
+    try {
+      setIsBusy(true)
+      await importTitanModule(pendingImport.payload, pendingImport.kind)
+      setMessage('Importação TITAN concluída com sucesso.')
+      setPreview(null)
+      setPendingImport(null)
+    } catch {
+      setMessage('A importação falhou sem alterar seus dados.')
+    } finally { setIsBusy(false) }
+  }
+
   return (
     <div className="space-y-6">
       <header>
@@ -110,10 +142,11 @@ export function SettingsPage() {
       </header>
 
       <Card elevated>
-        <div className="flex gap-3"><Palette className="text-blue-300"/><div><h2 className="font-bold">Tema Premium</h2><p className="mt-1 text-sm text-slate-400">Visual One UI com alto contraste e superfícies elevadas.</p></div></div>
+        <div className="flex gap-3"><Palette className="text-blue-300"/><div><h2 className="font-bold">Tema</h2><p className="mt-1 text-sm text-slate-400">Use sistema, claro ou escuro; a escolha é persistida em appPreferences.</p></div></div>
         <div className="mt-4 grid grid-cols-2 gap-3">
-          <Button variant={theme === 'premium' ? 'primary' : 'ghost'} onClick={() => changeTheme('premium')}>Premium</Button>
-          <Button variant={theme === 'amoled' ? 'primary' : 'ghost'} onClick={() => changeTheme('amoled')}>AMOLED</Button>
+          <Button variant={theme === 'system' ? 'primary' : 'ghost'} onClick={() => changeTheme('system')}>Sistema</Button>
+          <Button variant={theme === 'light' ? 'primary' : 'ghost'} onClick={() => changeTheme('light')}>Claro</Button>
+          <Button variant={theme === 'dark' ? 'primary' : 'ghost'} onClick={() => changeTheme('dark')}>Escuro</Button>
         </div>
       </Card>
 
@@ -230,6 +263,20 @@ export function SettingsPage() {
         ) : null}
       </Card>
 
+      <Card elevated>
+        <h2 className="text-lg font-bold">Central de importação TITAN</h2>
+        <p className="mt-1 text-sm text-slate-400">Cada ação abre um importador específico e aceita apenas o tipo interno correspondente.</p>
+        <div className="mt-4 grid gap-2">
+          {[
+            ['profile', '.titanprofile', 'Projeto TITAN'], ['workout', '.titanworkout', 'Treino'], ['nutrition', '.titannutrition', 'Nutrição'], ['cardio', '.titancardio', 'Cardio'], ['supplements', '.titansupplements', 'Suplementação'], ['project', '.titanproject', 'Projeto completo'],
+          ].map(([kind, ext, label]) => <label className="flex min-h-11 cursor-pointer items-center justify-between rounded-2xl bg-white/10 px-4 text-sm font-bold" key={kind}>{label}<input className="hidden" accept={ext} type="file" onChange={(event) => { const file = event.target.files?.[0]; if (file) void prepareTitanImport(file, kind as TitanImportKind); event.target.value = '' }} /></label>)}
+        </div>
+        <h3 className="mt-5 font-bold">Histórico de importação</h3>
+        <div className="mt-2 space-y-2 text-sm text-slate-300">{history.length === 0 ? <p>Nenhuma importação registrada.</p> : history.map((item) => <p className="rounded-2xl bg-white/5 p-3" key={item.id}>{new Date(item.importedAt).toLocaleString('pt-BR')} · {item.fileType} · {item.title} · {item.author} · {item.result}</p>)}</div>
+      </Card>
+
+      {preview ? <div className="fixed inset-0 z-[90] grid place-items-center bg-black/70 p-4"><div className="max-w-md rounded-3xl bg-slate-900 p-5" role="dialog" aria-modal="true"><h2 className="text-xl font-black">Confirmar importação: {preview.title}</h2><p className="mt-2 text-sm text-slate-300">Autor: {preview.author}. Data: {new Date(preview.createdAt).toLocaleString('pt-BR')}.</p><p className="mt-3 text-sm">Módulos incluídos: {preview.modules.join(', ') || 'nenhum'}.</p><p className="text-sm">Atualizados: {preview.updated.join(', ') || 'nenhum'}.</p><p className="text-sm">Preservados: {preview.preserved.join(', ')}.</p><p className="mt-3 rounded-2xl bg-amber-400/10 p-3 text-sm text-amber-100">O histórico de importação será preservado.</p><div className="mt-4 grid grid-cols-2 gap-2"><Button variant="ghost" onClick={() => { setPreview(null); setPendingImport(null) }}>Cancelar</Button><Button disabled={isBusy} onClick={() => void confirmTitanImport()}>Confirmar importação</Button></div></div></div> : null}
+
 
       <NavigationCard
         icon={<Brain size={23} aria-hidden="true" />}
@@ -322,6 +369,8 @@ function NavigationCard({
   label,
   path,
 }: NavigationCardProps) {
+
+
   return (
     <Card>
       <div className="flex items-center gap-3">

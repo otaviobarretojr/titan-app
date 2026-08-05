@@ -5,7 +5,7 @@ import type { DashboardWorkout } from '../types/dashboard'
 type WorkoutCardProps = { workout: DashboardWorkout | null }
 
 export function WorkoutCard({ workout }: WorkoutCardProps) {
-  if (!workout) return <div className="dashboard-card p-5 text-sm text-slate-400">Nenhum treino programado para hoje.</div>
+  if (!workout) return <div className="dashboard-card p-5 text-sm text-slate-400">Você ainda não possui um plano de treino ativo.</div>
   const completed = workout.status === 'completed'
   const started = workout.status === 'started'
   const action = completed ? 'Treino concluído' : started ? 'Continuar treino' : 'Iniciar treino'

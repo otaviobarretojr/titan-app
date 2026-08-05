@@ -247,3 +247,8 @@ button, a, input, select, textarea { touch-action: manipulation; }
   main { max-width: 56rem !important; }
   nav { max-width: 56rem !important; border-radius: 28px 28px 0 0; }
 }
+
+:root[data-theme="light"] body { background: #f8fafc; color: #0f172a; }
+:root[data-theme="light"] .premium-card,
+:root[data-theme="light"] .dashboard-card { background: rgb(255 255 255 / 92%); border-color: rgb(15 23 42 / 10%); color: #0f172a; }
+:root[data-theme="dark"] body { background: #09090b; color: #fff; }

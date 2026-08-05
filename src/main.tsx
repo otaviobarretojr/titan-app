@@ -3,6 +3,7 @@ import { createRoot } from 'react-dom/client'
 import { App } from './app/App'
 import { GlobalErrorBoundary } from './components/feedback/GlobalErrorBoundary'
 import { isChunkLoadError, markAppBootSuccessful, recoverFromChunkError } from './services/pwa/updateRecovery'
+import { applyThemeMode, loadThemePreference } from './services/preferences/appPreferences'
 import './styles/globals.css'
 
 function renderBootstrapFallback(message = 'Não foi possível iniciar o TITAN.') {
@@ -22,7 +23,8 @@ window.addEventListener('unhandledrejection', (event) => {
 })
 
 try {
-  document.documentElement.dataset.theme = localStorage.getItem('titan-theme') ?? 'premium'
+  applyThemeMode('system')
+  void loadThemePreference().then((mode) => applyThemeMode(mode))
   const rootElement = document.getElementById('root')
   if (!rootElement) {
     renderBootstrapFallback('Elemento raiz da aplicação não encontrado.')
