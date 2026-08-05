@@ -1,6 +1,6 @@
 import { useLiveQuery } from 'dexie-react-hooks'
-import { useRef, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { useEffect, useRef, useState } from 'react'
+import { Link, useSearchParams } from 'react-router-dom'
 import { DatabaseBackup, Download, FileUp, Info, Palette, RefreshCw, ShieldCheck, Trash2 } from 'lucide-react'
 import { titanDatabase } from '../../../database/titanDatabase'
 import { Button, Card } from '../../../shared/ui'
@@ -9,9 +9,24 @@ import { APP_VERSION, BUILD_DATE, GIT_COMMIT, RELEASE_CHANNEL, getDatabaseVersio
 import { formatBytes, getStorageDiagnostics, type StorageDiagnostics } from '../../../services/storage/storageDiagnostics'
 import { confirmTitanImport, readTitanFile, recordTitanImportFailure, type TitanEnvelopeType, type TitanPreview } from '../../../services/titanFile/titanFileService'
 
-export function SettingsPage() { const fileRef = useRef<HTMLInputElement>(null); const backupRef = useRef<HTMLInputElement>(null); const [expected,setExpected]=useState<TitanEnvelopeType>('project'); const prefs=useLiveQuery(()=>titanDatabase.appPreferences.get('app'),[],undefined); const imports=useLiveQuery(()=>titanDatabase.importHistory.orderBy('importedAt').reverse().toArray(),[],[]); const [preview,setPreview]=useState<TitanPreview|null>(null); const [message,setMessage]=useState(''); const [diag,setDiag]=useState<StorageDiagnostics|null>(null); const [strong,setStrong]=useState('')
+export function SettingsPage() { const fileRef = useRef<HTMLInputElement>(null); const backupRef = useRef<HTMLInputElement>(null); const [searchParams, setSearchParams] = useSearchParams(); const [expected,setExpected]=useState<TitanEnvelopeType>('project'); const prefs=useLiveQuery(()=>titanDatabase.appPreferences.get('app'),[],undefined); const imports=useLiveQuery(()=>titanDatabase.importHistory.orderBy('importedAt').reverse().toArray(),[],[]); const [preview,setPreview]=useState<TitanPreview|null>(null); const [message,setMessage]=useState(''); const [diag,setDiag]=useState<StorageDiagnostics|null>(null); const [strong,setStrong]=useState('')
 async function setTheme(theme:'system'|'light'|'dark'){ const now=new Date().toISOString(); localStorage.setItem('titan-theme', theme); document.documentElement.setAttribute('data-theme', theme); await titanDatabase.appPreferences.put({ id:'app', theme, onboardingStatus:prefs?.onboardingStatus??'pending', reduceAnimations:prefs?.reduceAnimations??false, highContrast:prefs?.highContrast??false, updateChannel:'stable', createdAt:prefs?.createdAt??now, updatedAt:now }) }
 async function choose(file: File){ try { setPreview(await readTitanFile(file, expected)); setMessage('') } catch(e) { await recordTitanImportFailure(file.name, expected, e); setMessage(e instanceof Error ? e.message : 'Arquivo inválido.') } }
+useEffect(() => {
+  const action = searchParams.get('action')
+
+  if (action === 'import-project') {
+    window.setTimeout(() => fileRef.current?.click(), 0)
+    setSearchParams({}, { replace: true })
+    return
+  }
+
+  if (action === 'restore-backup') {
+    window.setTimeout(() => backupRef.current?.click(), 0)
+    setSearchParams({}, { replace: true })
+  }
+}, [searchParams, setSearchParams])
+
 async function reset(){ if(strong !== 'APAGAR TITAN') { setMessage('Digite APAGAR TITAN para confirmar a limpeza forte.'); return } await titanDatabase.delete(); localStorage.clear(); location.reload() }
 return <div className="space-y-6"><header><p className="text-sm font-bold uppercase tracking-widest text-blue-300">TITAN</p><h1 className="mt-2 text-3xl font-black">Conta e Configurações</h1><p className="mt-2 text-sm text-slate-400">Perfil, planos, importações, aparência, atualizações, backup, novidades e sobre.</p></header>{message && <Card><p role="status" className="text-sm text-slate-300">{message}</p></Card>}
 <Card><h2 className="font-bold">PERFIL</h2><div className="mt-3 grid gap-2"><Link to="/profile">Dados pessoais, rotina, objetivos e metas</Link></div></Card>
@@ -21,4 +36,4 @@ return <div className="space-y-6"><header><p className="text-sm font-bold upperc
 <Card><h2 className="font-bold">NOVIDADES</h2><p className="mt-2 text-sm text-slate-300">Release v1.0.3: perfil completo, onboarding, planos independentes, contrato TITAN validado por Zod, importação transacional, tema system/light/dark e correção do Coach/Dexie.</p><Link className="mt-3 inline-block font-bold" to="/more">Histórico de versões em docs/CHANGELOG.md</Link></Card>
 <Card><div className="flex gap-3"><DatabaseBackup/><h2 className="font-bold">DADOS E SEGURANÇA</h2></div><Button className="mt-3" onClick={()=>void downloadBackup()}><Download/>Criar backup / Exportar dados</Button><Button className="mt-3" variant="ghost" onClick={()=>backupRef.current?.click()}><FileUp/>Restaurar backup</Button><input ref={backupRef} className="hidden" type="file" accept=".json" onChange={e=>{const f=e.target.files?.[0]; if(f) void restoreBackup(f).then(()=>location.reload()).catch(()=>setMessage('Backup inválido.')); e.target.value=''}}/><Button className="mt-3" variant="ghost" onClick={()=>void getStorageDiagnostics().then(setDiag)}>Uso de armazenamento</Button>{diag&&<p className="mt-2 text-sm">{formatBytes(diag.usage)} de {formatBytes(diag.quota)}; {diag.records} registros.</p>}<input className="mt-3 w-full rounded-xl bg-white/10 p-3" placeholder="Digite APAGAR TITAN" value={strong} onChange={e=>setStrong(e.target.value)}/><Button className="mt-3 bg-red-600" onClick={()=>void reset()}><Trash2/>Limpar dados</Button></Card>
 <Card><div className="flex gap-3"><Info/><h2 className="font-bold">SOBRE</h2></div><dl className="mt-3 text-sm"><dt>Nome instalado</dt><dd>TITAN</dd><dt>Versão</dt><dd>{APP_VERSION}</dd><dt>Build</dt><dd>{BUILD_DATE}</dd><dt>Commit</dt><dd>{GIT_COMMIT}</dd><dt>Dexie version</dt><dd>v{getDatabaseVersion()}</dd><dt>Status PWA</dt><dd>{getServiceWorkerStatus(false)}</dd><dt>Licença</dt><dd>Proprietary</dd></dl><p className="mt-3 flex gap-2 text-sm"><ShieldCheck/>Dados locais; backups devem ser protegidos pelo usuário.</p></Card></div> }
-function TitanPreviewModal({ preview,onCancel,onConfirm }:{preview:TitanPreview;onCancel:()=>void;onConfirm:()=>void}){return <div className="fixed inset-0 z-[80] grid place-items-center bg-black/70 p-4"><Card className="max-w-sm"><h2 className="text-xl font-black">Prévia TITAN</h2><dl className="mt-3 text-sm"><dt>Título</dt><dd>{preview.envelope.title}</dd><dt>Autor</dt><dd>{preview.envelope.author}</dd><dt>Data</dt><dd>{new Date(preview.envelope.createdAt).toLocaleString('pt-BR')}</dd><dt>Tipo</dt><dd>{preview.envelope.type}</dd><dt>Módulos incluídos</dt><dd>{preview.included.join(', ')}</dd><dt>Módulos alterados</dt><dd>{preview.changed.join(', ') || 'nenhum'}</dd><dt>Módulos preservados</dt><dd>{preview.preserved.join(', ') || 'nenhum'}</dd><dt>Histórico preservado</dt><dd>{preview.historyPreserved?'sim':'não'}</dd></dl><div className="mt-4 grid grid-cols-2 gap-2"><Button variant="ghost" onClick={onCancel}>Cancelar</Button><Button onClick={onConfirm}>Confirmar</Button></div></Card></div>}
+function TitanPreviewModal({ preview,onCancel,onConfirm }:{preview:TitanPreview;onCancel:()=>void;onConfirm:()=>void}){return <div className="fixed inset-0 z-[80] grid place-items-center bg-black/70 p-4"><Card className="max-h-[85dvh] w-full max-w-md overflow-y-auto pb-24"><h2 className="text-xl font-black">Prévia TITAN</h2><dl className="mt-3 text-sm"><dt>Título</dt><dd>{preview.envelope.title}</dd><dt>Autor</dt><dd>{preview.envelope.author}</dd><dt>Data</dt><dd>{new Date(preview.envelope.createdAt).toLocaleString('pt-BR')}</dd><dt>Tipo</dt><dd>{preview.envelope.type}</dd><dt>Módulos incluídos</dt><dd>{preview.included.join(', ')}</dd><dt>Módulos alterados</dt><dd>{preview.changed.join(', ') || 'nenhum'}</dd><dt>Módulos preservados</dt><dd>{preview.preserved.join(', ') || 'nenhum'}</dd><dt>Histórico preservado</dt><dd>{preview.historyPreserved?'sim':'não'}</dd></dl><div className="mt-4 grid grid-cols-2 gap-2"><Button variant="ghost" onClick={onCancel}>Cancelar</Button><Button onClick={onConfirm}>Confirmar</Button></div></Card></div>}

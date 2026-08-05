@@ -75,14 +75,14 @@ export function OnboardingGate({
 
             <Link
               className="rounded-2xl bg-white/10 p-3 text-center font-bold"
-              to="/more"
+              to="/more?action=import-project"
             >
               Importar Projeto TITAN
             </Link>
 
             <Link
               className="rounded-2xl bg-white/10 p-3 text-center font-bold"
-              to="/more"
+              to="/more?action=restore-backup"
             >
               Restaurar backup
             </Link>
