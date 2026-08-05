@@ -1,13 +1,17 @@
 import { useLiveQuery } from 'dexie-react-hooks'
-import { Link } from 'react-router-dom'
+import { Link, useLocation } from 'react-router-dom'
 import { titanDatabase } from '../../database/titanDatabase'
 import { Button, Card } from '../../shared/ui'
+
+const ONBOARDING_ALLOWED_PATHS = ['/profile', '/more']
 
 export function OnboardingGate({
   children,
 }: {
   children: React.ReactNode
 }) {
+  const location = useLocation()
+
   const profile = useLiveQuery(
     async () => (await titanDatabase.userProfile.get('primary')) ?? null,
     [],
@@ -43,7 +47,13 @@ export function OnboardingGate({
     )
   }
 
-  if (!profile && prefs?.onboardingStatus !== 'skipped') {
+  const onboardingPending =
+    !profile && prefs?.onboardingStatus !== 'skipped'
+
+  const routeAllowedDuringOnboarding =
+    ONBOARDING_ALLOWED_PATHS.includes(location.pathname)
+
+  if (onboardingPending && !routeAllowedDuringOnboarding) {
     return (
       <main className="mx-auto grid min-h-dvh max-w-md place-items-center p-6 text-white">
         <Card elevated>
