@@ -60,3 +60,8 @@
 - [x] Fluxo de atualização com reload único.
 - [x] Recuperação de erro de chunk documentada.
 - [x] IndexedDB preservado.
+
+## v1.0.3
+- [x] `project` não é `ActivePlanType`.
+- [x] Importador único com Zod, `expectedType`, limite de tamanho e rollback.
+- [x] Perfil, onboarding, configurações, tema, backup e documentação atualizados.

@@ -249,6 +249,65 @@ export type SleepEntryRecord = {
   updatedAt: string
 }
 
+
+
+export type ActivePlanType = 'workout' | 'nutrition' | 'cardio' | 'supplements'
+
+export type UserProfileRecord = {
+  id: string
+  name: string
+  displayName: string
+  heightCm: number
+  weightKg: number
+  goal: string
+  experience: string
+  trainingDays: string[]
+  wakeTime: string
+  workTime: string
+  workoutTime: string
+  sleepTime: string
+  timezone: string
+  targets: Record<string, number | string | boolean>
+  preferences: Record<string, unknown>
+  createdAt: string
+  updatedAt: string
+}
+
+export type ActivePlanRecord = {
+  id: ActivePlanType
+  type: ActivePlanType
+  title: string
+  author: string
+  sourceCreatedAt: string
+  payload: unknown
+  createdAt: string
+  updatedAt: string
+}
+
+export type ImportHistoryRecord = {
+  id: string
+  status: 'success' | 'failure'
+  type: 'profile' | ActivePlanType | 'project'
+  title: string
+  author: string
+  fileName: string
+  fileSize: number
+  modulesIncluded: string[]
+  modulesChanged: string[]
+  modulesPreserved: string[]
+  errorTitle?: string
+  errorMessage?: string
+  createdAt: string
+}
+
+export type AppPreferencesRecord = {
+  id: string
+  theme: 'system' | 'light' | 'dark'
+  onboardingStatus: 'pending' | 'completed' | 'deferred'
+  createdAt: string
+  updatedAt: string
+}
+
 export type CoachRecommendationRecord = {
   id: string
   userId: string
@@ -289,6 +348,10 @@ class TitanDatabase extends Dexie {
   coachRecommendations!: EntityTable<CoachRecommendationRecord, 'id'>
   notificationPreferences!: EntityTable<NotificationPreference, 'id'>
   notificationInbox!: EntityTable<NotificationInboxItem, 'id'>
+  userProfile!: EntityTable<UserProfileRecord, 'id'>
+  activePlans!: EntityTable<ActivePlanRecord, 'id'>
+  importHistory!: EntityTable<ImportHistoryRecord, 'id'>
+  appPreferences!: EntityTable<AppPreferencesRecord, 'id'>
 
   constructor() {
     super('titan-database')
@@ -518,6 +581,13 @@ class TitanDatabase extends Dexie {
         'id, userId, category, enabled, nextRunAt, [userId+category]',
       notificationInbox:
         'id, userId, category, priority, createdAt, readAt, dismissedAt, dedupeKey, [userId+createdAt], [userId+dedupeKey]',
+    })
+
+    this.version(12).stores({
+      userProfile: 'id, displayName, updatedAt',
+      activePlans: 'id, type, updatedAt',
+      importHistory: 'id, status, type, createdAt',
+      appPreferences: 'id, theme, onboardingStatus',
     })
   }
 }

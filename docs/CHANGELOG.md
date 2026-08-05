@@ -308,3 +308,9 @@
 - Coordena ativação do Service Worker e reload único.
 - Detecta falhas de chunks versionados e exibe tela de recuperação.
 - Preserva IndexedDB e dados locais.
+
+## v1.0.3 — Perfil, Planos e Configurações
+- Adicionado contrato TITAN v1.0 validado por Zod.
+- Separadas tabelas de perfil, planos ativos, preferências e histórico.
+- Implementada importação transacional com rollback e `expectedType`.
+- Atualizados tema, backup, Sobre e documentação de dados.
