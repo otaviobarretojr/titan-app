@@ -3,7 +3,7 @@ import { getDeviceIdentity } from './deviceIdentityService'
 
 export const CLOUD_BACKUP_VERSION = 3
 export const CLOUD_BACKUP_MAX_BYTES = 25 * 1024 * 1024
-const APP_VERSION = import.meta.env.VITE_APP_VERSION ?? '0.9.0-rc.1'
+const APP_VERSION = import.meta.env.VITE_APP_VERSION ?? '1.0.0'
 const PHOTO_TABLES = new Set(['progressPhotos'])
 
 export type BackupTables = Record<string, unknown[]>

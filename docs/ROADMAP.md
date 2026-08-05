@@ -1,9 +1,9 @@
 # TITAN — Roadmap
 - [x] v0.1 — Foundation
-- [ ] v0.2 — Dashboard
-- [ ] v0.3 — Treinos
-- [ ] v0.4 — Nutrição
-- [ ] v0.5 — Cardio
+- [x] v0.2 — Dashboard
+- [x] v0.3 — Treinos
+- [x] v0.4 — Nutrição
+- [x] v0.5 — Cardio
 - [x] v0.6 — Saúde e evolução
 - [x] v0.7 — Coach
 - [x] v0.8 — Relatórios
@@ -19,4 +19,5 @@
 - [x] Sprint 015 — Backup em Nuvem e Sincronização Segura
 - [x] Sprint 016 — Experiência Premium (UX/UI)
 - [x] Sprint 017 — Auditoria Completa e Beta
-- [ ] v1.0 — Primeira versão estável
+- [x] v1.0 — Primeira versão estável (TITAN v1.0.0 — 5 de agosto de 2026)
+- [ ] v2.0 — Health Connect, Galaxy Watch, IA Conversacional, Multiusuário, Sincronização automática e Portal Personal Trainer

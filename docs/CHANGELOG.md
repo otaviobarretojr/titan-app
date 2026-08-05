@@ -2,6 +2,16 @@
 
 ## Unreleased
 
+## v1.0.0 — Release Oficial
+
+### Sprint 018 — TITAN v1.0
+
+- Versão oficial promovida para `1.0.0` com tag lógica `v1.0.0`.
+- Manifesto, metadata HTML, release name e versão de backup em nuvem revisados para a release oficial.
+- Documentação oficial criada: release notes v1.0.0, guia do usuário, instalação, histórico do projeto e checklist final.
+- README, Roadmap e Arquitetura atualizados para refletir a primeira versão estável.
+- Revisão final de produção/PWA/offline/cache/performance documentada sem adicionar funcionalidades, contratos públicos ou schemas IndexedDB.
+
 ### Sprint 017 — Auditoria Completa e Beta
 
 - Auditoria beta pré-v1.0 cobrindo Dashboard, Treino, Nutrição, Cardio, Evolução, Saúde, Coach, Analytics, Notificações, Conta e backups local/nuvem.
