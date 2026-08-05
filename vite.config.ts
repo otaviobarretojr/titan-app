@@ -3,7 +3,7 @@ import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
 import { VitePWA } from 'vite-plugin-pwa'
 
-const appVersion = process.env.VITE_APP_VERSION ?? '1.0.2'
+const appVersion = process.env.VITE_APP_VERSION ?? '1.0.3'
 const buildDate = process.env.VITE_BUILD_DATE ?? new Date().toISOString()
 const gitCommit = process.env.VITE_GIT_COMMIT ?? process.env.GITHUB_SHA ?? 'local'
 
@@ -27,7 +27,7 @@ export default defineConfig({
         name: 'TITAN',
         short_name: 'TITAN',
         description:
-          'TITAN v1.0.2 — sistema operacional de performance pessoal para treino, nutrição, cardio e evolução.',
+          'TITAN v1.0.3 — sistema operacional de performance pessoal para treino, nutrição, cardio e evolução.',
         theme_color: '#09090b',
         background_color: '#09090b',
         display: 'standalone',
