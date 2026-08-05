@@ -32,3 +32,6 @@
 
 ## v1.0.2
 - [x] Atualização segura do PWA e recuperação sem apagar dados locais.
+
+## TITAN v1.0.3
+Release reconstruída de forma limpa com perfil completo, planos independentes, importação TITAN transacional, onboarding inteligente, dashboard orientado por planos, central de Conta e Configurações, tema System/Light/Dark, changelog interno, Sobre e backup compatível incluindo as novas tabelas Dexie.
