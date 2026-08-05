@@ -18,4 +18,5 @@
 - [x] Sprint 014 — Notificações Inteligentes
 - [x] Sprint 015 — Backup em Nuvem e Sincronização Segura
 - [x] Sprint 016 — Experiência Premium (UX/UI)
+- [x] Sprint 017 — Auditoria Completa e Beta
 - [ ] v1.0 — Primeira versão estável
