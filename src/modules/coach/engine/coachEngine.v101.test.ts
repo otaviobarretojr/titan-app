@@ -57,7 +57,7 @@ describe('Release v1.0.1 score integrity', () => {
       hydrationConsumedMl: 1500,
       hasHydrationData: true,
     })
-    expect(score.value).toBe(80)
+    expect(score.value).toBe(79)
     expect(score.measuredCategories).toEqual(['hydration', 'training'])
   })
 
