@@ -5,8 +5,8 @@ import { titanDatabase } from '../src/database/titanDatabase'
 
 describe('release v1.0.2', () => {
   it('expõe metadados e preserva o schema Dexie existente', () => {
-    expect(APP_VERSION).toBe('1.0.2')
-    expect(titanDatabase.verno).toBe(11)
+    expect(APP_VERSION).toBe('1.0.3')
+    expect(titanDatabase.verno).toBe(12)
   })
 
   it('mantém nome do PWA sem versão', async () => {
