@@ -4,9 +4,11 @@ import { ScoreBreakdown } from '../../dashboard/components/ScoreBreakdown'
 import { CoachInsightCard } from '../components/CoachInsightCard'
 import { CoachTrendCard } from '../components/CoachTrendCard'
 import { useCoachReport } from '../hooks/useCoachReport'
+import { usePersistCoachInsights } from '../hooks/usePersistCoachInsights'
 
 export function CoachPage() {
   const { report, isLoading } = useCoachReport()
+  usePersistCoachInsights(report?.dailyInsights)
   if (isLoading) return <SkeletonPage label="Analisando histórico local" />
   if (!report) return <Card><h1 className="text-xl font-black">Coach sem plano para hoje</h1><p className="mt-2 text-sm leading-6 text-slate-400">O Coach não encontrou um plano diário no IndexedDB. Nenhuma conclusão foi criada.</p></Card>
   const priority=report.dailyInsights[0]

@@ -9,6 +9,7 @@ import { ScoreCard } from '../components/ScoreCard'
 import { WorkoutCard } from '../components/WorkoutCard'
 import { unreadCount, getNotificationSnapshot } from '../../notifications/data/notificationsRepository'
 import { getNotificationPermission } from '../../../services/notifications/notificationService'
+import { usePersistCoachInsights } from '../../coach/hooks/usePersistCoachInsights'
 import { useDashboard } from '../hooks/useDashboard'
 
 const userTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone || 'America/Manaus'
@@ -20,6 +21,7 @@ export function DashboardPage() {
   const [unreadNotifications, setUnreadNotifications] = useState(0)
   const [nextReminder, setNextReminder] = useState<string | null>(null)
   const permission = getNotificationPermission()
+  usePersistCoachInsights(data?.coach?.dailyInsights ?? data?.insights)
   useEffect(() => { void Promise.all([unreadCount(), getNotificationSnapshot()]).then(([count, snapshot]) => { setUnreadNotifications(count); setNextReminder(snapshot.next[0]?.nextRunAt ?? null) }) }, [])
   if (error) return <InfoBanner title="Não foi possível abrir o TITAN" tone="error">{error} Seus registros locais permanecem seguros.</InfoBanner>
   if (isLoading || !data) return <SkeletonPage label="Carregando dashboard premium" variant="dashboard" />

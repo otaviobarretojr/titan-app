@@ -14,9 +14,10 @@ export function filterRepeatedInsights(insights: CoachInsight[], history: CoachR
   const cooldownDays: Record<CoachInsight['priority'],number> = { high: 2, medium: 4, low: 7 }
   return insights.filter(insight => !history.some(row => row.localDate !== today && row.insightKey === insight.id && Math.floor((new Date(`${today}T12:00:00Z`).getTime()-new Date(`${row.localDate}T12:00:00Z`).getTime())/DAY) < cooldownDays[insight.priority]))
 }
-async function persistInsights(insights: CoachInsight[], today: string, history: CoachRecommendationRecord[]) {
+export async function persistCoachInsights(insights: CoachInsight[], today: string, history: CoachRecommendationRecord[]) {
   const now = new Date().toISOString()
-  const rows = insights.filter(insight => !history.some(row => row.localDate === today && row.insightKey === insight.id)).map(insight => ({ id:`coach-${crypto.randomUUID()}`, userId:TITAN_USER_ID, localDate:today, title:insight.title, message:insight.message, priority:insight.priority, insightKey:insight.id, category:insight.category, evidence:insight.evidence, period:insight.period, sampleSize:insight.sampleSize, action:insight.message, actionPath:insight.actionPath, createdAt:now, updatedAt:now } satisfies CoachRecommendationRecord))
+  const existing = history.length ? history : await titanDatabase.coachRecommendations.where('userId').equals(TITAN_USER_ID).filter(row => row.localDate === today).toArray()
+  const rows = insights.filter(insight => !existing.some(row => row.localDate === today && row.insightKey === insight.id)).map(insight => ({ id:`coach-${crypto.randomUUID()}`, userId:TITAN_USER_ID, localDate:today, title:insight.title, message:insight.message, priority:insight.priority, insightKey:insight.id, category:insight.category, evidence:insight.evidence, period:insight.period, sampleSize:insight.sampleSize, action:insight.message, actionPath:insight.actionPath, createdAt:now, updatedAt:now } satisfies CoachRecommendationRecord))
   if (rows.length) await titanDatabase.coachRecommendations.bulkAdd(rows)
 }
 
@@ -50,8 +51,8 @@ export async function getCoachReport(): Promise<CoachReport | null> {
   const input={ currentMinutes:getTitanCurrentMinutes(), proteinConsumedG:todaySnapshot.protein??0, proteinTargetG:todayPlan.proteinTargetG, caloriesConsumedKcal:todaySnapshot.calories??0, calorieTargetKcal:todayPlan.calorieTargetKcal, hydrationConsumedMl:todaySnapshot.hydration??0, hydrationTargetMl:todayPlan.hydrationTargetMl, sleepMinutes:todaySnapshot.sleep??null, sleepTargetMinutes:todayPlan.sleepTargetMinutes, pendingMeals:todayMealPlans.filter(p=>!todayMeals.some(e=>e.mealPlanId===p.id)&&timeToMinutes(p.plannedTime)<getTitanCurrentMinutes()).length, workoutStatus:todayWorkout?.status??'none', cardioStatus:todayCardio?.status==='completed'?'completed':todayCardio?.status==='started'?'started':'none', plannedWorkoutMinutes:null, consistency:todaySnapshot.adherence??0, hasNutritionData:todaySnapshot.protein!==undefined, hasHydrationData:todaySnapshot.hydration!==undefined, hasConsistencyData:todaySnapshot.adherence!==undefined } as const
   const score=calculateTitanScore(input); const weeklyTrends=calculateTrends(snapshots,'weekly'); const monthlyTrends=calculateTrends(snapshots,'monthly'); const quarterlyTrends=calculateTrends(snapshots,'quarterly')
   const candidates=[...generateCoachAlerts(snapshots),...generateCoachInsights(input).filter(x=>x.id!=='on-track'),...generateHistoricalInsights(snapshots)]; const uniqueCandidates=[...new Map(candidates.map(x=>[x.id,x])).values()]
-  const dailyInsights=filterRepeatedInsights(uniqueCandidates,storedHistory,today).slice(0,5); await persistInsights(dailyInsights,today,storedHistory)
-  const history=(await titanDatabase.coachRecommendations.where('userId').equals(TITAN_USER_ID).reverse().sortBy('createdAt')).slice(0,30).map(historyView)
+  const dailyInsights=filterRepeatedInsights(uniqueCandidates,storedHistory,today).slice(0,5)
+  const history=storedHistory.slice(0,30).map(historyView)
   const metricSamples=(['protein','calories','hydration','sleep','weight','waist','training','trainingVolume','strength','cardio','score'] as TrendMetric[]).map(metric=>({metric,samples:snapshots.slice(-30).filter(x=>x[metric]!==undefined).length}))
   const measured = score.measuredCategories; const all:CoachCategory[]=['nutrition','hydration','training','cardio','recovery','consistency']
   const summarize=(trends: typeof weeklyTrends,label:string)=>trends.length?`${label}: ${trends.filter(x=>x.direction==='up').length} em alta, ${trends.filter(x=>x.direction==='down').length} em queda e ${trends.filter(x=>x.direction==='stable').length} estáveis, somente entre amostras registradas.`:`${label}: amostras insuficientes para comparação.`

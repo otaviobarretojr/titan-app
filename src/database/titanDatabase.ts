@@ -249,6 +249,36 @@ export type SleepEntryRecord = {
   updatedAt: string
 }
 
+export type ActivePlanRecord = {
+  id: string
+  userId: string
+  type: 'workout' | 'nutrition' | 'cardio' | 'supplements'
+  sourceId: string
+  localDate: string
+  createdAt: string
+  updatedAt: string
+}
+
+export type SupplementPlanRecord = {
+  id: string
+  userId: string
+  localDate: string
+  name: string
+  plannedTime: string
+  dose: string
+  createdAt: string
+  updatedAt: string
+}
+
+export type ImportHistoryRecord = {
+  id: string
+  userId: string
+  importedAt: string
+  expectedType: 'profile' | 'workout' | 'nutrition' | 'cardio' | 'supplements' | 'project'
+  counts: Record<string, number>
+  status: 'completed'
+}
+
 export type CoachRecommendationRecord = {
   id: string
   userId: string
@@ -287,6 +317,9 @@ class TitanDatabase extends Dexie {
   hydrationEntries!: EntityTable<HydrationEntryRecord, 'id'>
   sleepEntries!: EntityTable<SleepEntryRecord, 'id'>
   coachRecommendations!: EntityTable<CoachRecommendationRecord, 'id'>
+  activePlans!: EntityTable<ActivePlanRecord, 'id'>
+  supplementPlans!: EntityTable<SupplementPlanRecord, 'id'>
+  importHistory!: EntityTable<ImportHistoryRecord, 'id'>
   notificationPreferences!: EntityTable<NotificationPreference, 'id'>
   notificationInbox!: EntityTable<NotificationInboxItem, 'id'>
 
@@ -518,6 +551,15 @@ class TitanDatabase extends Dexie {
         'id, userId, category, enabled, nextRunAt, [userId+category]',
       notificationInbox:
         'id, userId, category, priority, createdAt, readAt, dismissedAt, dedupeKey, [userId+createdAt], [userId+dedupeKey]',
+    })
+
+    // Release v1.0.3: imports, independent active plans and supplements.
+    this.version(12).stores({
+      activePlans: 'id, userId, type, sourceId, localDate, [userId+type], [userId+localDate]',
+      supplementPlans: 'id, userId, localDate, plannedTime, [userId+localDate]',
+      importHistory: 'id, userId, importedAt, expectedType, status, [userId+importedAt]',
+      coachRecommendations:
+        'id, userId, localDate, priority, insightKey, category, createdAt, [userId+localDate], [userId+insightKey], [userId+insightKey+localDate]',
     })
   }
 }
