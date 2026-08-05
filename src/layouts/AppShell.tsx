@@ -31,7 +31,7 @@ const navigationItems: NavigationItem[] = [
   { label: 'Nutrição', to: '/nutrition', icon: Utensils },
   { label: 'Cardio', to: '/cardio', icon: HeartPulse },
   { label: 'Evolução', to: '/evolution', icon: ChartNoAxesCombined },
-  { label: 'Conta', to: '/account', icon: Cloud },
+  { label: 'Conta e configurações', to: '/more', icon: Cloud },
   { label: 'Mais', to: '/more', icon: MoreHorizontal },
 ]
 

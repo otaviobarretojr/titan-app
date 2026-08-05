@@ -101,19 +101,30 @@ export function SettingsPage() {
         </p>
 
         <h1 className="mt-2 text-3xl font-black">
-          Mais
+          Conta e configurações
         </h1>
 
         <p className="mt-2 text-sm leading-6 text-slate-400">
-          Configurações, segurança, relatórios e dados do aplicativo.
+          Perfil, planos, importações, aparência, atualizações, changelog, dados e informações técnicas.
         </p>
       </header>
 
       <Card elevated>
-        <div className="flex gap-3"><Palette className="text-blue-300"/><div><h2 className="font-bold">Tema Premium</h2><p className="mt-1 text-sm text-slate-400">Visual One UI com alto contraste e superfícies elevadas.</p></div></div>
+        <h2 className="text-lg font-black">PERFIL</h2><div className="mt-3 grid gap-2 text-sm text-slate-300"><Link to="/profile">Dados pessoais</Link><Link to="/profile">Rotina</Link><Link to="/profile">Objetivos</Link><Link to="/profile">Metas</Link></div>
+      </Card>
+      <Card elevated>
+        <h2 className="text-lg font-black">PLANOS E IMPORTAÇÕES</h2><div className="mt-3 grid gap-2 text-sm text-slate-300"><span>Projeto TITAN</span><span>Treino</span><span>Nutrição</span><span>Cardio</span><span>Suplementação</span><span>Histórico de importações preservado em IndexedDB</span></div>
+      </Card>
+      <Card elevated>
+        <h2 className="text-lg font-black">NOVIDADES</h2><ul className="mt-3 list-disc space-y-1 pl-5 text-sm text-slate-300"><li>Perfil e configuração inicial.</li><li>Importação de Projeto TITAN.</li><li>Planos independentes.</li><li>Central de configurações.</li><li>Tema e informações da versão.</li></ul>
+      </Card>
+
+      <Card elevated>
+        <div className="flex gap-3"><Palette className="text-blue-300"/><div><h2 className="font-bold">APARÊNCIA</h2><p className="mt-1 text-sm text-slate-400">Visual One UI com alto contraste e superfícies elevadas.</p></div></div>
         <div className="mt-4 grid grid-cols-2 gap-3">
-          <Button variant={theme === 'premium' ? 'primary' : 'ghost'} onClick={() => changeTheme('premium')}>Premium</Button>
-          <Button variant={theme === 'amoled' ? 'primary' : 'ghost'} onClick={() => changeTheme('amoled')}>AMOLED</Button>
+          <Button variant={theme === 'premium' ? 'primary' : 'ghost'} onClick={() => changeTheme('premium')}>Sistema</Button>
+          <Button variant={theme === 'light' ? 'primary' : 'ghost'} onClick={() => changeTheme('light')}>Claro</Button>
+          <Button variant={theme === 'dark' ? 'primary' : 'ghost'} onClick={() => changeTheme('dark')}>Escuro</Button>
         </div>
       </Card>
 

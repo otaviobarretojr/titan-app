@@ -1,7 +1,7 @@
 {
   "name": "titan-app",
   "private": true,
-  "version": "1.0.2",
+  "version": "1.0.3",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -41,9 +41,9 @@
     "vite": "^8.2.0",
     "vitest": "^4.1.10"
   },
-  "description": "TITAN v1.0.2 — atualização segura e recuperação do PWA.",
+  "description": "TITAN v1.0.3 — perfil, planos e central de configurações.",
   "author": "Otávio Barreto Jr.",
   "license": "Proprietary",
-  "releaseName": "TITAN v1.0.2 — Atualização Segura e Recuperação do PWA",
-  "releaseTag": "v1.0.2"
+  "releaseName": "TITAN v1.0.3 — Perfil, Planos e Configurações",
+  "releaseTag": "v1.0.3"
 }
