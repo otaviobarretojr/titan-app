@@ -3,8 +3,8 @@ import { calculateTitanScore, calculateTrends, generateHistoricalInsights, type 
 
 const empty: CoachEngineInput = { currentMinutes: 800, proteinConsumedG:0, proteinTargetG:150, caloriesConsumedKcal:0, calorieTargetKcal:2000, hydrationConsumedMl:0, hydrationTargetMl:2500, sleepMinutes:null, sleepTargetMinutes:480, pendingMeals:0, workoutStatus:'none', cardioStatus:'none', plannedWorkoutMinutes:null, consistency:0, hasNutritionData:false, hasHydrationData:false, hasConsistencyData:false }
 describe('Score TITAN', () => {
-  it('redistribui pesos e não converte ausência em zero', () => expect(calculateTitanScore(empty)).toMatchObject({value:null,label:'Sem dados',measuredCategories:[]}))
-  it('calcula somente categorias medidas', () => expect(calculateTitanScore({...empty,hydrationConsumedMl:2000,hasHydrationData:true}).value).toBe(80))
+  it('redistribui pesos e não converte ausência em zero', () => expect(calculateTitanScore(empty)).toMatchObject({value:null,label:'Sem dados suficientes',measuredCategories:[]}))
+  it('calcula somente categorias medidas', () => expect(calculateTitanScore({...empty,hydrationConsumedMl:2000,hasHydrationData:true}).value).toBeNull())
 })
 describe('tendências', () => {
   it('compara apenas amostras reais', () => { const trend=calculateTrends([{date:'2026-07-20',protein:100},{date:'2026-07-21',protein:100},{date:'2026-07-27',protein:80},{date:'2026-07-28',protein:60}],'weekly')[0]; expect(trend).toMatchObject({metric:'protein',direction:'down',sampleSize:2,previousSampleSize:2}) })
