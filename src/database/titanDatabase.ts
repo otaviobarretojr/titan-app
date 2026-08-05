@@ -249,6 +249,24 @@ export type SleepEntryRecord = {
   updatedAt: string
 }
 
+
+export type AppPreferenceRecord = {
+  key: string
+  value: unknown
+  createdAt: string
+  updatedAt: string
+}
+
+export type ImportHistoryRecord = {
+  id: string
+  importedAt: string
+  fileType: string
+  title: string
+  author: string
+  result: 'success' | 'failure'
+  message: string
+}
+
 export type CoachRecommendationRecord = {
   id: string
   userId: string
@@ -289,6 +307,8 @@ class TitanDatabase extends Dexie {
   coachRecommendations!: EntityTable<CoachRecommendationRecord, 'id'>
   notificationPreferences!: EntityTable<NotificationPreference, 'id'>
   notificationInbox!: EntityTable<NotificationInboxItem, 'id'>
+  appPreferences!: EntityTable<AppPreferenceRecord, 'key'>
+  importHistory!: EntityTable<ImportHistoryRecord, 'id'>
 
   constructor() {
     super('titan-database')
@@ -518,6 +538,11 @@ class TitanDatabase extends Dexie {
         'id, userId, category, enabled, nextRunAt, [userId+category]',
       notificationInbox:
         'id, userId, category, priority, createdAt, readAt, dismissedAt, dedupeKey, [userId+createdAt], [userId+dedupeKey]',
+    })
+
+    this.version(12).stores({
+      appPreferences: 'key, updatedAt',
+      importHistory: 'id, importedAt, fileType, result',
     })
   }
 }

@@ -12,7 +12,7 @@ export function CardioCard({ cardio }: CardioCardProps) {
     return (
       <Card>
         <p className="text-sm text-slate-400">
-          Nenhum cardio programado para hoje.
+          Nenhuma sessão de cardio planejada para hoje.
         </p>
       </Card>
     )
