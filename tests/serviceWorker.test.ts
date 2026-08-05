@@ -6,6 +6,8 @@ describe('Service Worker', () => {
     const config = await readFile('vite.config.ts', 'utf8')
     expect(config).toContain("registerType: 'prompt'")
     expect(config).toContain('cleanupOutdatedCaches: true')
+    expect(config).toContain('skipWaiting: false')
+    expect(config).toContain('clientsClaim: true')
     expect(config).toContain("handler: 'NetworkFirst'")
     expect(config).toContain("handler: 'CacheFirst'")
   })

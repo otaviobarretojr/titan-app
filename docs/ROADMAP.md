@@ -28,3 +28,7 @@
 - Instalações novas não recebem dados demonstrativos automaticamente em produção.
 - O Dashboard exibe “Sem dados suficientes” até haver evidências reais suficientes.
 - A atualização preserva dados locais existentes; para limpar dados locais, faça backup e confirme manualmente a remoção no navegador/sistema.
+
+
+## v1.0.2
+- [x] Atualização segura do PWA e recuperação sem apagar dados locais.

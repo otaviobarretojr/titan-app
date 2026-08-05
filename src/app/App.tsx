@@ -6,6 +6,7 @@ import {
   Routes,
 } from 'react-router-dom'
 import { AppShell } from '../layouts/AppShell'
+import { GlobalErrorBoundary } from '../components/feedback/GlobalErrorBoundary'
 
 const DashboardPage = lazy(() =>
   import('../modules/dashboard/pages/DashboardPage').then((module) => ({
@@ -111,6 +112,7 @@ function RouteLoading() {
 export function App() {
   return (
     <HashRouter>
+      <GlobalErrorBoundary>
       <Suspense fallback={<RouteLoading />}>
         <Routes>
           <Route element={<AppShell />}>
@@ -139,6 +141,7 @@ export function App() {
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </Suspense>
+      </GlobalErrorBoundary>
     </HashRouter>
   )
 }

@@ -2,8 +2,10 @@ import { RefreshCw, WifiOff } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { useRegisterSW } from 'virtual:pwa-register/react'
 import { Button } from '../../shared/ui'
+import { activateUpdateAndReload } from '../../services/pwa/updateRecovery'
 
 export function PwaStatus() {
+  const [registration, setRegistration] = useState<ServiceWorkerRegistration | null>(null)
   const [isOffline, setIsOffline] = useState(
     typeof navigator !== 'undefined' ? !navigator.onLine : false,
   )
@@ -14,6 +16,7 @@ export function PwaStatus() {
   } = useRegisterSW({
     onRegisteredSW(_url, registration) {
       if (!registration) return
+      setRegistration(registration)
       window.setInterval(() => void registration.update(), 60 * 60 * 1000)
     },
   })
@@ -49,9 +52,9 @@ export function PwaStatus() {
           </div>
           <Button
             className="min-h-10 px-3 text-sm"
-            onClick={() => updateServiceWorker(true)}
+            onClick={() => { void updateServiceWorker(false); void activateUpdateAndReload(registration) }}
           >
-            Atualizar
+            Atualizar agora
           </Button>
         </div>
       </div>

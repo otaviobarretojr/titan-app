@@ -91,3 +91,7 @@ A Sprint 017 consolida a auditoria beta pré-v1.0: fluxos funcionais, UX, perfor
 - Instalações novas não recebem dados demonstrativos automaticamente em produção.
 - O Dashboard exibe “Sem dados suficientes” até haver evidências reais suficientes.
 - A atualização preserva dados locais existentes; para limpar dados locais, faça backup e confirme manualmente a remoção no navegador/sistema.
+
+
+## Release v1.0.2
+Atualização segura do PWA com recuperação de chunks, reload único coordenado com o Service Worker e tela global que preserva IndexedDB. Consulte `docs/PWA_UPDATE_AND_RECOVERY.md`.
