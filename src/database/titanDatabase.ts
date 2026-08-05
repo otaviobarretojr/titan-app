@@ -249,6 +249,34 @@ export type SleepEntryRecord = {
   updatedAt: string
 }
 
+export type ActivePlanRecord = {
+  id: string
+  type: 'nutrition' | 'training' | 'supplementation'
+  userId: string
+  localDate: string
+  title: string
+  data: unknown
+  createdAt: string
+  updatedAt: string
+}
+
+export type UserProfileRecord = UserRecord
+
+export type ImportHistoryRecord = {
+  id: string
+  importedAt: string
+  fileTitle: string
+  fileCreatedAt: string
+  modules: string[]
+  touchedTables: string[]
+}
+
+export type AppPreferenceRecord = {
+  key: string
+  value: string | number | boolean | null
+  updatedAt: string
+}
+
 export type CoachRecommendationRecord = {
   id: string
   userId: string
@@ -289,6 +317,10 @@ class TitanDatabase extends Dexie {
   coachRecommendations!: EntityTable<CoachRecommendationRecord, 'id'>
   notificationPreferences!: EntityTable<NotificationPreference, 'id'>
   notificationInbox!: EntityTable<NotificationInboxItem, 'id'>
+  userProfile!: EntityTable<UserProfileRecord, 'id'>
+  activePlans!: EntityTable<ActivePlanRecord, 'id'>
+  importHistory!: EntityTable<ImportHistoryRecord, 'id'>
+  appPreferences!: EntityTable<AppPreferenceRecord, 'key'>
 
   constructor() {
     super('titan-database')
@@ -518,6 +550,16 @@ class TitanDatabase extends Dexie {
         'id, userId, category, enabled, nextRunAt, [userId+category]',
       notificationInbox:
         'id, userId, category, priority, createdAt, readAt, dismissedAt, dedupeKey, [userId+createdAt], [userId+dedupeKey]',
+    })
+
+    // v1.0.3: canonical TITAN import model. Release imports use these
+    // tables consistently instead of mixing activePlans with legacy plan
+    // tables; older module tables remain untouched to preserve history.
+    this.version(12).stores({
+      userProfile: 'id, displayName, createdAt',
+      activePlans: 'id, type, userId, localDate, [type+localDate], [userId+type]',
+      importHistory: 'id, importedAt, fileCreatedAt',
+      appPreferences: 'key, updatedAt',
     })
   }
 }
