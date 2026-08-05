@@ -95,3 +95,6 @@ A Sprint 017 consolida a auditoria beta pré-v1.0: fluxos funcionais, UX, perfor
 
 ## Release v1.0.2
 Atualização segura do PWA com recuperação de chunks, reload único coordenado com o Service Worker e tela global que preserva IndexedDB. Consulte `docs/PWA_UPDATE_AND_RECOVERY.md`.
+
+## TITAN v1.0.3
+Release reconstruída de forma limpa com perfil completo, planos independentes, importação TITAN transacional, onboarding inteligente, dashboard orientado por planos, central de Conta e Configurações, tema System/Light/Dark, changelog interno, Sobre e backup compatível incluindo as novas tabelas Dexie.

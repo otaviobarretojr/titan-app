@@ -1,6 +1,55 @@
 import Dexie, { type EntityTable } from 'dexie'
 import type { NotificationInboxItem, NotificationPreference } from '../modules/notifications/types/notifications'
 
+export type UserProfileRecord = {
+  id: string
+  name: string
+  heightCm: number
+  weightKg: number
+  objective: string
+  trainingDays: string[]
+  routine: string
+  wakeTime: string
+  workTime: string
+  workoutTime: string
+  sleepTime: string
+  timezone: string
+  goals: string[]
+  createdAt: string
+  updatedAt: string
+}
+
+export type ActivePlanType = 'workout' | 'nutrition' | 'cardio' | 'supplements' | 'project'
+
+export type ActivePlanRecord = {
+  id: ActivePlanType
+  type: ActivePlanType
+  title: string
+  author: string
+  sourceCreatedAt: string
+  payload: unknown
+  createdAt: string
+  updatedAt: string
+}
+
+export type ImportHistoryRecord = {
+  id: string
+  type: ActivePlanType | 'profile'
+  title: string
+  author: string
+  status: 'applied' | 'rejected'
+  message: string
+  createdAt: string
+}
+
+export type AppPreferencesRecord = {
+  id: string
+  theme: 'system' | 'light' | 'dark'
+  onboardingDeferred: boolean
+  createdAt: string
+  updatedAt: string
+}
+
 export type UserRecord = {
   id: string
   displayName: string
@@ -289,6 +338,10 @@ class TitanDatabase extends Dexie {
   coachRecommendations!: EntityTable<CoachRecommendationRecord, 'id'>
   notificationPreferences!: EntityTable<NotificationPreference, 'id'>
   notificationInbox!: EntityTable<NotificationInboxItem, 'id'>
+  userProfile!: EntityTable<UserProfileRecord, 'id'>
+  activePlans!: EntityTable<ActivePlanRecord, 'id'>
+  importHistory!: EntityTable<ImportHistoryRecord, 'id'>
+  appPreferences!: EntityTable<AppPreferencesRecord, 'id'>
 
   constructor() {
     super('titan-database')
@@ -518,6 +571,16 @@ class TitanDatabase extends Dexie {
         'id, userId, category, enabled, nextRunAt, [userId+category]',
       notificationInbox:
         'id, userId, category, priority, createdAt, readAt, dismissedAt, dedupeKey, [userId+createdAt], [userId+dedupeKey]',
+    })
+
+    // Release v1.0.3: additive stores for profile, independent plans,
+    // import audit history and preferences. Existing history, score, photos,
+    // measurements and legacy records are preserved.
+    this.version(12).stores({
+      userProfile: 'id, name, updatedAt',
+      activePlans: 'id, type, updatedAt',
+      importHistory: 'id, type, status, createdAt',
+      appPreferences: 'id, theme, updatedAt',
     })
   }
 }

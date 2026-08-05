@@ -77,3 +77,6 @@ O IndexedDB permanece como fonte operacional principal. Supabase é usado apenas
 
 ## Atualização PWA v1.0.2
 O PWA usa atualização coordenada: prompt explícito, ativação do Service Worker em espera, aguardo de `controllerchange`, reload único por `sessionStorage` e recuperação global para chunks versionados sem limpar IndexedDB.
+
+## TITAN v1.0.3
+Release reconstruída de forma limpa com perfil completo, planos independentes, importação TITAN transacional, onboarding inteligente, dashboard orientado por planos, central de Conta e Configurações, tema System/Light/Dark, changelog interno, Sobre e backup compatível incluindo as novas tabelas Dexie.

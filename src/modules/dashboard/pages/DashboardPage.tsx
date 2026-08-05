@@ -1,5 +1,7 @@
 import { AlertCircle, Bell, ChevronRight, Dumbbell, PencilLine, Settings, Sparkles, Utensils } from 'lucide-react'
 import { useEffect, useState } from 'react'
+import { titanDatabase } from '../../../database/titanDatabase'
+import { savePreference } from '../../../services/titanFile/titanFileService'
 import { Link } from 'react-router-dom'
 import { InfoBanner, SkeletonPage } from '../../../shared/ui'
 import { CoachCard } from '../components/CoachCard'
@@ -19,10 +21,14 @@ export function DashboardPage() {
   const { data, error, isLoading } = useDashboard()
   const [unreadNotifications, setUnreadNotifications] = useState(0)
   const [nextReminder, setNextReminder] = useState<string | null>(null)
+  const [hasProfile, setHasProfile] = useState<boolean | null>(null)
+  const [planCount, setPlanCount] = useState(0)
   const permission = getNotificationPermission()
-  useEffect(() => { void Promise.all([unreadCount(), getNotificationSnapshot()]).then(([count, snapshot]) => { setUnreadNotifications(count); setNextReminder(snapshot.next[0]?.nextRunAt ?? null) }) }, [])
+  useEffect(() => { void Promise.all([unreadCount(), getNotificationSnapshot()]).then(([count, snapshot]) => { setUnreadNotifications(count); setNextReminder(snapshot.next[0]?.nextRunAt ?? null) }); void titanDatabase.userProfile.get('primary').then((p)=>setHasProfile(Boolean(p))); void titanDatabase.activePlans.count().then(setPlanCount) }, [])
   if (error) return <InfoBanner title="Não foi possível abrir o TITAN" tone="error">{error} Seus registros locais permanecem seguros.</InfoBanner>
   if (isLoading || !data) return <SkeletonPage label="Carregando dashboard premium" variant="dashboard" />
+
+  if (hasProfile === false) return <div className="space-y-5"><section className="dashboard-card p-5"><h1 className="text-3xl font-black">Bem-vindo ao TITAN</h1><p className="mt-2 text-sm text-slate-300">Configure seu primeiro acesso de forma inteligente.</p><div className="mt-4 grid gap-3"><Link className="quick-action" to="/profile">Criar Perfil</Link><Link className="quick-action" to="/account">Importar Projeto TITAN</Link><Link className="quick-action" to="/account">Restaurar Backup</Link><button className="quick-action" onClick={()=>void savePreference({onboardingDeferred:true}).then(()=>setHasProfile(true))}>Continuar Depois</button></div></section></div>
 
   const insight = data.insights[0]
   return <div className="stagger-in space-y-6 pb-4">
@@ -44,7 +50,7 @@ export function DashboardPage() {
       {insight ? <CoachCard insight={insight} /> : <Link className="dashboard-card dashboard-link block p-5" to="/coach"><p className="font-bold">Tudo em equilíbrio</p><p className="mt-1 text-sm text-slate-400">Continue registrando sua rotina para receber uma nova recomendação.</p></Link>}
     </section>
 
-    <section aria-labelledby="agenda-title"><h2 className="one-ui-title" id="agenda-title">Seu dia</h2><div className="space-y-3"><MealCard meal={data.nextMeal} /><WorkoutCard workout={data.workout} />
+    <section aria-labelledby="agenda-title"><h2 className="one-ui-title" id="agenda-title">Seu dia</h2>{planCount === 0 ? <Link className="dashboard-card dashboard-link block p-5 text-sm text-slate-300" to="/account"><p className="font-bold text-white">Nenhum plano ativo.</p><p className="mt-1">Importe treino, nutrição, cardio, suplementação ou projeto completo para montar seu dashboard.</p></Link> : null}<div className="space-y-3"><MealCard meal={data.nextMeal} /><WorkoutCard workout={data.workout} />
       <Link className="dashboard-card dashboard-link flex items-center gap-4 p-5" to="/nutrition"><div className={`grid h-11 w-11 place-items-center rounded-2xl ${data.pendingMeals ? 'bg-rose-400/10 text-rose-300' : 'bg-emerald-400/10 text-emerald-300'}`}><AlertCircle size={21} /></div><div className="flex-1"><p className="text-xs font-bold uppercase tracking-[0.12em] text-slate-500">Pendências</p><p className="mt-1 font-extrabold">{data.pendingMeals ? `${data.pendingMeals} ${data.pendingMeals === 1 ? 'refeição atrasada' : 'refeições atrasadas'}` : 'Tudo em dia'}</p></div><ChevronRight className="text-slate-600" size={20} /></Link>
     </div></section>
 
