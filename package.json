@@ -1,7 +1,7 @@
 {
   "name": "titan-app",
   "private": true,
-  "version": "1.0.3",
+  "version": "1.0.4",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -12,7 +12,11 @@
     "validate": "npm run lint && npm run typecheck && npm run test && npm run build && npm run validate:release && npm run validate:binary-diff",
     "validate:binary-diff": "node scripts/validate-binary-diff.mjs",
     "validate:release": "node scripts/validate-release.mjs",
-    "test": "vitest run"
+    "test": "vitest run",
+    "nutrition:validate-sources": "node scripts/nutrition/validate-nutrition-source.mjs",
+    "nutrition:audit-provenance": "node scripts/nutrition/audit-food-provenance.mjs",
+    "nutrition:checksum": "node scripts/nutrition/generate-nutrition-checksum.mjs",
+    "nutrition:import": "node scripts/nutrition/import-nutrition-source.mjs"
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.3.3",
@@ -41,9 +45,9 @@
     "vite": "^8.2.0",
     "vitest": "^4.1.10"
   },
-  "description": "TITAN v1.0.3 — Perfil, Planos e Configurações.",
+  "description": "TITAN v1.0.4 — Fundação Nutricional com Dados Rastreáveis.",
   "author": "Otávio Barreto Jr.",
   "license": "Proprietary",
-  "releaseName": "TITAN v1.0.3 — Perfil, Planos e Configurações",
-  "releaseTag": "v1.0.3"
+  "releaseName": "TITAN v1.0.4 — Fundação Nutricional com Dados Rastreáveis",
+  "releaseTag": "v1.0.4"
 }

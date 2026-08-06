@@ -39,3 +39,7 @@
 - [x] Planos independentes com importação TITAN segura.
 - [x] Conta e Configurações real, tema simplificado e Sobre versionado.
 - [x] Correção do Coach para não escrever dentro de liveQuery.
+
+## v1.0.4 — Fundação nutricional
+- [x] Modelo, fontes, pipeline, cálculos e arquitetura local-first.
+- [ ] Importar os 24 alimentos pendentes após disponibilização de extrato oficial autorizado e verificável.

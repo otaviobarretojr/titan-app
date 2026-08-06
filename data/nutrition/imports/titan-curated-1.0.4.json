@@ -1,0 +1,7 @@
+{
+  "schemaVersion": "1.0",
+  "source": "controlled-normalized-import",
+  "records": [],
+  "pending": ["peito de frango cru","peito de frango grelhado","patinho cru","patinho cozido","tilápia crua","tilápia grelhada","ovo inteiro","clara de ovo","atum drenado","arroz branco cru","arroz branco cozido","feijão cozido","batata-doce crua","batata-doce cozida","aveia","banana","melancia","maçã","brócolis","alface","tomate","azeite","leite desnatado","iogurte natural"],
+  "reason": "O repositório main não contém extrato oficial TACO/USDA autorizado e normalizado; nenhum macro foi inventado."
+}

@@ -1,0 +1,4 @@
+[
+ {"id":"taco-unicamp","type":"taco","name":"TACO/UNICAMP","description":"Fonte brasileira principal; registro preparado, sem redistribuir dados não fornecidos.","version":"4ª edição revisada e ampliada (2011)","publisher":"NEPA/UNICAMP","reference":"https://www.nepa.unicamp.br/taco/","licenseName":"Consultar publicação oficial","licenseReference":"https://www.nepa.unicamp.br/taco/","commercialUseStatus":"requires_review","redistributionStatus":"metadata_only"},
+ {"id":"usda-fdc","type":"usda_fdc","name":"USDA FoodData Central","description":"Fonte complementar para importações controladas por FDC ID.","version":"access-date","publisher":"USDA","reference":"https://fdc.nal.usda.gov/","licenseName":"US Government Works","licenseReference":"https://fdc.nal.usda.gov/data-documentation.html","commercialUseStatus":"documented_by_publisher","redistributionStatus":"controlled_import"}
+]

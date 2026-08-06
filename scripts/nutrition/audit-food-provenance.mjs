@@ -1,0 +1,1 @@
+import{load,validate}from'./lib.mjs';const p=process.argv[2]??'data/nutrition/imports/titan-curated-1.0.4.json',d=await load(p),e=validate(d);console.log(JSON.stringify({records:d.records.length,withCompleteProvenance:d.records.length-e.length,pending:d.pending?.length??0,errors:e},null,2));if(e.length)process.exitCode=1

@@ -99,3 +99,6 @@ Atualização segura do PWA com recuperação de chunks, reload único coordenad
 ## Release v1.0.3
 
 A v1.0.3 introduz Perfil, Onboarding, Planos independentes, Importação TITAN 1.0, Conta e Configurações, histórico de importações e correção do fluxo Coach/Dexie. O formato oficial de importação é `.titan.json`; `.json` permanece aceito apenas por compatibilidade.
+
+## v1.0.4 — Fundação nutricional rastreável
+A camada nutricional local-first usa Dexie 13, importações versionadas e proveniência obrigatória. Consulte `docs/NUTRITION_SOURCE_POLICY.md`; não foram criadas telas nesta release.

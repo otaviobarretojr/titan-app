@@ -316,3 +316,7 @@
 - Adiciona planos independentes e histórico sanitizado de importações.
 - Remove temas Premium/AMOLED do fluxo oficial e usa system/light/dark.
 - Corrige escrita do Coach fora de `getCoachReport` para evitar Dexie ReadOnlyError.
+
+## v1.0.4
+- Fundação nutricional rastreável, Dexie 13, pipeline offline, contratos 1.0/1.1 e separação entre plano e execução.
+- Biblioteca inicial adiada por ausência de extrato oficial autorizado; zero macros sem fonte.
