@@ -209,3 +209,6 @@ export async function addHydration(amountMl: number) {
     updatedAt: now,
   })
 }
+
+// v1.0.4 planning/execution API. Importing a plan remains separate from creating execution.
+export { createNutritionPlan, getActiveNutritionPlan, archiveNutritionPlan, listPlanDays, listMealsForDay, listFoodsForMeal, createMealExecution, updateFoodExecution, completeMealExecution, skipMealExecution, calculateMealProgress, calculateDailyNutritionProgress, listPendingMeals } from './nutritionFoundationRepository'

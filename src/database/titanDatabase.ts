@@ -1,5 +1,6 @@
 import Dexie, { type EntityTable } from 'dexie'
 import type { NotificationInboxItem, NotificationPreference } from '../modules/notifications/types/notifications'
+import type * as Nutrition from '../modules/nutrition/types/foundation'
 
 export type UserRecord = {
   id: string
@@ -359,6 +360,26 @@ class TitanDatabase extends Dexie {
   activePlans!: EntityTable<ActivePlanRecord, 'id'>
   importHistory!: EntityTable<ImportHistoryRecord, 'id'>
   appPreferences!: EntityTable<AppPreferencesRecord, 'id'>
+  nutritionDataSources!: EntityTable<Nutrition.NutritionDataSourceRecord, 'id'>
+  nutritionSourceImports!: EntityTable<Nutrition.NutritionSourceImportRecord, 'id'>
+  foodCategories!: EntityTable<Nutrition.FoodCategoryRecord, 'id'>
+  foodLibrary!: EntityTable<Nutrition.FoodLibraryRecord, 'id'>
+  foodAliases!: EntityTable<Nutrition.FoodAliasRecord, 'id'>
+  foodNutrients!: EntityTable<Nutrition.FoodNutrientRecord, 'id'>
+  foodHouseholdMeasures!: EntityTable<Nutrition.FoodHouseholdMeasureRecord, 'id'>
+  foodYieldFactors!: EntityTable<Nutrition.FoodYieldFactorRecord, 'id'>
+  foodSubstitutions!: EntityTable<Nutrition.FoodSubstitutionRecord, 'id'>
+  recipes!: EntityTable<Nutrition.RecipeRecord, 'id'>
+  recipeIngredients!: EntityTable<Nutrition.RecipeIngredientRecord, 'id'>
+  nutritionPlans!: EntityTable<Nutrition.NutritionPlanRecord, 'id'>
+  nutritionPlanDays!: EntityTable<Nutrition.NutritionPlanDayRecord, 'id'>
+  plannedMeals!: EntityTable<Nutrition.PlannedMealRecord, 'id'>
+  plannedFoods!: EntityTable<Nutrition.PlannedFoodRecord, 'id'>
+  mealExecutions!: EntityTable<Nutrition.MealExecutionRecord, 'id'>
+  foodExecutions!: EntityTable<Nutrition.FoodExecutionRecord, 'id'>
+  shoppingLists!: EntityTable<Nutrition.ShoppingListRecord, 'id'>
+  shoppingListItems!: EntityTable<Nutrition.ShoppingListItemRecord, 'id'>
+  pantryItems!: EntityTable<Nutrition.PantryItemRecord, 'id'>
 
   constructor() {
     super('titan-database')
@@ -603,6 +624,25 @@ class TitanDatabase extends Dexie {
       const legacyTheme = typeof localStorage !== 'undefined' ? localStorage.getItem('titan-theme') : null
       const theme = legacyTheme === 'premium' || legacyTheme === 'amoled' || legacyTheme === 'dark' ? 'dark' : legacyTheme === 'light' || legacyTheme === 'system' ? legacyTheme : 'system'
       await table.put({ id: 'app', theme, onboardingStatus: 'pending', reduceAnimations: false, highContrast: false, updateChannel: 'stable', createdAt: now, updatedAt: now })
+    })
+
+    // v1.0.4 is strictly additive: every v1.0.3 store and row is retained.
+    this.version(13).stores({
+      nutritionDataSources: 'id, type, name, updatedAt',
+      nutritionSourceImports: 'id, sourceId, checksum, status, importedAt, createdAt, updatedAt',
+      foodCategories: 'id, normalizedName, createdAt, updatedAt',
+      foodLibrary: 'id, sourceId, sourceFoodId, normalizedName, categoryId, [sourceId+sourceFoodId], createdAt, updatedAt',
+      foodAliases: 'id, foodId, normalizedName, createdAt, updatedAt',
+      foodNutrients: 'id, foodId, nutrient, createdAt, updatedAt',
+      foodHouseholdMeasures: 'id, foodId, unit, createdAt, updatedAt',
+      foodYieldFactors: 'id, foodId, fromState, toState, createdAt, updatedAt',
+      foodSubstitutions: 'id, foodId, substituteFoodId, createdAt, updatedAt',
+      recipes: 'id, userId, name, createdAt, updatedAt', recipeIngredients: 'id, recipeId, foodId, createdAt, updatedAt',
+      nutritionPlans: 'id, userId, status, createdAt, updatedAt', nutritionPlanDays: 'id, planId, userId, localDate, createdAt, updatedAt',
+      plannedMeals: 'id, planId, planDayId, userId, localDate, status, createdAt, updatedAt', plannedFoods: 'id, plannedMealId, foodId, createdAt, updatedAt',
+      mealExecutions: 'id, plannedMealId, userId, localDate, status, createdAt, updatedAt', foodExecutions: 'id, mealExecutionId, foodId, createdAt, updatedAt',
+      shoppingLists: 'id, userId, weekStartDate, status, createdAt, updatedAt', shoppingListItems: 'id, shoppingListId, foodId, status, createdAt, updatedAt',
+      pantryItems: 'id, userId, foodId, createdAt, updatedAt',
     })
   }
 }

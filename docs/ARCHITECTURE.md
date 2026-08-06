@@ -81,3 +81,6 @@ O PWA usa atualização coordenada: prompt explícito, ativação do Service Wor
 ## Release v1.0.3 — Separação de domínios
 
 A v1.0.3 separa Perfil, Planos, Execução, Histórico e Preferências. A migração Dexie v12 adiciona apenas `userProfile`, `activePlans`, `importHistory` e `appPreferences`; tabelas v1.0.2 não são removidas. Importações passam exclusivamente por `titanFileService.ts`.
+
+## Nutrition Foundation v1.0.4
+A migração Dexie 13 é aditiva. Repositórios de fontes, alimentos, nutrição, receitas, compras e estoque são separados; cálculos são puros e o bootstrap reporta estado sem bloquear falhas não críticas.

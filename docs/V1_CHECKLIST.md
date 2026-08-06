@@ -68,3 +68,7 @@
 - [x] Project preserva módulos ausentes e não é salvo em activePlans.
 - [x] Tema system/light/dark com migração premium/amoled.
 - [x] Documentação da release e do modelo de dados.
+
+## v1.0.4 Nutrition Foundation
+- [x] Proveniência obrigatória, migração aditiva, offline, plano separado de execução e nenhuma tela nova.
+- [ ] Biblioteca curada (bloqueada até existir arquivo oficial normalizado e autorizado).

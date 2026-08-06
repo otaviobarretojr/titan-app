@@ -1,0 +1,20 @@
+import type { FoodHouseholdMeasureRecord, FoodLibraryRecord, FoodUnit, Macros, NutritionLabelSource } from '../types/foundation'
+export const INTERNAL_SCALE = 1_000_000
+const decimal = (value: number) => Math.round((value + Number.EPSILON) * INTERNAL_SCALE) / INTERNAL_SCALE
+export const roundDisplay = (value: number) => Math.round(value * 10) / 10
+export const roundPurchase = (value: number, increment = 1) => Math.ceil(value / increment) * increment
+export const roundUnit = (value: number) => Math.round(value * 100) / 100
+export function addMacros(values: Macros[]): Macros { const sum = (key: keyof Macros) => decimal(values.reduce((n, v) => decimal(n + (v[key] ?? 0)), 0)); return { caloriesKcal: sum('caloriesKcal'), proteinG: sum('proteinG'), carbohydrateG: sum('carbohydrateG'), fatG: sum('fatG'), fiberG: sum('fiberG'), sodiumMg: sum('sodiumMg') } }
+export function calculateMacros(food: Pick<FoodLibraryRecord, keyof Macros | 'referenceQuantity'>, quantity: number): Macros { if (quantity < 0 || food.referenceQuantity <= 0) throw new Error('Quantidade inválida.'); const factor = decimal(quantity / food.referenceQuantity); return addMacros([{ caloriesKcal: decimal(food.caloriesKcal * factor), proteinG: decimal(food.proteinG * factor), carbohydrateG: decimal(food.carbohydrateG * factor), fatG: decimal(food.fatG * factor), fiberG: decimal((food.fiberG ?? 0) * factor), sodiumMg: decimal((food.sodiumMg ?? 0) * factor) }]) }
+export function unitToGrams(quantity: number, unit: FoodUnit, measures: FoodHouseholdMeasureRecord[] = []): number { if (unit === 'g') return quantity; const m = measures.find(x => x.unit === unit); if (!m) throw new Error(`Conversão para ${unit} indisponível.`); return decimal(quantity / m.quantity * m.grams) }
+export function gramsToUnit(grams: number, unit: FoodUnit, measures: FoodHouseholdMeasureRecord[] = []): number { if (unit === 'g') return grams; const m = measures.find(x => x.unit === unit); if (!m) throw new Error(`Conversão para ${unit} indisponível.`); return decimal(grams / m.grams * m.quantity) }
+export function normalizeNutritionLabel(label: NutritionLabelSource): Macros { if (label.servingQuantity <= 0 || !['g', 'ml'].includes(label.servingUnit)) throw new Error('Rótulo não pode ser normalizado para 100 g/ml.'); return calculateMacros({ ...label, referenceQuantity: label.servingQuantity }, 100) }
+export const calculatePartialConsumption = (macros: Macros, fraction: number) => calculateMacros({ ...macros, referenceQuantity: 1 }, Math.min(1, Math.max(0, fraction)))
+export const calculateRemainingMacros = (target: Macros, consumed: Macros) => ({ caloriesKcal: Math.max(0, decimal(target.caloriesKcal-consumed.caloriesKcal)), proteinG: Math.max(0, decimal(target.proteinG-consumed.proteinG)), carbohydrateG: Math.max(0, decimal(target.carbohydrateG-consumed.carbohydrateG)), fatG: Math.max(0, decimal(target.fatG-consumed.fatG)) })
+export const convertRawToPrepared = (quantity: number, factor: number) => { if (factor <= 0) throw new Error('Fator de rendimento inválido.'); return decimal(quantity * factor) }
+export const convertPreparedToRaw = (quantity: number, factor: number) => { if (factor <= 0) throw new Error('Fator de rendimento inválido.'); return decimal(quantity / factor) }
+export const sumWeeklyRequirements = (requirements: Array<{foodId:string; quantity:number}>) => [...requirements.reduce((m,r)=>m.set(r.foodId, decimal((m.get(r.foodId)??0)+r.quantity)),new Map<string,number>())].map(([foodId,quantity])=>({foodId,quantity}))
+export const subtractPantry = (required:number, available:number) => Math.max(0, decimal(required-available))
+export const calculatePurchaseQuantity = (required:number, available:number, increment=1) => roundPurchase(subtractPantry(required,available),increment)
+export const calculateRecipeMacros = (ingredients: Array<{macros:Macros; quantity:number; referenceQuantity:number}>) => addMacros(ingredients.map(i=>calculateMacros({...i.macros,referenceQuantity:i.referenceQuantity},i.quantity)))
+export const calculateRecipeYield = (ingredientGrams:number[], lossPercent=0) => decimal(ingredientGrams.reduce((a,b)=>a+b,0)*(1-lossPercent/100))

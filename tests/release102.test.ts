@@ -3,10 +3,10 @@ import { describe, expect, it } from 'vitest'
 import { APP_VERSION } from '../src/services/appMetadata'
 import { titanDatabase } from '../src/database/titanDatabase'
 
-describe('release v1.0.3', () => {
+describe('release v1.0.4', () => {
   it('expõe metadados e preserva o schema Dexie existente', () => {
-    expect(APP_VERSION).toBe('1.0.3')
-    expect(titanDatabase.verno).toBe(12)
+    expect(APP_VERSION).toBe('1.0.4')
+    expect(titanDatabase.verno).toBe(13)
   })
 
   it('mantém nome do PWA sem versão', async () => {

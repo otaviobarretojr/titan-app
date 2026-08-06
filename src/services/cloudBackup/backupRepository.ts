@@ -17,9 +17,17 @@ export async function replaceLocalDataFromBackup(backup: TitanCloudBackup) {
   localStorage.setItem(`titan-restore-snapshot-${new Date().toISOString()}`, JSON.stringify(snapshot))
   await titanDatabase.transaction('rw', titanDatabase.tables, async () => {
     for (const table of titanDatabase.tables) {
-      await table.clear()
+      // v1.0.3 backups have no nutrition tables: keep the current foundation.
+      // Official library rows reconcile by stable ID; custom rows are restored
+      // alongside them without duplicating the curated library.
+      if (!(table.name in backup.tables)) continue
       const records = backup.tables[table.name] ?? []
-      if (records.length > 0) await table.bulkAdd(records)
+      if (table.name === 'foodLibrary' || table.name === 'nutritionDataSources') {
+        if (records.length > 0) await table.bulkPut(records)
+      } else {
+        await table.clear()
+        if (records.length > 0) await table.bulkAdd(records)
+      }
     }
   })
   for (const [key, value] of Object.entries(backup.preferences)) localStorage.setItem(key, value)
